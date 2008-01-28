@@ -1,0 +1,44 @@
+<use name=FWCore/Framework>
+<use name=Foundation/PluginManager>
+<use name=FWCore/ParameterSet>
+<use name=Geometry/CaloGeometry>
+<use name=Geometry/CaloEventSetup>
+<use name=Geometry/Records>	
+<use name=DataFormats/JetReco>
+<use name=DataFormats/METReco>
+<use name=DataFormats/EgammaCandidates>
+<use name=DataFormats/CaloTowers>
+<use name=DataFormats/HcalRecHit>
+<use name=DataFormats/HcalDigi>
+<use name=DataFormats/HcalDetId>
+<use name=DataFormats/EcalRecHit>
+<use name=DataFormats/EcalDigi>
+<use name=DataFormats/EcalDetId>
+<use name=DataFormats/FEDRawData>
+<use name=TBDataFormats/HcalTBObjects>
+<use name=DataFormats/TrackReco>
+
+<flags EDM_PLUGIN=1>
+
+<export>
+   <lib name=CalibrationCalibTreeMaker>
+   <use name=FWCore/Framework>
+   <use name=Foundation/PluginManager>
+   <use name=FWCore/ParameterSet>
+   <use name=root>
+   <use name=Geometry/CaloGeometry>
+   <use name=Geometry/Records>
+   <use name=Geometry/CaloEventSetup>
+   <use name=DataFormats/JetReco>
+   <use name=DataFormats/METReco>
+   <use name=DataFormats/EgammaCandidates>
+   <use name=DataFormats/HcalRecHit>
+   <use name=DataFormats/HcalDigi>
+   <use name=DataFormats/HcalDetId>
+   <use name=DataFormats/EcalRecHit>
+   <use name=DataFormats/EcalDigi>
+   <use name=DataFormats/EcalDetId>
+   <use name=DataFormats/FEDRawData>
+   <use name=TBDataFormats/HcalTBObjects>
+   <use name=DataFormats/TrackReco>
+</export>

@@ -1,0 +1,28 @@
+#
+# Produce root tuple with calibration input data
+#
+
+
+module calibmaker = CalibTreeMaker {
+   string   OutputFile           = "calib.root"
+   string   GammaJetTreeName     = "GammaJetTree"
+   string   TrackTowerTreeName   = "TrackTowerTree"
+   string   TrackClusterTreeName = "TrackClusterTree"
+   InputTag met                  = met
+   #GammaJet
+   InputTag jets       = iterativeCone5CaloJets
+   InputTag genjets    = iterativeCone5GenJets
+   InputTag alltowers  = towerMaker
+   InputTag photon     = correctedPhotons
+   #TrackTower
+   InputTag track      = iterativeCone5CaloJets
+   InputTag tower      = iterativeCone5CaloJets
+   #TrackCluster
+   InputTag tc_track   = iterativeCone5CaloJets
+   InputTag tc_tower   = iterativeCone5CaloJets
+   #Some flags
+   bool writeGammaJet     = false
+   bool writeTrackTower   = false
+   bool writeTrackCluster = false
+   
+}
