@@ -21,6 +21,14 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 
+
+#include "FWCore/Framework/interface/Event.h"
+//#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/Common/interface/Handle.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+
 /** \class CalibGammaJet
   *  
   * $Date: July 2007
@@ -35,24 +43,25 @@ public:
   void setup(const edm::ParameterSet& pSet, TTree* tree);
 
   /** Analyze the Data */
-  void analyze(const CaloJet& rjet,
-	       const GenJet&  gjet,
-	       const CaloMETCollection& rmets,
-	       const Photon& photon,
-	       const CaloTowerCollection& caloTowers,
-	       const CaloGeometry& geom,
-	       TTree* tree);
+  void analyze(const edm::Event& iEvent, 
+               const edm::EventSetup& iSetup, 
+	       TTree* CalibTree);
 
 private:
-
+  edm::InputTag jets_,genjets_,met_,alltowers_,photon_;                    
+  edm::InputTag EBrechitCollection_;
+ 
   // Tree variables
   float jcalpt, jcalphi, jcaleta, jcalet, jcale;
   float jgenpt, jgenphi, jgeneta, jgenet, jgene;
-  float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
   float mcalmet,mcalphi,mcalsum;
   float photonpt, photonphi, photoneta, photonet, photone; 
   int   NobjTowCal;
-  int   *towid_phi, *towid_eta, *towid;
+  int   *towid_phi, *towid_eta, *towid, *townum;
+  float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
+  int   NobjETowCal;
+  int   *etowid_phi, *etowid_eta, *etowid, *etownum;
+  float *etowet, *etoweta, *etowphi, *etowe;
 };
 
 #endif

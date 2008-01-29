@@ -8,21 +8,26 @@ module calibmaker = CalibTreeMaker {
    string   GammaJetTreeName     = "GammaJetTree"
    string   TrackTowerTreeName   = "TrackTowerTree"
    string   TrackClusterTreeName = "TrackClusterTree"
+   string   JetJetTreeName       = "JetJetTree"
    InputTag met                  = met
    #GammaJet
    InputTag jets       = iterativeCone5CaloJets
-   InputTag genjets    = iterativeCone5GenJets
+   InputTag genjets    = iterativeCone5GenJetsNoNuBSM
    InputTag alltowers  = towerMaker
    InputTag photon     = correctedPhotons
+   InputTag EBrechitCollection = ecalRecHit:EcalRecHitsEB
    #TrackTower
    InputTag track      = iterativeCone5CaloJets
    InputTag tower      = iterativeCone5CaloJets
    #TrackCluster
    InputTag tc_track   = iterativeCone5CaloJets
    InputTag tc_tower   = iterativeCone5CaloJets
+   #GammaJet
+   InputTag jj_jets    = iterativeCone5CaloJets
+   InputTag jj_genjets = iterativeCone5GenJetsNoNuBSM
    #Some flags
    bool writeGammaJet     = false
    bool writeTrackTower   = false
    bool writeTrackCluster = false
-   
+   bool writeJetJet       = false
 }
