@@ -175,7 +175,7 @@ void CalibGammaJet::analyze(const edm::Event& iEvent,
 	    etowid_phi[jetow] = det.iphi();
 	    etowid_eta[jetow] = det.ieta();
 	    etowid[jetow]     = myRecHit->id().rawId();
-	    etownum[jetow]    = jetow;
+	    etownum[jetow]    = jtow;
 	    ++jetow;
 	}
      }
