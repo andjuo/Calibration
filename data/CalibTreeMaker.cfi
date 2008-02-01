@@ -1,33 +1,37 @@
+module calibTreeMaker = CalibTreeMaker {
+
 #
-# Produce root tuple with calibration input data
+# administratives
+#
+  string   OutputFile         = "calib.root"
+  string   PhotonJetTreeName  = "GammaJetTree"
+  string   TrackTowerTreeName = "TrackTowerTree"
+  string   JetJetTreeName     = "JetJetTree"
+
+#
+# input tags
 #
 
+# PhotonJet sample
+  InputTag PhotonJetJets    = MyPhotonJetJets
+  InputTag PhotonJetGenJets = MyPhotonJetGenJets
+  InputTag PhotonJetMet     = MyPhotonJetMet
+  InputTag PhotonJetTowers  = MyPhotonJetTowers
+  InputTag PhotonJetPhotons = MyPhotonJetPhotons
+  InputTag EBRecHits        = ecalRecHit:EcalRecHitsEB
 
-module calibmaker = CalibTreeMaker {
-   string   OutputFile           = "calib.root"
-   string   GammaJetTreeName     = "GammaJetTree"
-   string   TrackTowerTreeName   = "TrackTowerTree"
-   string   TrackClusterTreeName = "TrackClusterTree"
-   string   JetJetTreeName       = "JetJetTree"
-   InputTag met                  = met
-   #GammaJet
-   InputTag jets       = iterativeCone5CaloJets
-   InputTag genjets    = iterativeCone5GenJetsNoNuBSM
-   InputTag alltowers  = towerMaker
-   InputTag photon     = correctedPhotons
-   InputTag EBrechitCollection = ecalRecHit:EcalRecHitsEB
-   #TrackTower
-   InputTag track      = iterativeCone5CaloJets
-   InputTag tower      = iterativeCone5CaloJets
-   #TrackCluster
-   InputTag tc_track   = iterativeCone5CaloJets
-   InputTag tc_tower   = iterativeCone5CaloJets
-   #GammaJet
-   InputTag jj_jets    = iterativeCone5CaloJets
-   InputTag jj_genjets = iterativeCone5GenJetsNoNuBSM
-   #Some flags
-   bool writeGammaJet     = false
-   bool writeTrackTower   = false
-   bool writeTrackCluster = false
-   bool writeJetJet       = false
+# TrackTower sample
+  InputTag TrackTowerTracks = MyTrackTowerTracks
+  InputTag TrackTowerTowers = MyTrackTowerTowers
+
+# JetJet sample
+  InputTag JetJetJets       = MyJetJetJets
+  InputTag JetJetGenJets    = MyJetJetGenJets
+
+#
+# steerables
+#
+  bool WritePhotonJetTree   = false
+  bool WriteTrackTowerTree  = false
+  bool WriteJetJetTree      = false
 }

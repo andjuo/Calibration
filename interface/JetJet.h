@@ -1,46 +1,34 @@
-#ifndef CalibJetJet_H
-#define CalibJetJet_H
+#ifndef JetJet_H
+#define JetJet_H
+
+#include <string>
+#include <vector>
+#include <iostream>
 
 #include "TFile.h"
 #include "TNamed.h"
-#include <vector>
-#include <map>
-#include "TROOT.h"
 #include "TChain.h"
 
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/ParameterSet/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "DataFormats/JetReco/interface/CaloJet.h"
-#include "DataFormats/JetReco/interface/CaloJetfwd.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
-#include "DataFormats/JetReco/interface/GenJetfwd.h"
+#include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 
-//#include "DataFormats/Candidate/interface/Candidate.h"
-
-/** \class CalibJetJet
-  *  
-  * $Date: July 2007
-  * \author Christian Autermann
-  * original code by L. Apanasevich - UIC, P. Bargassa - Rice U.
-  */
-class CalibJetJet {
+class JetJet {
 public:
-  CalibJetJet(){}; 
-  ~CalibJetJet(){}; 
+  JetJet(){}; 
+  ~JetJet(){}; 
 
-  void setup(const edm::ParameterSet& pSet, TTree* tree);
-
-  /** Analyze the Data */
-  void analyze(const reco::CaloJetCollection& rjet,
-	       const reco::GenJetCollection&  gjet,
-	       const CaloMETCollection& rmets,
-	       const CaloTowerCollection& caloTowers,
-	       TTree* tree);
+  void setup(const edm::ParameterSet&, TTree*);
+  void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
+  edm::InputTag jets_, genjets_, met_;
 
-  // Tree variables
+  //tree variables
   float fstjetpt, fstjetphi, fstjeteta, fstjetet, fstjete;
   float scdjetpt, scdjetphi, scdjeteta, scdjetet, scdjete;
   float fstgenjetpt, fstgenjetphi, fstgenjeteta, fstgenjetet, fstgenjete;

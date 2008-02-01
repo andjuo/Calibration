@@ -1,0 +1,18 @@
+# geometry
+# include "Geometry/CMSCommonData/data/cmsIdealGeometryXML.cfi"
+# include "Geometry/CaloEventSetup/data/CaloGeometry.cff"
+
+# produce photon jet sample
+  include "Calibration/CalibSamples/data/PhotonJetFilter.cff"
+  sequence photonJetInput  = {selectedPhotonJetSample}
+
+# produce track tower sample
+  include "Calibration/CalibSamples/data/TrackTowerSample.cff"
+  sequence trackTowerInput = {makeTrackTowerSample}
+
+# produce calibration tree
+  include "Calibration/CalibTreeMaker/data/CalibTreeMaker.cfi"
+
+  sequence makePhotonJetTree  = {photonJetInput, calibTreeMaker}
+  sequence makeTrackTowerTree = {trackTowerInput,calibTreeMaker}
+  sequence makeAllTrees = {photonJetInput & trackTowerInput, calibTreeMaker}
