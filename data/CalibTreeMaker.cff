@@ -7,8 +7,8 @@
   sequence photonJetInput  = {selectedPhotonJetSample}
 
 # produce track tower sample
-  include "Calibration/CalibSamples/data/TrackTowerSample.cff"
-  sequence trackTowerInput = {makeTrackTowerSample}
+  include "Calibration/CalibSamples/data/TrackTowerFilter.cff"
+  sequence trackTowerInput = {selectedTrackTowerSample}
 
 # produce calibration tree
   include "Calibration/CalibTreeMaker/data/CalibTreeMaker.cfi"
