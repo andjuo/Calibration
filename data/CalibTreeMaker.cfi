@@ -18,7 +18,7 @@ module calibTreeMaker = CalibTreeMaker {
   InputTag PhotonJetMet     = MyPhotonJetMet
   InputTag PhotonJetTowers  = MyPhotonJetTowers
   InputTag PhotonJetPhotons = MyPhotonJetPhotons
-  InputTag EBRecHits        = ecalRecHit:EcalRecHitsEB
+  InputTag EBRecHits        = ecalRecHit:EcalRecHitsEB:Rec1
 
 # TrackTower sample
   InputTag TrackTowerTracks = MyTrackTowerTracks

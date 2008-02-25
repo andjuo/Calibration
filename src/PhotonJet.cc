@@ -9,6 +9,9 @@
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 
+//check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
+#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
+
 void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
   jets_      = cfg.getParameter<edm::InputTag>("PhotonJetJets");
@@ -88,10 +91,20 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "PhotonEta", &photoneta, "PhotonEta/F" );
   CalibTree->Branch( "PhotonEt",  &photonet,  "PhtonEt/F"   );
   CalibTree->Branch( "PhotonE",   &photone,   "PhotonE/F"   );
+
+  // CSA07 weight and pid branches
+  CalibTree->Branch( "EventWeight", &eventweight,  "EventWeight/F"  );
+  CalibTree->Branch( "ProcessID"  , &processid,    "ProcessID/I"  );
 }
 
 void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
+  //CSA07 event weights
+  edm::Handle<double> weightHandle;
+  evt.getByLabel ("csaweightproducer","weight", weightHandle);
+  eventweight = *weightHandle;
+  processid = csa07::csa07ProcessId(evt); //Stew lower pt bound was reduced from 15 to 0 GeV (pid=28)
+
   edm::Handle<CaloJet> jet;
   evt.getByLabel(jets_, jet);
 
@@ -109,6 +122,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   const GenJet&  genjet  = *genJet;
   const CaloMETCollection& recmets = *met; 
 
+  /*
   const EBRecHitCollection *EBRecHit = 0;
   edm::Handle<EBRecHitCollection> EcalRecHitEB;
   evt.getByLabel( ebrechits_, EcalRecHitEB);
@@ -121,6 +135,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
 	 << ebrechits_.instance()
          << endl;
   }
+  */
 
   edm::ESHandle<CaloGeometry> pG;
   setup.get<IdealGeometryRecord>().get(pG);
@@ -151,6 +166,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
     townum[jtow] = jtow;
 
     double eem=0.;
+    /*
     for (size_t it=0; it<(*tow)->constituentsSize(); ++it) {
       const DetId detid = (*tow)->constituent(it);
       EcalRecHitCollection::const_iterator myRecHit = EBRecHit->find(detid);
@@ -170,6 +186,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
 	++icell;
       }
     }
+    */
   }
   NobjETowCal = icell;
 

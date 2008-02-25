@@ -47,6 +47,8 @@ private:
   int   NobjETowCal;
   int   *etowid_phi, *etowid_eta, *etowid, *etownum;
   float *etowet, *etoweta, *etowphi, *etowe;
+  float eventweight;
+  int   processid;
 };
 
 #endif
