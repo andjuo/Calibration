@@ -10,7 +10,7 @@
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 
 //check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
-#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
+//#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
 
 void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
@@ -103,7 +103,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   edm::Handle<double> weightHandle;
   evt.getByLabel ("csaweightproducer","weight", weightHandle);
   eventweight = *weightHandle;
-  processid = csa07::csa07ProcessId(evt); //Stew lower pt bound was reduced from 15 to 0 GeV (pid=28)
+  //processid = csa07::csa07ProcessId(evt); //Stew lower pt bound was reduced from 15 to 0 GeV (pid=28)
 
   edm::Handle<CaloJet> jet;
   evt.getByLabel(jets_, jet);
