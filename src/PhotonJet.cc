@@ -8,6 +8,9 @@
 #include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
 
 //check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
 //#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
@@ -17,6 +20,7 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   jets_      = cfg.getParameter<edm::InputTag>("PhotonJetJets");
   photon_    = cfg.getParameter<edm::InputTag>("PhotonJetPhotons");
   genjets_   = cfg.getParameter<edm::InputTag>("PhotonJetGenJets");
+  genphotons_= cfg.getParameter<edm::InputTag>("PhotonJetGenPhotons");
   met_       = cfg.getParameter<edm::InputTag>("PhotonJetMet");
   ebrechits_ = cfg.getParameter<edm::InputTag>("EBRecHits");
 
@@ -91,10 +95,16 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "PhotonEta", &photoneta, "PhotonEta/F" );
   CalibTree->Branch( "PhotonEt",  &photonet,  "PhtonEt/F"   );
   CalibTree->Branch( "PhotonE",   &photone,   "PhotonE/F"   );
+  // GenPhotons branches
+  CalibTree->Branch( "GenPhotonPt",  &gphotonpt,  "GenPhotonPt/F"  );
+  CalibTree->Branch( "GenPhotonPhi", &gphotonphi, "GenPhotonPhi/F" );
+  CalibTree->Branch( "GenPhotonEta", &gphotoneta, "GenPhotonEta/F" );
+  CalibTree->Branch( "GenPhotonEt",  &gphotonet,  "GenPhtonEt/F"   );
+  CalibTree->Branch( "GenPhotonE",   &gphotone,   "GenPhotonE/F"   );
 
   // CSA07 weight and pid branches
   CalibTree->Branch( "EventWeight", &eventweight,  "EventWeight/F"  );
-  CalibTree->Branch( "ProcessID"  , &processid,    "ProcessID/I"  );
+  //CalibTree->Branch( "ProcessID"  , &processid,    "ProcessID/I"  );
 }
 
 void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
@@ -114,12 +124,16 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   edm::Handle<GenJet> genJet;
   evt.getByLabel(genjets_,genJet);
 
+  edm::Handle<GenParticleCandidate> genPhoton;
+  evt.getByLabel(genphotons_,genPhoton);
+
   edm::Handle<CaloMETCollection> met;
   evt.getByLabel(met_,met);
 
   const CaloJet& calojet = *jet;
-  const Photon&  Photon  = *photon; 
-  const GenJet&  genjet  = *genJet;
+  const Photon& Photon = *photon; 
+  const GenJet& genjet = *genJet;
+  const GenParticleCandidate&  genphoton = *genPhoton; 
   const CaloMETCollection& recmets = *met; 
 
   /*
@@ -137,10 +151,12 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   }
   */
 
+  /*
   edm::ESHandle<CaloGeometry> pG;
   setup.get<IdealGeometryRecord>().get(pG);
   const CaloGeometry cG = *pG;
   const CaloSubdetectorGeometry* EBgeom=cG.getSubdetectorGeometry(DetId::Ecal,1);
+  */
 
   jcalpt  = calojet.pt();
   jcalphi = calojet.phi();
@@ -165,8 +181,8 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
     towid [jtow] = (*tow)->id().rawId();
     townum[jtow] = jtow;
 
-    double eem=0.;
     /*
+    double eem=0.;
     for (size_t it=0; it<(*tow)->constituentsSize(); ++it) {
       const DetId detid = (*tow)->constituent(it);
       EcalRecHitCollection::const_iterator myRecHit = EBRecHit->find(detid);
@@ -201,6 +217,12 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   photoneta = Photon.eta();
   photonet  = Photon.et();
   photone   = Photon.energy();
+
+  gphotonpt  = genphoton.pt();
+  gphotonphi = genphoton.phi();
+  gphotoneta = genphoton.eta();
+  gphotonet  = genphoton.et();
+  gphotone   = genphoton.energy();
 
   typedef CaloMETCollection::const_iterator cmiter;
   for ( cmiter i=recmets.begin(); i!=recmets.end(); i++) {

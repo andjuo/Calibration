@@ -33,7 +33,7 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
-  edm::InputTag jets_,genjets_,met_,photon_;                    
+  edm::InputTag jets_,genjets_,met_,photon_,genphotons_;                    
   edm::InputTag ebrechits_;
 
   //tree variables
@@ -41,6 +41,7 @@ private:
   float jgenpt, jgenphi, jgeneta, jgenet, jgene;
   float mcalmet,mcalphi,mcalsum;
   float photonpt, photonphi, photoneta, photonet, photone; 
+  float gphotonpt, gphotonphi, gphotoneta, gphotonet, gphotone; 
   int   NobjTowCal;
   int   *towid_phi, *towid_eta, *towid, *townum;
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
@@ -48,7 +49,7 @@ private:
   int   *etowid_phi, *etowid_eta, *etowid, *etownum;
   float *etowet, *etoweta, *etowphi, *etowe;
   float eventweight;
-  int   processid;
+  //int   processid;
 };
 
 #endif
