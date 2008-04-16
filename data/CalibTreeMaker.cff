@@ -3,11 +3,11 @@
 # include "Geometry/CaloEventSetup/data/CaloGeometry.cff"
 
 # produce photon jet sample
-  include "Calibration/CalibSamples/data/PhotonJetFilter.cff"
+  include "Calibration/CalibSamples/data/PhotonJetSample.cff"
   sequence photonJetInput  = {selectedPhotonJetSample}
 
 # produce track tower sample
-  include "Calibration/CalibSamples/data/TrackTowerFilter.cff"
+  include "Calibration/CalibSamples/data/TrackTowerSample.cff"
   sequence trackTowerInput = {selectedTrackTowerSample}
 
 # produce calibration tree
