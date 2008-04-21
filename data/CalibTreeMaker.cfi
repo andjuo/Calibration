@@ -28,6 +28,13 @@ module calibTreeMaker = CalibTreeMaker {
 # JetJet sample
   InputTag JetJetJets       = MyJetJetJets
   InputTag JetJetGenJets    = MyJetJetGenJets
+  InputTag JetJetMET        = MyJetJetGenMET
+  double etaMaxTag          = 1.5
+  double etaMaxProbe        = 5.0
+  double PtMin              = 1.
+  double sumPtMaxFracThird  = 0.1
+  double deltaPhiJetMax     = 0.15
+  double deltaPhiMETMax     = 0.15
 
 #
 # steerables

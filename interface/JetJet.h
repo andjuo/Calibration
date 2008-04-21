@@ -17,6 +17,16 @@
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 
+//
+// class decleration
+//
+class PtGreater {
+public:
+  template <typename T> bool operator () (const T& i, const T& j) {
+    return (i.pt() > j.pt());
+  }
+};
+
 class JetJet {
 public:
   JetJet(){}; 
@@ -27,6 +37,7 @@ public:
 
 private:
   edm::InputTag jets_, genjets_, met_;
+  double etaMaxTag_, etaMaxProbe_, PtMin_, sumPtMaxFracThird_, deltaPhiJetMax_, deltaPhiMETMax_;
 
   //tree variables
   float fstjetpt, fstjetphi, fstjeteta, fstjetet, fstjete;

@@ -15,4 +15,5 @@
 
   sequence makePhotonJetTree  = {photonJetInput, calibTreeMaker}
   sequence makeTrackTowerTree = {trackTowerInput,calibTreeMaker}
+  sequence makeJetJetTree = {calibTreeMaker}
   sequence makeAllTrees = {photonJetInput & trackTowerInput, calibTreeMaker}

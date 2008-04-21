@@ -1,9 +1,11 @@
 <use name=FWCore/Framework>
 <use name=Foundation/PluginManager>
 <use name=FWCore/ParameterSet>
+<use name=FWCore/Utilities>
 <use name=Geometry/CaloGeometry>
 <use name=Geometry/CaloEventSetup>
 <use name=Geometry/Records>	
+<use name=DataFormats/Math>
 <use name=DataFormats/JetReco>
 <use name=DataFormats/METReco>
 <use name=DataFormats/EgammaReco>
@@ -26,6 +28,7 @@
    <use name=FWCore/Framework>
    <use name=Foundation/PluginManager>
    <use name=FWCore/ParameterSet>
+   <use name=FWCore/Utilities>
    <use name=root>
    <use name=Geometry/CaloGeometry>
    <use name=Geometry/Records>
@@ -44,3 +47,4 @@
    <use name=TBDataFormats/HcalTBObjects>
    <use name=DataFormats/TrackReco>
 </export>
+

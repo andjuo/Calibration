@@ -1,10 +1,18 @@
+#include "DataFormats/Math/interface/deltaR.h"
 #include "Calibration/CalibTreeMaker/interface/JetJet.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
 
 void JetJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
-  jets_      = cfg.getParameter<edm::InputTag>("JetJetJets");
-  genjets_   = cfg.getParameter<edm::InputTag>("JetJetGenJets");
-  met_       = cfg.getParameter<edm::InputTag>("JetJetMet");
+  jets_              = cfg.getParameter<edm::InputTag>("JetJetJets");
+  genjets_           = cfg.getParameter<edm::InputTag>("JetJetGenJets");
+  met_               = cfg.getParameter<edm::InputTag>("JetJetMET");
+  etaMaxTag_         = cfg.getParameter<double>("etaMaxTag");
+  etaMaxProbe_       = cfg.getParameter<double>("etaMaxProbe");
+  PtMin_             = cfg.getParameter<double>("PtMin");
+  sumPtMaxFracThird_ = cfg.getParameter<double>("sumPtMaxFracThird");
+  deltaPhiJetMax_    = cfg.getParameter<double>("deltaPhiJetMax");
+  deltaPhiMETMax_    = cfg.getParameter<double>("deltaPhiMETMax");
 
   //tower for jet 1
   const int kMAX = 10000;
@@ -98,41 +106,61 @@ void JetJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree*
 
   edm::Handle<reco::CaloJetCollection> calojet;
   evt.getByLabel(jets_, calojet);
+  reco::CaloJetCollection CaloJets = *calojet;
+  std::sort( CaloJets.begin(), CaloJets.end(), PtGreater());
 
   edm::Handle<CaloMETCollection> recmets;
   evt.getByLabel(met_, recmets);
-
-  double const eta_cut = 3.5;
-  double s_sum_et = 0.0;
-  std::vector <CaloTowerRef> j1_towers, j2_towers;
-  for(reco::CaloJetCollection::const_iterator jit1 = calojet->begin(); jit1!=calojet->end(); ++jit1){
-    if(fabs(jit1->eta()) > eta_cut) continue;
-    for(reco::CaloJetCollection::const_iterator jit2 = jit1; jit2!=calojet->end(); ++jit2){
-      if(fabs(jit2->eta()) > eta_cut) continue;
-      for(reco::CaloJetCollection::const_iterator jit3 = jit2; jit2!=calojet->end(); ++jit3){
-	if(fabs(jit3->eta()) > eta_cut) continue;
-	s_sum_et += jit3->pt();
-      }
-      if(s_sum_et<15. && s_sum_et/(jit1->pt()+jit2->pt())<0.1 ){
-	fstjetpt  = jit1->pt();
-	fstjetphi = jit1->phi();
-	fstjeteta = jit1->eta();
-	fstjetet  = jit1->et();
-	fstjete   = jit1->energy();
-	j1_towers = jit1->getConstituents ();
-	scdjetpt  = jit2->pt();
-	scdjetphi = jit2->phi();
-	scdjeteta = jit2->eta();
-	scdjetet  = jit2->et();
-	scdjete   = jit2->energy();
-	j2_towers = jit2->getConstituents ();
-      } 
-      else return;
-      break;
-    }
-    break;	  
+  math::XYZTLorentzVector lvec_met;
+  math::XYZTLorentzVector lvec_jet1, lvec_jet2;
+  typedef CaloMETCollection::const_iterator cmiter;
+  for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
+    mcalmet = i->pt();
+    mcalphi = i->phi();
+    mcalsum = i->sumEt();
+    lvec_met = i->p4();
+    break;
   }
 
+  std::vector <CaloTowerRef> j1_towers, j2_towers;
+  //return if not enough jets
+  if (CaloJets.size() <= 2) return;
+  //return if none of two leading jets in tag region
+  if ( abs(CaloJets.at(0).eta()) > etaMaxTag_ && abs(CaloJets.at(1).eta()) > etaMaxTag_ ) return;
+  //return if one of two leading jets outside probe region
+  if ( abs(CaloJets.at(0).eta()) > etaMaxProbe_ || abs(CaloJets.at(1).eta()) > etaMaxProbe_ ) return;
+  //return if one of two leading jets too soft
+  if ( abs(CaloJets.at(0).pt()) < PtMin_ || abs(CaloJets.at(1).pt()) < PtMin_ ) return;
+  //return if two leading jets are not back to back
+  if ( abs(deltaPhi(CaloJets.at(0).phi(), CaloJets.at(1).phi()) - 3.1415927) > deltaPhiJetMax_ ) return;
+  //return if one two leading jets are not in direction of MET
+  if ( deltaPhi(CaloJets.at(0).phi(), lvec_met.phi()) > deltaPhiMETMax_ && 
+       deltaPhi(CaloJets.at(1).phi(), lvec_met.phi()) > deltaPhiMETMax_ ) return;
+  //four vectors of two leading jets
+  lvec_jet1 = CaloJets.at(0).p4();
+  lvec_jet2 = CaloJets.at(1).p4();
+  double s_sum_et = 0.0;
+  for(reco::CaloJetCollection::const_iterator jit1 = CaloJets.begin()+2; jit1!=CaloJets.end(); ++jit1){
+    s_sum_et += jit1->pt();
+  }
+  
+  if ( s_sum_et/(CaloJets.at(0).pt()+CaloJets.at(1).pt()) < sumPtMaxFracThird_ ) {
+    fstjetpt  = CaloJets.at(0).pt();
+    fstjetphi = CaloJets.at(0).phi();
+    fstjeteta = CaloJets.at(0).eta();
+    fstjetet  = CaloJets.at(0).et();
+    fstjete   = CaloJets.at(0).energy();
+    j1_towers = CaloJets.at(0).getConstituents ();
+    scdjetpt  = CaloJets.at(1).pt();
+    scdjetphi = CaloJets.at(1).phi();
+    scdjeteta = CaloJets.at(1).eta();
+    scdjetet  = CaloJets.at(1).et();
+    scdjete   = CaloJets.at(1).energy();
+    j2_towers = CaloJets.at(1).getConstituents();
+  } else {
+    return;
+  }
+    
   int jtow = 0;
   NobjTowJ1Cal=j1_towers.size();
   for (std::vector <CaloTowerRef>::const_iterator tow = j1_towers.begin(); 
@@ -148,7 +176,7 @@ void JetJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree*
     towj1id_eta[jtow] = (*tow)->id().ieta();
     towj1id[jtow]     = (*tow)->id().rawId();
   }
-  jtow = 0;
+     jtow = 0;
   NobjTowJ2Cal=j2_towers.size();
   for (std::vector <CaloTowerRef>::const_iterator tow = j2_towers.begin();
        tow != j2_towers.end(); ++tow, ++jtow){
@@ -164,53 +192,49 @@ void JetJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree*
     towj2id[jtow]     = (*tow)->id().rawId();
   }
   
-  typedef CaloMETCollection::const_iterator cmiter;
-  for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
-    mcalmet = i->pt();
-    mcalphi = i->phi();
-    mcalsum = i->sumEt();
-    break;
-  }
-  
-  s_sum_et = 0.0;
-  //std::vector <CaloTowerRef> jgen1_towers, jgen2_towers;
+  double dRmax1 = 10.;
+  math::XYZTLorentzVector lvec_gjet1;
   for(reco::GenJetCollection::const_iterator jit1 = genjet->begin(); jit1!=genjet->end(); ++jit1){
-    if(fabs(jit1->eta()) > eta_cut) continue;
-    for(reco::GenJetCollection::const_iterator jit2 = jit1; jit2!=genjet->end(); ++jit2){
-      if(fabs(jit2->eta()) > eta_cut) continue;
-      for(reco::GenJetCollection::const_iterator jit3 = jit2; jit2!=genjet->end(); ++jit3){
-	if(fabs(jit3->eta()) > eta_cut) continue;
-	s_sum_et += jit3->pt();
-      }
-      if(s_sum_et<15. && s_sum_et/(jit1->pt()+jit2->pt())<0.1 ){
-	fstgenjetpt  = jit1->pt();
-	fstgenjetphi = jit1->phi();
-	fstgenjeteta = jit1->eta();
-	fstgenjetet  = jit1->et();
-	fstgenjete   = jit1->energy();
-	//jgen1_towers = jit1->getConstituents ();
-	scdgenjetpt  = jit2->pt();
-	scdgenjetphi = jit2->phi();
-	scdgenjeteta = jit2->eta();
-	scdgenjetet  = jit2->et();
-	scdgenjete   = jit2->energy();
-	//jgen2_towers = jit2->getConstituents ();
-      } 
-      else {
-	fstgenjetpt  = 0.0;
-	fstgenjetphi = 0.0;
-	fstgenjeteta = 0.0;
-	fstgenjetet  = 0.0;
-	fstgenjete   = 0.0;
-	scdgenjetpt  = 0.0;
-	scdgenjetphi = 0.0;
-	scdgenjeteta = 0.0;
-	scdgenjetet  = 0.0;
-	scdgenjete   = 0.0;
-      }
-      break;
+    if ( deltaR(lvec_jet1.eta(), lvec_jet1.phi(), jit1->eta(), jit1->phi()) < dRmax1 ){
+      dRmax1 = deltaR(lvec_jet1.eta(), lvec_jet1.phi(), jit1->eta(), jit1->phi());
+      lvec_gjet1 = jit1->p4();
     }
-    break;	  
   }
+
+  double dRmax2 = 10.;
+  math::XYZTLorentzVector lvec_gjet2;
+  for(reco::GenJetCollection::const_iterator jit1 = genjet->begin(); jit1!=genjet->end(); ++jit1){
+    if ( deltaR(lvec_jet2.eta(), lvec_jet2.phi(), jit1->eta(), jit1->phi()) < dRmax2 ){
+      dRmax2 = deltaR(lvec_jet2.eta(), lvec_jet2.phi(), jit1->eta(), jit1->phi());
+      lvec_gjet2 = jit1->p4();
+    }
+  }
+
+  //only fill generator jet information, if both jets are matched
+  if ( dRmax1 < 0.15 && dRmax2 < 0.15 ){
+    fstgenjetpt  = lvec_gjet1.Pt();
+    fstgenjetphi = lvec_gjet1.Phi();
+    fstgenjeteta = lvec_gjet1.Eta();
+    fstgenjetet  = lvec_gjet1.Et();
+    fstgenjete   = lvec_gjet1.E();
+    scdgenjetpt  = lvec_gjet2.Pt();
+    scdgenjetphi = lvec_gjet2.Phi();
+    scdgenjeteta = lvec_gjet2.Eta();
+    scdgenjetet  = lvec_gjet2.Et();
+    scdgenjete   = lvec_gjet2.E();
+  }  else {
+    fstgenjetpt  = 0.0;
+    fstgenjetphi = 0.0;
+    fstgenjeteta = 0.0;
+    fstgenjetet  = 0.0;
+    fstgenjete   = 0.0;
+    scdgenjetpt  = 0.0;
+    scdgenjetphi = 0.0;
+    scdgenjeteta = 0.0;
+    scdgenjetet  = 0.0;
+    scdgenjete   = 0.0;
+  }
+
   CalibTree->Fill();
+
 }
