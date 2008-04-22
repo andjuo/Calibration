@@ -15,7 +15,7 @@
 //
 // Original Author:  Danilo Piparo
 //         Created:  Tue Apr  1 16:39:36 CEST 2008
-// $Id$
+// $Id: ZJetsHamburgInterface.cc,v 1.1 2008/04/17 11:50:39 rwolf Exp $
 //
 //
 
@@ -90,7 +90,9 @@ void ZJetsHamburgInterface::analyze(const edm::Event& event,
     // Fill the hash map of leading jets indexs for calo jets
     for (unsigned int i=0;i<genjetsvec.size();++i){
         name=event.getProvenance(genjetsvec[i].id()).moduleLabel();
-        gen_index_map[name]=i;
+        if (name.find("gen")!=std::string::npos)
+            if (gen_index_map.count(name)==0)
+                gen_index_map[name]=i;
         }
 
     // Jet index
@@ -120,7 +122,9 @@ void ZJetsHamburgInterface::analyze(const edm::Event& event,
     // Fill the hash map of leading jets indexs for calo jets
     for (unsigned int i=0;i<calojetsvec.size();++i){
         name=event.getProvenance(calojetsvec[i].id()).moduleLabel();
-        calo_index_map[name]=i;
+        if (name.find("Calo")!=std::string::npos)
+            if (calo_index_map.count(name)==0)
+                calo_index_map[name]=i;
         }
 
     // Jet index
