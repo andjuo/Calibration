@@ -38,6 +38,7 @@ public:
 private:
   edm::InputTag jets_, genjets_, met_;
   double etaMaxTag_, etaMaxProbe_, PtMin_, sumPtMaxFracThird_, deltaPhiJetMax_, deltaPhiMETMax_;
+  double minEMF_, maxEMF_;
 
   //tree variables
   float fstjetpt, fstjetphi, fstjeteta, fstjetet, fstjete;

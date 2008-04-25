@@ -35,6 +35,8 @@ module calibTreeMaker = CalibTreeMaker {
   double sumPtMaxFracThird  = 0.1
   double deltaPhiJetMax     = 0.15
   double deltaPhiMETMax     = 0.15
+  double minEMF             = 0.10
+  double maxEMF             = 0.90
 
 #
 # steerables

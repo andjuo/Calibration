@@ -13,6 +13,8 @@ void JetJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   sumPtMaxFracThird_ = cfg.getParameter<double>("sumPtMaxFracThird");
   deltaPhiJetMax_    = cfg.getParameter<double>("deltaPhiJetMax");
   deltaPhiMETMax_    = cfg.getParameter<double>("deltaPhiMETMax");
+  minEMF_            = cfg.getParameter<double>("minEMF");
+  maxEMF_            = cfg.getParameter<double>("maxEMF");
 
   //tower for jet 1
   const int kMAX = 10000;
@@ -133,9 +135,12 @@ void JetJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree*
   if ( abs(CaloJets.at(0).pt()) < PtMin_ || abs(CaloJets.at(1).pt()) < PtMin_ ) return;
   //return if two leading jets are not back to back
   if ( abs(deltaPhi(CaloJets.at(0).phi(), CaloJets.at(1).phi()) - 3.1415927) > deltaPhiJetMax_ ) return;
-  //return if one two leading jets are not in direction of MET
+  //return if one of two leading jets are not in direction of MET
   if ( deltaPhi(CaloJets.at(0).phi(), lvec_met.phi()) > deltaPhiMETMax_ && 
        deltaPhi(CaloJets.at(1).phi(), lvec_met.phi()) > deltaPhiMETMax_ ) return;
+  //return if one of two leading jets have too small or too high EMF
+  if ( CaloJets.at(0).emEnergyFraction() < minEMF_ || CaloJets.at(0).emEnergyFraction() > maxEMF_ ||
+       CaloJets.at(1).emEnergyFraction() < minEMF_ || CaloJets.at(1).emEnergyFraction() > maxEMF_ ) return;
   //four vectors of two leading jets
   lvec_jet1 = CaloJets.at(0).p4();
   lvec_jet2 = CaloJets.at(1).p4();
