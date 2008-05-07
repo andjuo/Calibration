@@ -26,7 +26,6 @@ module calibTreeMaker = CalibTreeMaker {
   InputTag TrackTowerTracks = MyTrackTowerTracks
   InputTag TrackTowerTowers = MyTrackTowerTowers
 
-<<<<<<< CalibTreeMaker.cfi
 # 2Jet sample
   InputTag DiJet_Jets       = MyDiJet_Jets
   InputTag DiJet_GenJets    = MyDiJet_GenJets
@@ -34,20 +33,6 @@ module calibTreeMaker = CalibTreeMaker {
 # 3Jet sample
   InputTag TriJet_Jets       = MyTriJet_Jets
   InputTag TriJet_GenJets    = MyTriJet_GenJets
-=======
-# JetJet sample
-  InputTag JetJetJets       = MyJetJetJets
-  InputTag JetJetGenJets    = MyJetJetGenJets
-  InputTag JetJetMET        = MyJetJetGenMET
-  double etaMaxTag          = 1.5
-  double etaMaxProbe        = 5.0
-  double PtMin              = 1.
-  double sumPtMaxFracThird  = 0.1
-  double deltaPhiJetMax     = 0.15
-  double deltaPhiMETMax     = 0.15
-  double minEMF             = 0.10
-  double maxEMF             = 0.90
->>>>>>> 1.7
 
 #
 # steerables
