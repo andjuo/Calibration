@@ -10,10 +10,25 @@
   include "Calibration/CalibSamples/data/TrackTowerSample.cff"
   sequence trackTowerInput = {selectedTrackTowerSample}
 
+# produce 2-jet sample
+  include "Calibration/CalibSamples/data/DiJetSample.cff"
+  sequence DiJetInput = {selectedDiJetSample}
+
+# produce 3-jet sample
+  include "Calibration/CalibSamples/data/TriJetSample.cff"
+  sequence TriJetInput = {selectedTriJetSample}
+
 # produce calibration tree
   include "Calibration/CalibTreeMaker/data/CalibTreeMaker.cfi"
 
   sequence makePhotonJetTree  = {photonJetInput, calibTreeMaker}
   sequence makeTrackTowerTree = {trackTowerInput,calibTreeMaker}
+<<<<<<< CalibTreeMaker.cff
+  sequence makeDiJetTree =  {DiJetInput,calibTreeMaker}
+  sequence makeTriJetTree = {TriJetInput,calibTreeMaker}
+ 
+  sequence makeAllTrees = {photonJetInput & trackTowerInput & DiJetInput & TriJetInput, calibTreeMaker}
+=======
   sequence makeJetJetTree = {calibTreeMaker}
   sequence makeAllTrees = {photonJetInput & trackTowerInput, calibTreeMaker}
+>>>>>>> 1.4

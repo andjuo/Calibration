@@ -6,7 +6,8 @@ module calibTreeMaker = CalibTreeMaker {
   string   OutputFile         = "calib.root"
   string   PhotonJetTreeName  = "GammaJetTree"
   string   TrackTowerTreeName = "TrackTowerTree"
-  string   JetJetTreeName     = "JetJetTree"
+  string   DiJetTreeName      = "DiJetTree"
+  string   TriJetTreeName     = "TriJetTree"
 
 #
 # input tags
@@ -25,6 +26,15 @@ module calibTreeMaker = CalibTreeMaker {
   InputTag TrackTowerTracks = MyTrackTowerTracks
   InputTag TrackTowerTowers = MyTrackTowerTowers
 
+<<<<<<< CalibTreeMaker.cfi
+# 2Jet sample
+  InputTag DiJet_Jets       = MyDiJet_Jets
+  InputTag DiJet_GenJets    = MyDiJet_GenJets
+
+# 3Jet sample
+  InputTag TriJet_Jets       = MyTriJet_Jets
+  InputTag TriJet_GenJets    = MyTriJet_GenJets
+=======
 # JetJet sample
   InputTag JetJetJets       = MyJetJetJets
   InputTag JetJetGenJets    = MyJetJetGenJets
@@ -37,11 +47,13 @@ module calibTreeMaker = CalibTreeMaker {
   double deltaPhiMETMax     = 0.15
   double minEMF             = 0.10
   double maxEMF             = 0.90
+>>>>>>> 1.7
 
 #
 # steerables
 #
   bool WritePhotonJetTree   = false
   bool WriteTrackTowerTree  = false
-  bool WriteJetJetTree      = false
+  bool WriteDiJetTree       = false
+  bool WriteTriJetTree      = false
 }

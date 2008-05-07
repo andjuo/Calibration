@@ -5,15 +5,17 @@ CalibTreeMaker::CalibTreeMaker(const edm::ParameterSet& cfg)
   _file=0;
   
   //admins
-  _HistName   = cfg.getParameter<std::string>("OutputFile");
-  _TTTreeName = cfg.getParameter<std::string>("TrackTowerTreeName");
-  _PJTreeName = cfg.getParameter<std::string>("PhotonJetTreeName" );
-  _JJTreeName = cfg.getParameter<std::string>("JetJetTreeName");
+  _HistName    = cfg.getParameter<std::string>("OutputFile");
+  _TTTreeName  = cfg.getParameter<std::string>("TrackTowerTreeName");
+  _PJTreeName  = cfg.getParameter<std::string>("PhotonJetTreeName" );
+  _JJTreeName  = cfg.getParameter<std::string>("DiJetTreeName");
+  _JJJTreeName = cfg.getParameter<std::string>("TriJetTreeName");
 
   //select
   writePhotonJet_ = cfg.getParameter<bool>("WritePhotonJetTree" );
   writeTrackTower_= cfg.getParameter<bool>("WriteTrackTowerTree");
-  writeJetJet_    = cfg.getParameter<bool>("WriteJetJetTree");
+  writeDiJet_     = cfg.getParameter<bool>("WriteDiJetTree");
+  writeTriJet_    = cfg.getParameter<bool>("WriteTriJetTree");
 
   //open tree file
   _file=new TFile(_HistName.c_str(),"RECREATE");
@@ -28,9 +30,13 @@ CalibTreeMaker::CalibTreeMaker(const edm::ParameterSet& cfg)
     TrackTowerTree  = new TTree(_TTTreeName.c_str(),"");
     tracktower_analysis_.setup( cfg, TrackTowerTree );
   }
-  if (writeJetJet_){
-    JetJetTree      = new TTree(_JJTreeName.c_str(),"");
-    jetjet_analysis_.setup( cfg, JetJetTree );
+  if (writeDiJet_){
+    DiJetTree      = new TTree(_JJTreeName.c_str(),"");
+    DiJet_analysis_.setup( cfg, DiJetTree );
+  }
+  if (writeTriJet_){
+    TriJetTree      = new TTree(_JJJTreeName.c_str(),"");
+    TriJet_analysis_.setup( cfg, TriJetTree );
   }
 }
 
@@ -50,8 +56,11 @@ void CalibTreeMaker::analyze(const edm::Event& evt, const edm::EventSetup& setup
     tracktower_analysis_.analyze(evt, setup, TrackTowerTree);
   }
 
-  if (writeJetJet_){
-    jetjet_analysis_.analyze(evt, setup, JetJetTree);
+  if (writeDiJet_){
+    DiJet_analysis_.analyze(evt, setup, DiJetTree);
+  }
+  if (writeTriJet_){
+    TriJet_analysis_.analyze(evt, setup, TriJetTree);
   }
 }
 
@@ -70,9 +79,13 @@ void CalibTreeMaker::endJob()
     TrackTowerTree->Write();
     delete TrackTowerTree;
   }
-  if(writeJetJet_){
-    JetJetTree->Write();
-    delete JetJetTree;
+  if(writeDiJet_){
+    DiJetTree->Write();
+    delete DiJetTree;
+  } 
+  if(writeTriJet_){
+    TriJetTree->Write();
+    delete TriJetTree;
   } 
 
   if (_file!=0) {   // if there was a tree file...
