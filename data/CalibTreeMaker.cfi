@@ -26,13 +26,10 @@ module calibTreeMaker = CalibTreeMaker {
   InputTag TrackTowerTracks = MyTrackTowerTracks
   InputTag TrackTowerTowers = MyTrackTowerTowers
 
-# 2Jet sample
-  InputTag DiJet_Jets       = MyDiJet_Jets
-  InputTag DiJet_GenJets    = MyDiJet_GenJets
-
-# 3Jet sample
-  InputTag TriJet_Jets       = MyTriJet_Jets
-  InputTag TriJet_GenJets    = MyTriJet_GenJets
+# NJet sample
+  InputTag NJet_Jets       = MyNJet_Jets
+  InputTag NJet_GenJets    = MyNJet_GenJets
+  InputTag NJet_MET        = MyNJet_MET
 
 #
 # steerables

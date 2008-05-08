@@ -25,5 +25,6 @@
   sequence makeTrackTowerTree = {trackTowerInput,calibTreeMaker}
   sequence makeDiJetTree =  {DiJetInput,calibTreeMaker}
   sequence makeTriJetTree = {TriJetInput,calibTreeMaker}
+  sequence makeNJetTree =  {DiJetInput & TriJetInput, calibTreeMaker}
  
   sequence makeAllTrees = {photonJetInput & trackTowerInput & DiJetInput & TriJetInput, calibTreeMaker}

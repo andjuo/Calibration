@@ -2,12 +2,12 @@
 
 void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
-  jets_      = cfg.getParameter<edm::InputTag>("NJetJets");
-  genjets_   = cfg.getParameter<edm::InputTag>("NJetGenJets");
-  met_       = cfg.getParameter<edm::InputTag>("NJetMet");
+  jets_ = cfg.getParameter<edm::InputTag>("NJet_Jets");
+  //genjets_=cfg.getParameter<edm::InputTag>("NJet_GenJets");
+  met_  = cfg.getParameter<edm::InputTag>("NJet_MET");
 
   //tower for all jets
-  unsigned int kMAX = 10000;
+  const int kMAX = 10000;
   towet  = new float [ kMAX ];
   toweta = new float [ kMAX ];
   towphi = new float [ kMAX ];
@@ -35,12 +35,12 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "Tow_jetidx",tow_jetidx, "Tow_jetidx[NobjTow]/F");
 
   //All jets
-  kMAX = 30;
-  jetpt  = new float [ kMAX ];
-  jetphi = new float [ kMAX ];
-  jeteta = new float [ kMAX ];
-  jetet  = new float [ kMAX ];
-  jete   = new float [ kMAX ];
+  const int kjMAX = 50;
+  jetpt  = new float [ kjMAX ];
+  jetphi = new float [ kjMAX ];
+  jeteta = new float [ kjMAX ];
+  jetet  = new float [ kjMAX ];
+  jete   = new float [ kjMAX ];
   // Jet-specific branches of the tree 
   CalibTree->Branch( "NobjJet",&NobjJet,"NobjJet/I"             );
   CalibTree->Branch( "JetPt", jetpt, "JetPt[NobjJet]/F" );
@@ -57,6 +57,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 
 void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
+//std::cout << "before Handle" << std::endl;
   edm::Handle<reco::CaloJetCollection> pJets;
   //edm::Handle<edm::View<reco::Jet> > pJets;
   evt.getByLabel(jets_, pJets);
@@ -64,10 +65,12 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   edm::Handle<CaloMETCollection> recmets;
   evt.getByLabel(met_, recmets);
 
+//std::cout << "before loop over jets" << std::endl;
   NobjJet = pJets->size();
   unsigned int towno = 0;
   for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
   {
+//std::cout << jtno << ". jet" << std::endl;
     jetpt[  jtno ] = (*pJets)[jtno].pt();
     jetphi[ jtno ] = (*pJets)[jtno].phi();
     jeteta[ jtno ] = (*pJets)[jtno].eta();
@@ -77,6 +80,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     NobjTow=j_towers.size();
     for (std::vector<CaloTowerRef>::const_iterator tow = j_towers.begin(); 
 	 tow != j_towers.end(); ++tow, ++towno){
+//std::cout << "   " << towno << ". tower" << std::endl;
       towet[towno]     = (*tow)->et();
       toweta[towno]    = (*tow)->eta();
       towphi[towno]    = (*tow)->phi();
@@ -90,6 +94,8 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       tow_jetidx[towno]= jtno;
     }
   }
+
+//std::cout << "before met " << std::endl;
   
   typedef CaloMETCollection::const_iterator cmiter;
   for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
@@ -98,6 +104,8 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     msum = i->sumEt();
     break;
   }
-  
+
+//std::cout << "before Tree fill " << std::endl;
+ 
   CalibTree->Fill();
 }
