@@ -15,7 +15,7 @@
 //
 // Original Author:  Danilo Piparo
 //         Created:  Tue Apr  1 16:39:36 CEST 2008
-// $Id: ZJetsHamburgInterface.cc,v 1.1 2008/04/17 11:50:39 rwolf Exp $
+// $Id: ZJetsHamburgInterface.cc,v 1.2 2008/04/22 10:10:18 dpiparo Exp $
 //
 //
 
@@ -30,7 +30,7 @@
 #include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
-
+#include "DataFormats/METReco/interface/CaloMETCollection.h"
 
 ZJetsHamburgInterface::ZJetsHamburgInterface(const edm::ParameterSet& cfg)
 
