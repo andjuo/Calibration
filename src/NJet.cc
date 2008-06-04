@@ -1,4 +1,6 @@
 #include "Calibration/CalibTreeMaker/interface/NJet.h"
+#include "DataFormats/METReco/interface/CaloMET.h"
+
 
 void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {

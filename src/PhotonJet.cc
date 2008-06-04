@@ -11,6 +11,7 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
+#include "DataFormats/METReco/interface/CaloMET.h"
 
 //check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
 //#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
