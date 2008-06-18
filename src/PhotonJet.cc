@@ -111,10 +111,12 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
   //CSA07 event weights
-  edm::Handle<double> weightHandle;
-  evt.getByLabel ("csaweightproducer","weight", weightHandle);
-  eventweight = *weightHandle;
+  //edm::Handle<double> weightHandle;
+  //evt.getByLabel ("csaweightproducer","weight", weightHandle);
+  //eventweight = *weightHandle;
   //processid = csa07::csa07ProcessId(evt); //Stew lower pt bound was reduced from 15 to 0 GeV (pid=28)
+
+  eventweight = 1.;
 
   edm::Handle<CaloJet> jet;
   evt.getByLabel(jets_, jet);

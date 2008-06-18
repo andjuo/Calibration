@@ -4,9 +4,10 @@
 
 void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
-  jets_ = cfg.getParameter<edm::InputTag>("NJet_Jets");
-  //genjets_=cfg.getParameter<edm::InputTag>("NJet_GenJets");
-  met_  = cfg.getParameter<edm::InputTag>("NJet_MET");
+  jets_    = cfg.getParameter<edm::InputTag>("NJet_Jets");
+  //genjets_ = cfg.getParameter<edm::InputTag>("NJet_GenJets");
+  met_     = cfg.getParameter<edm::InputTag>("NJet_MET");
+  weight_  = cfg.getParameter<edm::InputTag> ("NJet_Weight");
 
   //tower for all jets
   const int kMAX = 10000;
@@ -55,11 +56,20 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "Met",   &mmet,"Met/F"   );
   CalibTree->Branch( "MetPhi",&mphi,"MetPhi/F");
   CalibTree->Branch( "MetSum",&msum,"MetSum/F");
+
+  //EventWeight
+  CalibTree->Branch( "Weight",&weight,"Weight/F"   );
 }
 
 void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
-//std::cout << "before Handle" << std::endl;
+
+  //Event Weighting
+  //double weight = 1.; 
+  edm::Handle<double> weightHandle;
+  evt.getByLabel (weight_, weightHandle);
+  weight = (float)( *weightHandle );
+
   edm::Handle<reco::CaloJetCollection> pJets;
   //edm::Handle<edm::View<reco::Jet> > pJets;
   evt.getByLabel(jets_, pJets);
@@ -67,13 +77,11 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   edm::Handle<CaloMETCollection> recmets;
   evt.getByLabel(met_, recmets);
 
-//std::cout << "before loop over jets" << std::endl;
   NobjTow=0;
   NobjJet = pJets->size();
   unsigned int towno = 0;
   for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
   {
-//std::cout << jtno << ". jet, pt=" << (*pJets)[jtno].pt() << std::endl;
     jetpt[  jtno ] = (*pJets)[jtno].pt();
     jetphi[ jtno ] = (*pJets)[jtno].phi();
     jeteta[ jtno ] = (*pJets)[jtno].eta();
@@ -97,7 +105,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     }
   }
 
-//std::cout << "before met " << std::endl;
   
   typedef CaloMETCollection::const_iterator cmiter;
   for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
@@ -107,7 +114,5 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     break;
   }
 
-//std::cout << "before Tree fill " << std::endl;
- 
   CalibTree->Fill();
 }

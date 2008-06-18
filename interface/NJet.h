@@ -26,7 +26,7 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
-  edm::InputTag jets_, genjets_, met_;
+  edm::InputTag jets_, genjets_, met_, weight_;
 
   //tree variables
   int   NobjJet;
@@ -34,7 +34,7 @@ private:
   int   NobjTow;
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
   int   *towid_phi, *towid_eta, *towid, *tow_jetidx;
-  float mmet, mphi, msum;
+  float mmet, mphi, msum, weight;
 };
 
 #endif

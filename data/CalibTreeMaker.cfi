@@ -30,6 +30,7 @@ module calibTreeMaker = CalibTreeMaker {
   InputTag NJet_Jets       = MyNJet_Jets
   InputTag NJet_GenJets    = MyNJet_GenJets
   InputTag NJet_MET        = MyNJet_MET
+  InputTag NJet_Weight     = MyNJet_Weight
 
 #
 # steerables
