@@ -10,7 +10,7 @@
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
 
 //check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
@@ -127,7 +127,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   edm::Handle<GenJet> genJet;
   evt.getByLabel(genjets_,genJet);
 
-  edm::Handle<GenParticleCandidate> genPhoton;
+  edm::Handle<GenParticle> genPhoton;
   evt.getByLabel(genphotons_,genPhoton);
 
   edm::Handle<CaloMETCollection> met;
@@ -136,7 +136,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   const CaloJet& calojet = *jet;
   const Photon& Photon = *photon; 
   const GenJet& genjet = *genJet;
-  const GenParticleCandidate&  genphoton = *genPhoton; 
+  const GenParticle&  genphoton = *genPhoton; 
   const CaloMETCollection& recmets = *met; 
 
   /*
