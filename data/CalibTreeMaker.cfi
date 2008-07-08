@@ -14,13 +14,14 @@ module calibTreeMaker = CalibTreeMaker {
 #
 
 # PhotonJet sample
-  InputTag PhotonJetJets       = MyPhotonJetJets
-  InputTag PhotonJetGenJets    = MyPhotonJetGenJets
-  InputTag PhotonJetMet        = MyPhotonJetMet
-  InputTag PhotonJetTowers     = MyPhotonJetTowers
-  InputTag PhotonJetPhotons    = MyPhotonJetPhotons
-  InputTag PhotonJetGenPhotons = MyPhotonJetGenPhotons
-  InputTag EBRecHits           = ecalRecHit:EcalRecHitsEB:Rec1
+  InputTag PhotonJetJets             = MyPhotonJetJets
+  InputTag PhotonJetGenJets          = MyPhotonJetGenJets
+  InputTag PhotonJetMet              = MyPhotonJetMet
+  InputTag PhotonJetTowers           = MyPhotonJetTowers
+  InputTag PhotonJetPhotons          = MyPhotonJetPhotons
+  InputTag PhotonJetGenPhotons       = MyPhotonJetGenPhotons
+  InputTag EBRecHits                 = ecalRecHit:EcalRecHitsEB:Rec1
+  InputTag PhotonJetNonLeadingJetsPt = MyPhotonJetNonLeadingJetsPt
 
 # TrackTower sample
   InputTag TrackTowerTracks = MyTrackTowerTracks

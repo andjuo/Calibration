@@ -18,12 +18,13 @@
 
 void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
-  jets_      = cfg.getParameter<edm::InputTag>("PhotonJetJets");
-  photon_    = cfg.getParameter<edm::InputTag>("PhotonJetPhotons");
-  genjets_   = cfg.getParameter<edm::InputTag>("PhotonJetGenJets");
-  genphotons_= cfg.getParameter<edm::InputTag>("PhotonJetGenPhotons");
-  met_       = cfg.getParameter<edm::InputTag>("PhotonJetMet");
-  ebrechits_ = cfg.getParameter<edm::InputTag>("EBRecHits");
+  jets_             = cfg.getParameter<edm::InputTag>("PhotonJetJets");
+  photon_           = cfg.getParameter<edm::InputTag>("PhotonJetPhotons");
+  genjets_          = cfg.getParameter<edm::InputTag>("PhotonJetGenJets");
+  genphotons_       = cfg.getParameter<edm::InputTag>("PhotonJetGenPhotons");
+  met_              = cfg.getParameter<edm::InputTag>("PhotonJetMet");
+  ebrechits_        = cfg.getParameter<edm::InputTag>("EBRecHits");
+  nonleadingjetspt_ = cfg.getParameter<edm::InputTag>("PhotonJetNonLeadingJetsPt");
 
   //tower data
   const int kMAX = 10000;
@@ -102,6 +103,8 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "GenPhotonEta", &gphotoneta, "GenPhotonEta/F" );
   CalibTree->Branch( "GenPhotonEt",  &gphotonet,  "GenPhtonEt/F"   );
   CalibTree->Branch( "GenPhotonE",   &gphotone,   "GenPhotonE/F"   );
+  // NonLeadingJetPt branch
+  CalibTree->Branch( "NonLeadingJetPt", &nonleadingjetspt,   "NonLeadingJetPt/F"   );
 
   // CSA07 weight and pid branches
   CalibTree->Branch( "EventWeight", &eventweight,  "EventWeight/F"  );
@@ -132,6 +135,9 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
 
   edm::Handle<CaloMETCollection> met;
   evt.getByLabel(met_,met);
+
+  edm::Handle<double> NonLeadingJetsPt;
+  evt.getByLabel( nonleadingjetspt_, NonLeadingJetsPt );
 
   const CaloJet& calojet = *jet;
   const Photon& Photon = *photon; 
@@ -234,5 +240,8 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
     mcalsum = i->sumEt();
     break;
   }
+
+  nonleadingjetspt = (float)(*NonLeadingJetsPt);
+
   CalibTree->Fill();
 }

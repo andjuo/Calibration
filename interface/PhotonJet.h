@@ -33,8 +33,8 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
-  edm::InputTag jets_,genjets_,met_,photon_,genphotons_;                    
-  edm::InputTag ebrechits_;
+  edm::InputTag jets_,genjets_, met_, photon_, genphotons_;                    
+  edm::InputTag ebrechits_, nonleadingjetspt_;
 
   //tree variables
   float jcalpt, jcalphi, jcaleta, jcalet, jcale;
@@ -49,6 +49,7 @@ private:
   int   *etowid_phi, *etowid_eta, *etowid, *etownum;
   float *etowet, *etoweta, *etowphi, *etowe;
   float eventweight;
+  float nonleadingjetspt;
   //int   processid;
 };
 
