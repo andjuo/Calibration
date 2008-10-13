@@ -1,6 +1,8 @@
 #ifndef CalibTreeMaker_H
 #define CalibTreeMaker_H
 
+#define CMSSW_2_1_X
+
 #include <memory>
 #include <iostream>
 

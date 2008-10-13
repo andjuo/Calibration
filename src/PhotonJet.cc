@@ -174,10 +174,18 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   jcale   = calojet.energy();
 
   int jtow=0, icell=0;
-  std::vector <CaloTowerRef> jetTowers = calojet.getConstituents();
+
+  // uncomment for CMSSW_2_1_X compatibility
+  std::vector <CaloTowerPtr> jetTowers = calojet.getCaloConstituents();
   NobjTowCal=jetTowers.size();
-  for(std::vector<CaloTowerRef>::const_iterator tow = jetTowers.begin();
+  for(std::vector<CaloTowerPtr>::const_iterator tow = jetTowers.begin();
       tow != jetTowers.end(); ++tow, ++jtow){
+
+//   uncomment for CMSSW_2_0_X compatibility
+//   std::vector <CaloTowerRef> jetTowers = calojet.getConstituents();
+//   NobjTowCal=jetTowers.size();
+//   for(std::vector<CaloTowerRef>::const_iterator tow = jetTowers.begin();
+//       tow != jetTowers.end(); ++tow, ++jtow){
     towet [jtow] = (*tow)->et();
     toweta[jtow] = (*tow)->eta();
     towphi[jtow] = (*tow)->phi();

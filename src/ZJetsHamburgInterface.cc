@@ -15,7 +15,7 @@
 //
 // Original Author:  Danilo Piparo
 //         Created:  Tue Apr  1 16:39:36 CEST 2008
-// $Id: ZJetsHamburgInterface.cc,v 1.2 2008/04/22 10:10:18 dpiparo Exp $
+// $Id: ZJetsHamburgInterface.cc,v 1.3 2008/06/04 15:26:28 stadie Exp $
 //
 //
 
@@ -206,10 +206,17 @@ void ZJetsHamburgInterface::analyze(const edm::Event& event,
         // Calotowers ------------------------------------------
 
         int jtow=0;
-        std::vector <CaloTowerRef>jetTowers=calo_leading_jet->getConstituents();
+	// uncomment for CMSSW_2_1_X compatibility
+        std::vector <CaloTowerPtr>jetTowers=calo_leading_jet->getCaloConstituents();
         m_NobjTowCal=jetTowers.size();
-        for(std::vector<CaloTowerRef>::const_iterator tow = jetTowers.begin();
+        for(std::vector<CaloTowerPtr>::const_iterator tow = jetTowers.begin();
             tow != jetTowers.end(); ++tow, ++jtow){
+
+//        uncomment for CMSSW_2_0_X compatibility
+//        std::vector <CaloTowerRef>jetTowers=calo_leading_jet->getConstituents();
+//         m_NobjTowCal=jetTowers.size();
+//         for(std::vector<CaloTowerRef>::const_iterator tow = jetTowers.begin();
+//             tow != jetTowers.end(); ++tow, ++jtow){
             m_towet [jtow] = (*tow)->et();
             m_toweta[jtow] = (*tow)->eta();
             m_towphi[jtow] = (*tow)->phi();
