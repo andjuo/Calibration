@@ -88,17 +88,18 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     jetet[  jtno ] = (*pJets)[jtno].et();
     jete[   jtno ] = (*pJets)[jtno].energy();
 
-    // uncomment for CMSSW_2_1_x compatibility
+    // uncomment for CMSSW_2_1_X compatibility
     std::vector<CaloTowerPtr> j_towers = (*pJets)[jtno].getCaloConstituents();
     NobjTow+=j_towers.size();
     for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
 	 tow != j_towers.end(); ++tow, ++towno){
 
-//     uncomment for CMSSW_2_0_X compatibility
-//     std::vector<CaloTowerRef> j_towers = (*pJets)[jtno].getConstituents(); 
-//     NobjTow+=j_towers.size();
-//     for (std::vector<CaloTowerRef>::const_iterator tow = j_towers.begin(); 
-//       tow != j_towers.end(); ++tow, ++towno){
+// uncomment for CMSSW_2_0_X compatibility
+//    std::vector<CaloTowerRef> j_towers = (*pJets)[jtno].getConstituents(); 
+//    NobjTow+=j_towers.size();
+//    for (std::vector<CaloTowerRef>::const_iterator tow = j_towers.begin(); 
+//         tow != j_towers.end(); ++tow, ++towno){
+
       towet[towno]     = (*tow)->et();
       toweta[towno]    = (*tow)->eta();
       towphi[towno]    = (*tow)->phi();

@@ -20,6 +20,8 @@
 <use name=DataFormats/FEDRawData>
 <use name=TBDataFormats/HcalTBObjects>
 <use name=DataFormats/TrackReco>
+<use name=DataFormats/MuonReco>
+<use name=TrackingTools/TrackAssociator>
 
 <flags EDM_PLUGIN=1>
 
@@ -46,5 +48,7 @@
    <use name=DataFormats/FEDRawData>
    <use name=TBDataFormats/HcalTBObjects>
    <use name=DataFormats/TrackReco>
+   <use name=DataFormats/MuonReco>
+   <use name=TrackingTools/TrackAssociator>
 </export>
 
