@@ -43,6 +43,20 @@ process.load("RecoJets.Configuration.RecoJetsAll_cff")
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
+#############   Define the L2 correction service #####
+process.L2JetCorrector = cms.ESSource("L2RelativeCorrectionService", 
+                                      tagName = cms.string('iCSA08_S156_L2Relative_Scone5'),
+                                      label = cms.string('L2RelativeJetCorrector')
+                                      )
+#############   Define the L3 correction service #####
+process.L3JetCorrector = cms.ESSource("L3AbsoluteCorrectionService", 
+                                      tagName = cms.string('iCSA08_S156_L3Absolute_Scone5'),
+                                      label = cms.string('L3AbsoluteJetCorrector')
+                                      )
+
+# set the record's IOV. Must be defined once. Choose ANY correction service. #
+process.prefer("L2JetCorrector")
+
 process.photonCalIsolation.src = 'photons'
 process.photonCalIsolation.dRMin = 0.20
 process.photonCalIsolation.dRMax = 0.50

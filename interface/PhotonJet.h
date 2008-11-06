@@ -57,7 +57,7 @@ private:
   TrackAssociatorParameters parameters_;
 
   //tree variables
-  float jcalpt, jcalphi, jcaleta, jcalet, jcale;
+  float jcalpt, jcalphi, jcaleta, jcalet, jcale, jscalel2, jscalel3;
   float jgenpt, jgenphi, jgeneta, jgenet, jgene;
   float mcalmet,mcalphi,mcalsum;
   float photonpt, photonphi, photoneta, photonet, photone; 

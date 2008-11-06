@@ -1,4 +1,6 @@
 #include "Calibration/CalibTreeMaker/interface/PhotonJet.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
+
 
 //check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
 //#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
@@ -117,6 +119,8 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetCalEta", &jcaleta,   "JetCalEta/F" );
   CalibTree->Branch( "JetCalEt",  &jcalet,    "JetCalEt/F"  );
   CalibTree->Branch( "JetCalE",   &jcale,     "JetCalE/F"   );
+  CalibTree->Branch( "JetCorrL2", &jscalel2,  "JetCorrL2/F" );
+  CalibTree->Branch( "JetCorrL3", &jscalel3,  "JetCorrL3/F" );
   // GenJet branches 
   CalibTree->Branch( "JetGenPt",  &jgenpt,    "JetGenPt/F"  );
   CalibTree->Branch( "JetGenPhi", &jgenphi,   "JetGenPhi/F" );
@@ -202,6 +206,19 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   const CaloGeometry cG = *pG;
   const CaloSubdetectorGeometry* EBgeom=cG.getSubdetectorGeometry(DetId::Ecal,1);
   */
+
+  std::string l2name = "L2RelativeJetCorrector";
+  std::string l3name = "L3AbsoluteJetCorrector";
+
+  const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name,setup);   //Define the jet corrector
+  const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
+  jscalel2   = correctorL2  ->correction(calojet.p4());  //calculate the correction
+  jscalel3   = correctorL3  ->correction(calojet.p4());  //calculate the correction
+  cout<<" Jet Pt = "<<calojet.pt()
+      <<" Jet Eta = "<<calojet.eta()
+      <<" Scale L2 = "<<jscalel2
+      <<" Scale L3 = "<<jscalel3
+      <<endl;
 
   jcalpt  = calojet.pt();
   jcalphi = calojet.phi();
