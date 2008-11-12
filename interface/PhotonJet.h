@@ -52,14 +52,16 @@ private:
   edm::InputTag jets_,genjets_, met_, photon_, genphotons_;                    
   edm::InputTag ebrechits_, nonleadingjetspt_;
   edm::InputTag recTracks_, recMuons_;
+  edm::InputTag weight_tag;
   double conesize_;
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
 
+
   //tree variables
   float jcalpt, jcalphi, jcaleta, jcalet, jcale, jscalel2, jscalel3;
   float jgenpt, jgenphi, jgeneta, jgenet, jgene;
-  float mcalmet,mcalphi,mcalsum;
+  float mcalmet,mcalphi,mcalsum, weight;
   float photonpt, photonphi, photoneta, photonet, photone; 
   float gphotonpt, gphotonphi, gphotoneta, gphotonet, gphotone; 
   int   NobjTowCal;
@@ -68,14 +70,14 @@ private:
   int   NobjETowCal;
   int   *etowid_phi, *etowid_eta, *etowid, *etownum;
   float *etowet, *etoweta, *etowphi, *etowe;
-  float eventweight;
   float nonleadingjetspt;
   int   NobjTrack;
   float *trackpt, *tracketa, *trackphi, *trackp, *tracketaout, *trackphiout;
-  float *trackdr, *trackdrout;
+  float *trackdr, *trackdrout, *trackchi2;
   float *trackemc1, *trackemc3, *trackemc5;
   float *trackhac1, *trackhac3, *trackhac5;
-  int   *trackid, *tracktowid, *tracktowidphi, *tracktowideta;
+  float *muDR, *muDE;
+  int   *trackid, *tracktowid, *tracktowidphi, *tracktowideta, *tracknhits;
   //int   processid;
 };
 

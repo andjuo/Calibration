@@ -17,6 +17,8 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   recTracks_        = cfg.getParameter<edm::InputTag>("PhotonJetRecTracks");
   recMuons_         = cfg.getParameter<edm::InputTag>("PhotonJetRecMuons");
   conesize_         = cfg.getParameter<double>("PhotonJetConeSize");
+  weight_tag        = cfg.getParameter<edm::InputTag> ("PhotonJet_Weight_Tag");
+  weight            = (float)(cfg.getParameter<double> ("PhotonJet_Weight"));
    
   // TrackAssociator parameters
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
@@ -90,6 +92,8 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   tracktowidphi = new int [ kMAX ];
   tracktowideta = new int [ kMAX ];
   trackid       = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
+  muDR          = new float[ kMAX ];
+  muDE          = new float[ kMAX ];
 
   //track branches
   CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
@@ -98,6 +102,8 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "TrackTowIdPhi", tracktowidphi, "TrackTowIdPhi[NobjTrack]/I" );
   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
   CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
+  CalibTree->Branch( "TrackNHits", tracknhits, "TrackNHits[NobjTrack]/I" );
+  CalibTree->Branch( "TrackChi2",  trackchi2,  "TrackChi2[NobjTrack]/F"  );
   CalibTree->Branch( "TrackPt",    trackpt,    "TrackPt[NobjTrack]/F"    );
   CalibTree->Branch( "TrackEta",   tracketa,   "TrackEta[NobjTrack]/F"   );
   CalibTree->Branch( "TrackPhi",   trackphi,   "TrackPhi[NobjTrack]/F"   );
@@ -112,6 +118,8 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "TrackHAC1",  trackhac1,  "TrackHAC1[NobjTrack]/F"  );
   CalibTree->Branch( "TrackHAC3",  trackhac3,  "TrackHAC3[NobjTrack]/F"  );
   CalibTree->Branch( "TrackHAC5",  trackhac5,  "TrackHAC5[NobjTrack]/F"  );
+  CalibTree->Branch( "MuDR", muDR,  "MuDR[NobjTrack]/F"  );
+  CalibTree->Branch( "MuDE", muDE,  "MuDE[NobjTrack]/F"  );
 
   // CaloJet branches 
   CalibTree->Branch( "JetCalPt",  &jcalpt,    "JetCalPt/F"  );
@@ -147,19 +155,18 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "NonLeadingJetPt", &nonleadingjetspt,   "NonLeadingJetPt/F"   );
 
   // CSA07 weight and pid branches
-  CalibTree->Branch( "EventWeight", &eventweight,  "EventWeight/F"  );
+  CalibTree->Branch( "EventWeight", &weight,  "EventWeight/F"  );
   //CalibTree->Branch( "ProcessID"  , &processid,    "ProcessID/I"  );
 }
 
 void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
-  //CSA07 event weights
-  //edm::Handle<double> weightHandle;
-  //evt.getByLabel ("csaweightproducer","weight", weightHandle);
-  //eventweight = *weightHandle;
-  //processid = csa07::csa07ProcessId(evt); //Stew lower pt bound was reduced from 15 to 0 GeV (pid=28)
-
-  eventweight = 1.;
+  if(weight<0)
+    {
+      edm::Handle<double> weightHandle;
+      evt.getByLabel ("weight_tag", weightHandle);
+      weight =(float)( *weightHandle);
+    }
 
   edm::Handle<CaloJet> jet;
   evt.getByLabel(jets_, jet);
@@ -214,11 +221,13 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
   jscalel2   = correctorL2  ->correction(calojet.p4());  //calculate the correction
   jscalel3   = correctorL3  ->correction(calojet.p4());  //calculate the correction
+  /*
   cout<<" Jet Pt = "<<calojet.pt()
       <<" Jet Eta = "<<calojet.eta()
       <<" Scale L2 = "<<jscalel2
       <<" Scale L3 = "<<jscalel3
       <<endl;
+  */
 
   jcalpt  = calojet.pt();
   jcalphi = calojet.phi();
@@ -327,7 +336,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
     double dRin   = deltaR(*it,calojet);
     double outeta = info.trkGlobPosAtEcal.eta();
     double outphi = info.trkGlobPosAtEcal.phi();
-    double dRout  = deltaR(it->eta(),it->phi(),outeta,outphi);
+    double dRout  = deltaR(calojet.eta(),calojet.phi(),outeta,outphi);
     if (dRin < conesize_ || dRout < conesize_){
       saveTrack=true;
     }
@@ -377,11 +386,15 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
       */
       
       //Match track with muons
+      muDR[iTrack] = -1;
+      muDE[iTrack] = -1;
       bool muonMatch = false;
       //for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
       for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
 	double dRm = deltaR(*im,*it);
 	double dE = fabs( (im->pt()-it->pt())/it->pt() );
+	muDR[iTrack] = dRm;
+	muDE[iTrack] = dE;
 	if (dRm<0.1 && dE < 0.2) muonMatch = true;
       }
       if (muonMatch) {
