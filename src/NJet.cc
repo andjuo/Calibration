@@ -248,6 +248,8 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	  tracktowideta[iTrack] = HcalCenterId.ieta();
 	  tracktowid[iTrack]    = centerId.rawId();
 	  track_jetidx[iTrack]  = jtno;
+	  trackchi2[iTrack]     = it->normalizedChi2();
+	  tracknhits[iTrack]    = it->numberOfValidHits();
 
 	  //Match track with muons
 	  muDR[iTrack] = -1;

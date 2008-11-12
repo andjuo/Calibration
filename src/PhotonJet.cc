@@ -378,6 +378,8 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
       tracktowidphi[iTrack] = HcalCenterId.iphi();
       tracktowideta[iTrack] = HcalCenterId.ieta();
       tracktowid[iTrack]    = centerId.rawId();
+      trackchi2[iTrack]     = it->normalizedChi2();
+      tracknhits[iTrack]    = it->numberOfValidHits();
       /*
      std::cout<<"rawId: "<<centerId.rawId()
 	       <<"iphiId: "<<HcalCenterId.iphi()
