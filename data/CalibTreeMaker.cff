@@ -18,6 +18,10 @@
   include "Calibration/CalibSamples/data/TriJetSample.cff"
   sequence TriJetInput = {selectedTriJetSample}
 
+# produce top sample
+  include "Calibration/CalibSamples/data/TopSample.cff"
+  sequence TopInput = {selectedTopSample}
+
 # produce calibration tree
   include "Calibration/CalibTreeMaker/data/CalibTreeMaker.cfi"
 
@@ -26,5 +30,7 @@
   sequence makeDiJetTree =  {DiJetInput,calibTreeMaker}
   sequence makeTriJetTree = {TriJetInput,calibTreeMaker}
   sequence makeNJetTree =  {DiJetInput & TriJetInput, calibTreeMaker}
+  sequence makeTopTree =   {TopInput, calibTreeMaker}
  
-  sequence makeAllTrees = {photonJetInput & trackTowerInput & DiJetInput & TriJetInput, calibTreeMaker}
+  sequence makeAllTrees = {photonJetInput & trackTowerInput & DiJetInput &
+                           TriJetInput & TopInput, calibTreeMaker}

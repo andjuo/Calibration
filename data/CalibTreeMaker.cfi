@@ -8,6 +8,7 @@ module calibTreeMaker = CalibTreeMaker {
   string   TrackTowerTreeName = "TrackTowerTree"
   string   DiJetTreeName      = "DiJetTree"
   string   TriJetTreeName     = "TriJetTree"
+  string   TopTreeName        = "TopTree"
 
 #
 # input tags
@@ -36,6 +37,11 @@ module calibTreeMaker = CalibTreeMaker {
   InputTag NJet_MET        = MyNJet_MET
   InputTag NJet_Weight     = MyNJet_Weight
 
+# Top sample
+  InputTag TopHadBJets    = MyTopHadBJets
+  InputTag TopHadWJets    = MyTopHadWJets
+  InputTag Top_Weight     = MyTop_Weight
+
 #
 # steerables
 #
@@ -43,4 +49,5 @@ module calibTreeMaker = CalibTreeMaker {
   bool WriteTrackTowerTree  = false
   bool WriteDiJetTree       = false
   bool WriteTriJetTree      = false
+  bool WriteTopTree         = false
 }
