@@ -29,17 +29,11 @@ private:
   edm::InputTag wjets_, bjets_, weight_;
 
   //tree variables
-  int   NobjWJet;
-  float *wjetpt, *wjetphi, *wjeteta, *wjetet, *wjete;
-  int   NobjWTow;
-  float *wtowet, *wtoweta, *wtowphi, *wtowen, *wtowem, *wtowhd, *wtowoe;
-  int   *wtowid_phi, *wtowid_eta, *wtowid, *wtow_jetidx;
-
-  int   NobjBJet;
-  float *bjetpt, *bjetphi, *bjeteta, *bjetet, *bjete;
-  int   NobjBTow;
-  float *btowet, *btoweta, *btowphi, *btowen, *btowem, *btowhd, *btowoe;
-  int   *btowid_phi, *btowid_eta, *btowid, *btow_jetidx;
+  int   NobjJet, *jetflavor, *jettopid;
+  float *jetpt, *jetphi, *jeteta, *jetet, *jete;
+  int   NobjTow;
+  float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
+  int   *towid_phi, *towid_eta, *towid, *tow_jetidx;
 
   float weight;
 };
