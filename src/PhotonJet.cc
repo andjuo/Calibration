@@ -18,7 +18,7 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   recMuons_         = cfg.getParameter<edm::InputTag>("PhotonJetRecMuons");
   conesize_         = cfg.getParameter<double>("PhotonJetConeSize");
   weight_tag        = cfg.getParameter<edm::InputTag> ("PhotonJet_Weight_Tag");
-  weight            = (float)(cfg.getParameter<double> ("PhotonJet_Weight"));
+  weight_            = (float)(cfg.getParameter<double> ("PhotonJet_Weight"));
    
   // TrackAssociator parameters
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
@@ -162,12 +162,13 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 
 void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
-  if(weight<0)
+  if(weight_<0)
     {
       edm::Handle<double> weightHandle;
       evt.getByLabel ("weight_tag", weightHandle);
       weight =(float)( *weightHandle);
     }
+  else weight = weight_;
 
   edm::Handle<CaloJet> jet;
   evt.getByLabel(jets_, jet);

@@ -8,7 +8,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   jets_       = cfg.getParameter<edm::InputTag>("NJet_Jets");
   genjets_    = cfg.getParameter<edm::InputTag>("NJet_GenJets");
   met_        = cfg.getParameter<edm::InputTag>("NJet_MET");
-  weight      = (float)(cfg.getParameter<double> ("NJet_Weight"));
+  weight_      = (float)(cfg.getParameter<double> ("NJet_Weight"));
   weight_tag  = cfg.getParameter<edm::InputTag> ("NJet_Weight_Tag");
   recTracks_  = cfg.getParameter<edm::InputTag>("NJetRecTracks");
   recMuons_   = cfg.getParameter<edm::InputTag>("NJetRecMuons");
@@ -128,12 +128,13 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
   //Event Weighting
-  if(weight < 0)
+  if(weight_ < 0)
     {
       edm::Handle<double> weightHandle;
       evt.getByLabel (weight_tag, weightHandle);
       weight = (float)( *weightHandle );
     }
+  else weight = weight_;
 
   edm::Handle<reco::CaloJetCollection> pJets;
   //edm::Handle<edm::View<reco::Jet> > pJets;

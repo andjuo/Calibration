@@ -54,6 +54,7 @@ private:
   edm::InputTag recTracks_, recMuons_;
   edm::InputTag weight_tag;
   double conesize_;
+  float weight_;
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
 
