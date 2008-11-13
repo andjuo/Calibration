@@ -66,12 +66,13 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   tracktowideta = new int [ kMAX ];
   track_jetidx  = new int[ kMAX ];
   trackid       = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
+  tracknhits    = new int[ kMAX ]; 
+  trackchi2     = new float[ kMAX ];
   muDR          = new float[ kMAX ];
   muDE          = new float[ kMAX ];
 
   //track branches
   CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
-  CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
   CalibTree->Branch( "TrackTowId", tracktowid, "TrackTowId[NobjTrack]/I" );
   CalibTree->Branch( "TrackTowIdPhi", tracktowidphi, "TrackTowIdPhi[NobjTrack]/I" );
   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
@@ -187,7 +188,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       tow_jetidx[towno]= jtno;
     }
   }
-
   
   typedef CaloMETCollection::const_iterator cmiter;
   for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
@@ -196,8 +196,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     msum = i->sumEt();
     break;
   }
-
-
 
   //Tracks
   edm::Handle<reco::TrackCollection> tracks;
@@ -248,7 +246,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	  tracktowideta[iTrack] = HcalCenterId.ieta();
 	  tracktowid[iTrack]    = centerId.rawId();
 	  track_jetidx[iTrack]  = jtno;
-	  trackchi2[iTrack]     = it->normalizedChi2();
+          trackchi2[iTrack]     = it->normalizedChi2();
 	  tracknhits[iTrack]    = it->numberOfValidHits();
 
 	  //Match track with muons
@@ -273,7 +271,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       }
   }
   NobjTrack=iTrack;
-
 
   CalibTree->Fill();
 }

@@ -92,12 +92,13 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   tracktowidphi = new int [ kMAX ];
   tracktowideta = new int [ kMAX ];
   trackid       = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
+  tracknhits    = new int[ kMAX ];
+  trackchi2     = new float[ kMAX ];
   muDR          = new float[ kMAX ];
   muDE          = new float[ kMAX ];
 
   //track branches
   CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
-  CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
   CalibTree->Branch( "TrackTowId", tracktowid, "TrackTowId[NobjTrack]/I" );
   CalibTree->Branch( "TrackTowIdPhi", tracktowidphi, "TrackTowIdPhi[NobjTrack]/I" );
   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
