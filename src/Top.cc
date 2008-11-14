@@ -45,13 +45,13 @@ void Top::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   jetflavor = new int[ kjMAX ];
   jettopid  = new int[ kjMAX ];
   // -Jet-specific ranches of the tree 
-  CalibTree->Branch( "NobjJet",&NobjJet,"NobjJet/I"             );
+  CalibTree->Branch( "NobjJet",&NobjJet,"NobjJet/I"     );
   CalibTree->Branch( "JetPt", jetpt, "JetPt[NobjJet]/F" );
   CalibTree->Branch( "JetPhi",jetphi,"JetPhi[NobjJet]/F");
   CalibTree->Branch( "JetEta",jeteta,"JetEta[NobjJet]/F");
   CalibTree->Branch( "JetEt", jetet, "JetEt[NobjJet]/F" );
   CalibTree->Branch( "JetE",  jete,  "JetE[NobjJet]/F"  );
-  CalibTree->Branch( "JetFlavor", jetflavor,  "JetFlavor[NobjJet]/I"  );
+  CalibTree->Branch( "JetFlavor", jetflavor,  "JetFlavor[NobjJet]/I" );
   CalibTree->Branch( "JetTopID",  jettopid,   "JetTopID[NobjJet]/I"  );
 
   //EventWeight
@@ -122,15 +122,16 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
   }
 
   //Filling b-jets
-  for (unsigned int jtno = 0; jtno<pBJets->size(); ++jtno)
+  for (unsigned int jtno = pWJets->size(); 
+       jtno<pBJets->size()+jtno<pWJets->size(); ++jtno)
   {
     jetpt [ jtno ] = (*pBJets)[jtno].pt();
     jetphi[ jtno ] = (*pBJets)[jtno].phi();
     jeteta[ jtno ] = (*pBJets)[jtno].eta();
     jetet [ jtno ] = (*pBJets)[jtno].et();
     jete  [ jtno ] = (*pBJets)[jtno].energy();
-    jetflavor[jtno]= 3;//uds
-    jettopid [jtno]= jtno;
+    jetflavor[jtno]= 3;//b
+    jettopid [jtno]= jtno - pWJets->size();
 
     // uncomment for CMSSW_2_1_X compatibility
     std::vector<CaloTowerPtr> j_towers = (*pBJets)[jtno].getCaloConstituents();
@@ -154,7 +155,7 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
       towid_phi[towno] = (*tow)->id().iphi();
       towid_eta[towno] = (*tow)->id().ieta();
       towid[towno]     = (*tow)->id().rawId();
-      tow_jetidx[towno]= pWJets->size() + jtno;
+      tow_jetidx[towno]= jtno;
     }
   }
 
