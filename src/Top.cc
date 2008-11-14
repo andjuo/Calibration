@@ -4,9 +4,10 @@
 
 void Top::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
-  bjets_   = cfg.getParameter<edm::InputTag>("TopHadBJets");
-  wjets_   = cfg.getParameter<edm::InputTag>("TopHadWJets");
-  weight_  = cfg.getParameter<edm::InputTag>("Top_Weight");
+  bjets_     = cfg.getParameter<edm::InputTag> ("TopHadBJets");
+  wjets_     = cfg.getParameter<edm::InputTag> ("TopHadWJets");
+  weight     = (float)(cfg.getParameter<double>("Top_Weight"));
+  weight_tag = cfg.getParameter<edm::InputTag> ("Top_Weight_Tag");
 
   //tower for all -jets
   int kMAX = 10000;
@@ -61,9 +62,11 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
 {
   //Event Weighting
   //double weight = 1.; 
-  edm::Handle<double> weightHandle;
-  evt.getByLabel (weight_, weightHandle);
-  weight = (float)( *weightHandle );
+  if(weight < 0) {
+    edm::Handle<double> weightHandle;
+    evt.getByLabel (weight_tag, weightHandle);
+    weight = (float)( *weightHandle );
+  }
 
   edm::Handle<reco::CaloJetCollection> pBJets;
   //edm::Handle<edm::View<reco::Jet> > pBJets;
@@ -83,23 +86,23 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
   unsigned int towno = 0;
   for (unsigned int jtno = 0; jtno<pWJets->size(); ++jtno)
   {
-    jetpt[  jtno ] = (*pBJets)[jtno].pt();
-    jetphi[ jtno ] = (*pBJets)[jtno].phi();
-    jeteta[ jtno ] = (*pBJets)[jtno].eta();
-    jetet[  jtno ] = (*pBJets)[jtno].et();
-    jete[   jtno ] = (*pBJets)[jtno].energy();
-    jete[   jtno ] = (*pBJets)[jtno].energy();
+    jetpt [ jtno ] = (*pWJets)[jtno].pt();
+    jetphi[ jtno ] = (*pWJets)[jtno].phi();
+    jeteta[ jtno ] = (*pWJets)[jtno].eta();
+    jetet [ jtno ] = (*pWJets)[jtno].et();
+    jete  [ jtno ] = (*pWJets)[jtno].energy();
+    jete  [ jtno ] = (*pWJets)[jtno].energy();
     jetflavor[jtno]= 1;//uds
-    jettopid[ jtno]= jtno/2;
-
+    jettopid [jtno]= jtno/2;
+    
     // uncomment for CMSSW_2_1_X compatibility
-    std::vector<CaloTowerPtr> j_towers = (*pBJets)[jtno].getCaloConstituents();
+    std::vector<CaloTowerPtr> j_towers = (*pWJets)[jtno].getCaloConstituents();
     NobjTow+=j_towers.size();
     for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
 	 tow != j_towers.end(); ++tow, ++towno){
 
 // uncomment for CMSSW_2_0_X compatibility
-//    std::vector<CaloTowerRef> j_towers = (*pBJets)[jtno].getConstituents(); 
+//    std::vector<CaloTowerRef> j_towers = (*pWJets)[jtno].getConstituents(); 
 //    NobjTow+=j_towers.size();
 //    for (std::vector<CaloTowerRef>::const_iterator tow = j_towers.begin(); 
 //         tow != j_towers.end(); ++tow, ++towno){
@@ -121,13 +124,13 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
   //Filling b-jets
   for (unsigned int jtno = 0; jtno<pBJets->size(); ++jtno)
   {
-    jetpt[  jtno ] = (*pBJets)[jtno].pt();
+    jetpt [ jtno ] = (*pBJets)[jtno].pt();
     jetphi[ jtno ] = (*pBJets)[jtno].phi();
     jeteta[ jtno ] = (*pBJets)[jtno].eta();
-    jetet[  jtno ] = (*pBJets)[jtno].et();
-    jete[   jtno ] = (*pBJets)[jtno].energy();
+    jetet [ jtno ] = (*pBJets)[jtno].et();
+    jete  [ jtno ] = (*pBJets)[jtno].energy();
     jetflavor[jtno]= 3;//uds
-    jettopid[ jtno]= jtno;
+    jettopid [jtno]= jtno;
 
     // uncomment for CMSSW_2_1_X compatibility
     std::vector<CaloTowerPtr> j_towers = (*pBJets)[jtno].getCaloConstituents();
