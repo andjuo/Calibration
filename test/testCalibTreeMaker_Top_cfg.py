@@ -2,6 +2,15 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("Calib")
 
+## add message logger
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.threshold = 'INFO'
+process.MessageLogger.categories.append('TtSemiLeptonicEvent')
+process.MessageLogger.cerr.INFO = cms.untracked.PSet(
+    default             = cms.untracked.PSet( limit = cms.untracked.int32( 0) ),
+    TtSemiLeptonicEvent = cms.untracked.PSet( limit = cms.untracked.int32(-1) ),
+)
+
 #
 # Define input source
 #
@@ -47,19 +56,19 @@ process.load("RecoJets.Configuration.RecoJetsAll_cff")
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
-#############   Define the L2 correction service #####
-process.L2JetCorrector = cms.ESSource("L2RelativeCorrectionService", 
-                                      tagName = cms.string('iCSA08_S156_L2Relative_Scone5'),
-                                      label = cms.string('L2RelativeJetCorrector')
-                                      )
-#############   Define the L3 correction service #####
-process.L3JetCorrector = cms.ESSource("L3AbsoluteCorrectionService", 
-                                      tagName = cms.string('iCSA08_S156_L3Absolute_Scone5'),
-                                      label = cms.string('L3AbsoluteJetCorrector')
-                                      )
-
-# set the record's IOV. Must be defined once. Choose ANY correction service. #
-process.prefer("L2JetCorrector")
+##############   Define the L2 correction service #####
+#process.L2JetCorrector = cms.ESSource("L2RelativeCorrectionService", 
+#                                      tagName = cms.string('iCSA08_S156_L2Relative_Scone5'),
+#                                      label = cms.string('L2RelativeJetCorrector')
+#                                      )
+##############   Define the L3 correction service #####
+#process.L3JetCorrector = cms.ESSource("L3AbsoluteCorrectionService", 
+#                                      tagName = cms.string('iCSA08_S156_L3Absolute_Scone5'),
+#                                      label = cms.string('L3AbsoluteJetCorrector')
+#                                      )
+#
+## set the record's IOV. Must be defined once. Choose ANY correction service. #
+#process.prefer("L2JetCorrector")
 
 #
 # Configuration for Top
@@ -69,6 +78,8 @@ process.calibTreeMaker.TopHadBJets    = 'topSample:TopHadBJets'
 process.calibTreeMaker.TopHadWJets    = 'topSample:TopHadWJets'
 process.calibTreeMaker.Top_Weight_Tag = 'tag'
 process.calibTreeMaker.Top_Weight     = 1.
+# For debugging
+process.ttSemiLepEvent.verbosity = cms.int32(1)
 
 #
 # Choose name of output file
