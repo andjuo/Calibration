@@ -123,24 +123,24 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
 
   //Filling b-jets
   for (unsigned int jtno = pWJets->size(); 
-       jtno<pBJets->size()+jtno<pWJets->size(); ++jtno)
+       jtno<pBJets->size()+pWJets->size(); ++jtno)
   {
-    jetpt [ jtno ] = (*pBJets)[jtno].pt();
-    jetphi[ jtno ] = (*pBJets)[jtno].phi();
-    jeteta[ jtno ] = (*pBJets)[jtno].eta();
-    jetet [ jtno ] = (*pBJets)[jtno].et();
-    jete  [ jtno ] = (*pBJets)[jtno].energy();
+    jetpt [ jtno ] = (*pBJets)[jtno-pWJets->size()].pt();
+    jetphi[ jtno ] = (*pBJets)[jtno-pWJets->size()].phi();
+    jeteta[ jtno ] = (*pBJets)[jtno-pWJets->size()].eta();
+    jetet [ jtno ] = (*pBJets)[jtno-pWJets->size()].et();
+    jete  [ jtno ] = (*pBJets)[jtno-pWJets->size()].energy();
     jetflavor[jtno]= 3;//b
     jettopid [jtno]= jtno - pWJets->size();
 
     // uncomment for CMSSW_2_1_X compatibility
-    std::vector<CaloTowerPtr> j_towers = (*pBJets)[jtno].getCaloConstituents();
+    std::vector<CaloTowerPtr> j_towers = (*pBJets)[jtno-pWJets->size()].getCaloConstituents();
     NobjTow+=j_towers.size();
     for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
 	 tow != j_towers.end(); ++tow, ++towno){
 
 // uncomment for CMSSW_2_0_X compatibility
-//    std::vector<CaloTowerRef> j_towers = (*pBJets)[jtno].getConstituents(); 
+//    std::vector<CaloTowerRef> j_towers = (*pBJets)[jtno-pWJets->size()].getConstituents(); 
 //    NobjTow+=j_towers.size();
 //    for (std::vector<CaloTowerRef>::const_iterator tow = j_towers.begin(); 
 //         tow != j_towers.end(); ++tow, ++towno){
