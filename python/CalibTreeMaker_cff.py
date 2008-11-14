@@ -6,15 +6,19 @@ from Calibration.CalibSamples.DiJetSample_cff import *
 from Calibration.CalibSamples.TriJetSample_cff import *
 #from Calibration.CalibSamples.TopSample_cff import *
 from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
-photonJetInput = cms.Sequence(selectedPhotonJetSample)
-trackTowerInput = cms.Sequence(selectedTrackTowerSample)
-DiJetInput = cms.Sequence(selectedDiJetSample)
-TriJetInput = cms.Sequence(selectedTriJetSample)
-makePhotonJetTree = cms.Sequence(photonJetInput*calibTreeMaker)
+
+photonJetInput     = cms.Sequence(selectedPhotonJetSample)
+trackTowerInput    = cms.Sequence(selectedTrackTowerSample)
+DiJetInput         = cms.Sequence(selectedDiJetSample)
+TriJetInput        = cms.Sequence(selectedTriJetSample)
+#TopInput           = cms.Sequence(makeTopSample_semiLepFilter)
+
+makePhotonJetTree  = cms.Sequence(photonJetInput*calibTreeMaker)
 makeTrackTowerTree = cms.Sequence(trackTowerInput*calibTreeMaker)
-makeDiJetTree = cms.Sequence(DiJetInput*calibTreeMaker)
-makeTriJetTree = cms.Sequence(TriJetInput*calibTreeMaker)
-makeNJetTree = cms.Sequence(DiJetInput+TriJetInput*calibTreeMaker)
-#makeTopTree = cms.Sequence(TopInput*calibTreeMaker)
+makeDiJetTree      = cms.Sequence(DiJetInput*calibTreeMaker)
+makeTriJetTree     = cms.Sequence(TriJetInput*calibTreeMaker)
+makeNJetTree       = cms.Sequence(DiJetInput+TriJetInput*calibTreeMaker)
+#makeTopTree        = cms.Sequence(TopInput*calibTreeMaker)
+
 #makeAllTrees = cms.Sequence(photonJetInput+trackTowerInput+DiJetInput+TriJetInput+TopInput*calibTreeMaker)
 
