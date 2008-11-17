@@ -214,11 +214,11 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
     // skip low Pt tracks
     if (it->pt() < 2) continue;
-    bool saveTrack = false;
     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
     for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
       {
+	bool saveTrack = false;
 	double dRin   = deltaR(*it,(*pJets)[jtno]);
 	double outeta = info.trkGlobPosAtEcal.eta();
 	double outphi = info.trkGlobPosAtEcal.phi();
