@@ -17,7 +17,7 @@ process.MessageLogger.cerr.INFO = cms.untracked.PSet(
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
     #
-    # TTbar sample 1
+    # TTbar sample 1 (100 events)
     #
     'file:/afs/cern.ch/cms/PRS/top/cmssw-data/relval200-for-pat-testing/FullSimTTBar-2_1_X_2008-07-08_STARTUP_V4-AODSIM.100.root'
     # TTbar sample 2
@@ -50,7 +50,7 @@ process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 #process.load("TrackingTools.TrackAssociator.default_cfi")
 
-process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
+process.load("Calibration.CalibTreeMaker.CalibTreeMaker_Top_cff")
 
 process.load("RecoJets.Configuration.RecoJetsAll_cff")
 
