@@ -23,6 +23,7 @@
 #include "Calibration/CalibTreeMaker/interface/TrackTower.h"
 #include "Calibration/CalibTreeMaker/interface/NJet.h"
 #include "Calibration/CalibTreeMaker/interface/Top.h"
+#include "Calibration/CalibTreeMaker/interface/ZJet.h"
 
 class CalibTreeMaker : public edm::EDAnalyzer {
  public:
@@ -34,6 +35,7 @@ class CalibTreeMaker : public edm::EDAnalyzer {
   TTree * DiJetTree;
   TTree * TriJetTree;
   TTree * TopTree;
+  TTree * ZJetTree;
   
  private:
   virtual void beginJob(const edm::EventSetup&) ;
@@ -45,11 +47,12 @@ class CalibTreeMaker : public edm::EDAnalyzer {
   NJet  DiJet_analysis_;
   NJet  TriJet_analysis_;
   Top   Top_analysis_;
+  ZJet  zjet_analysis_;
 
   std::string _HistName;
-  std::string _TTTreeName, _PJTreeName, _JJTreeName, _JJJTreeName, _TopTreeName;
+  std::string _TTTreeName, _PJTreeName, _JJTreeName, _JJJTreeName, _TopTreeName, _ZJTreeName;
   TFile* _file;
-  bool writePhotonJet_, writeTrackTower_, writeDiJet_, writeTriJet_, writeTop_;
+  bool writePhotonJet_, writeTrackTower_, writeDiJet_, writeTriJet_, writeTop_, writeZJet_;
 };
 
 #endif

@@ -67,6 +67,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   track_jetidx  = new int[ kMAX ];
   trackid       = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
   tracknhits    = new int[ kMAX ]; 
+  trackQuality  = new int[kMAX];
   trackchi2     = new float[ kMAX ];
   muDR          = new float[ kMAX ];
   muDE          = new float[ kMAX ];
@@ -78,6 +79,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
   CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
   CalibTree->Branch( "TrackNHits", tracknhits, "TrackNHits[NobjTrack]/I" );
+  CalibTree->Branch( "TrackQuality",trackQuality,"TrackQuality[NobjTrack]/I");
   CalibTree->Branch( "TrackChi2",  trackchi2,  "TrackChi2[NobjTrack]/F"  );
   CalibTree->Branch( "TrackPt",    trackpt,    "TrackPt[NobjTrack]/F"    );
   CalibTree->Branch( "TrackEta",   tracketa,   "TrackEta[NobjTrack]/F"   );
@@ -250,6 +252,15 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
           trackchi2[iTrack]     = it->normalizedChi2();
 	  tracknhits[iTrack]    = it->numberOfValidHits();
 
+	  trackQuality[iTrack] = -10;      
+	  if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
+	  if(it->quality(reco::TrackBase::loose))  trackQuality[iTrack] = 0;
+	  if(it->quality(reco::TrackBase::tight))  trackQuality[iTrack] = 1;
+	  if(it->quality(reco::TrackBase::highPurity)) trackQuality[iTrack] = 2; 
+	  if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
+	  if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
+	  if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
+	  
 	  //Match track with muons
 	  muDR[iTrack] = -1;
 	  muDE[iTrack] = -1;

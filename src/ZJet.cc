@@ -1,24 +1,24 @@
-#include "Calibration/CalibTreeMaker/interface/PhotonJet.h"
+#include "Calibration/CalibTreeMaker/interface/ZJet.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 
 
 //check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
 //#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
 
-void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
+void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
-  jets_             = cfg.getParameter<edm::InputTag>("PhotonJetJets");
-  photon_           = cfg.getParameter<edm::InputTag>("PhotonJetPhotons");
-  genjets_          = cfg.getParameter<edm::InputTag>("PhotonJetGenJets");
-  genphotons_       = cfg.getParameter<edm::InputTag>("PhotonJetGenPhotons");
-  met_              = cfg.getParameter<edm::InputTag>("PhotonJetMet");
+  jets_             = cfg.getParameter<edm::InputTag>("ZJetJets");
+  z_                = cfg.getParameter<edm::InputTag>("ZJetZs");
+  genzs_            = cfg.getParameter<edm::InputTag>("ZJetGenZs");
+  genjets_          = cfg.getParameter<edm::InputTag>("ZJetGenJets");
+  met_              = cfg.getParameter<edm::InputTag>("ZJetMet");
   ebrechits_        = cfg.getParameter<edm::InputTag>("EBRecHits");
-  nonleadingjetspt_ = cfg.getParameter<edm::InputTag>("PhotonJetNonLeadingJetsPt");
-  recTracks_        = cfg.getParameter<edm::InputTag>("PhotonJetRecTracks");
-  recMuons_         = cfg.getParameter<edm::InputTag>("PhotonJetRecMuons");
-  conesize_         = cfg.getParameter<double>("PhotonJetConeSize");
-  weight_tag        = cfg.getParameter<edm::InputTag> ("PhotonJet_Weight_Tag");
-  weight_            = (float)(cfg.getParameter<double> ("PhotonJet_Weight"));
+  nonleadingjetspt_ = cfg.getParameter<edm::InputTag>("ZJetNonLeadingJetsPt");
+  recTracks_        = cfg.getParameter<edm::InputTag>("ZJetRecTracks");
+  recMuons_         = cfg.getParameter<edm::InputTag>("ZJetRecMuons");
+  conesize_         = cfg.getParameter<double>("ZJetConeSize");
+  weight_tag        = cfg.getParameter<edm::InputTag> ("ZJet_Weight_Tag");
+  weight_            = (float)(cfg.getParameter<double> ("ZJet_Weight"));
    
   // TrackAssociator parameters
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
@@ -142,18 +142,20 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "MetCal",    &mcalmet,   "MetCal/F"    );
   CalibTree->Branch( "MetCalPhi", &mcalphi,   "MetCalPhi/F" );
   CalibTree->Branch( "MetCalSum", &mcalsum,   "MetCalSum/F" );
-  // Photons branches
-  CalibTree->Branch( "PhotonPt",  &photonpt,  "PhotonPt/F"  );
-  CalibTree->Branch( "PhotonPhi", &photonphi, "PhotonPhi/F" );
-  CalibTree->Branch( "PhotonEta", &photoneta, "PhotonEta/F" );
-  CalibTree->Branch( "PhotonEt",  &photonet,  "PhotonEt/F"   );
-  CalibTree->Branch( "PhotonE",   &photone,   "PhotonE/F"   );
-  // GenPhotons branches
-  CalibTree->Branch( "GenPhotonPt",  &gphotonpt,  "GenPhotonPt/F"  );
-  CalibTree->Branch( "GenPhotonPhi", &gphotonphi, "GenPhotonPhi/F" );
-  CalibTree->Branch( "GenPhotonEta", &gphotoneta, "GenPhotonEta/F" );
-  CalibTree->Branch( "GenPhotonEt",  &gphotonet,  "GenPhotonEt/F"   );
-  CalibTree->Branch( "GenPhotonE",   &gphotone,   "GenPhotonE/F"   );
+
+
+  // Zs branches
+  CalibTree->Branch( "ZPt",  &zpt,  "ZPt/F"  );
+  CalibTree->Branch( "ZPhi", &zphi, "ZPhi/F" );
+  CalibTree->Branch( "ZEta", &zeta, "ZEta/F" );
+  CalibTree->Branch( "ZEt",  &zet,  "ZEt/F"   );
+  CalibTree->Branch( "ZE",   &ze,   "ZE/F"   );
+  // GenZs branches
+  CalibTree->Branch( "GenZPt",  &gzpt,  "GenZPt/F"  );
+  CalibTree->Branch( "GenZPhi", &gzphi, "GenZPhi/F" );
+  CalibTree->Branch( "GenZEta", &gzeta, "GenZEta/F" );
+  CalibTree->Branch( "GenZEt",  &gzet,  "GenZEt/F"   );
+  CalibTree->Branch( "GenZE",   &gze,   "GenZE/F"   );
   // NonLeadingJetPt branch
   CalibTree->Branch( "NonLeadingJetPt", &nonleadingjetspt,   "NonLeadingJetPt/F"   );
 
@@ -162,7 +164,7 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   //CalibTree->Branch( "ProcessID"  , &processid,    "ProcessID/I"  );
 }
 
-void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
+void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
   if(weight_<0)
     {
@@ -175,14 +177,14 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   edm::Handle<CaloJet> jet;
   evt.getByLabel(jets_, jet);
 
-  edm::Handle<Photon> photon;
-  evt.getByLabel(photon_,photon);
-
   edm::Handle<GenJet> genJet;
   evt.getByLabel(genjets_,genJet);
 
-  edm::Handle<GenParticle> genPhoton;
-  evt.getByLabel(genphotons_,genPhoton);
+  edm::Handle<Particle> z;
+  evt.getByLabel(z_,z);
+
+  edm::Handle<GenParticle> genZ;
+  evt.getByLabel(genzs_,genZ);
 
   edm::Handle<CaloMETCollection> met;
   evt.getByLabel(met_,met);
@@ -191,9 +193,9 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   evt.getByLabel( nonleadingjetspt_, NonLeadingJetsPt );
 
   const CaloJet& calojet = *jet;
-  const Photon& Photon = *photon; 
   const GenJet& genjet = *genJet;
-  const GenParticle&  genphoton = *genPhoton; 
+  const GenParticle&  genz = *genZ; 
+  const GenParticle&  Z = *z; 
   const CaloMETCollection& recmets = *met; 
 
   /*
@@ -295,18 +297,18 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
   jgeneta = genjet.eta();
   jgenet  = genjet.et();
   jgene   = genjet.energy();
-
-  photonpt  = Photon.pt();
-  photonphi = Photon.phi();
-  photoneta = Photon.eta();
-  photonet  = Photon.et();
-  photone   = Photon.energy();
-
-  gphotonpt  = genphoton.pt();
-  gphotonphi = genphoton.phi();
-  gphotoneta = genphoton.eta();
-  gphotonet  = genphoton.et();
-  gphotone   = genphoton.energy();
+ 
+  zpt  = Z.pt();
+  zphi = Z.phi();
+  zeta = Z.eta();
+  zet  = Z.et();
+  ze   = Z.energy();
+ 
+  gzpt  = genz.pt();
+  gzphi = genz.phi();
+  gzeta = genz.eta();
+  gzet  = genz.et();
+  gze   = genz.energy();
 
   typedef CaloMETCollection::const_iterator cmiter;
   for ( cmiter i=recmets.begin(); i!=recmets.end(); i++) {
@@ -394,7 +396,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
       if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
       if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
       /*
-     std::cout<<"rawId: "<<centerId.rawId()
+	std::cout<<"rawId: "<<centerId.rawId()
 	       <<"iphiId: "<<HcalCenterId.iphi()
 	       <<"ietaId: "<<HcalCenterId.ieta()
 	       <<std::endl;

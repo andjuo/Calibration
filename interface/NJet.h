@@ -62,7 +62,7 @@ private:
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
   int   *towid_phi, *towid_eta, *towid, *tow_jetidx;
   float mmet, mphi, msum, weight;
-  int   NobjTrack;
+  int   NobjTrack, *trackQuality;
   float *trackpt, *tracketa, *trackphi, *trackp, *tracketaout, *trackphiout;
   float *trackdr, *trackdrout, *trackchi2;
   float *trackemc1, *trackemc3, *trackemc5;

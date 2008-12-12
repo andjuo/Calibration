@@ -4,7 +4,7 @@ process = cms.Process("Calib")
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
- #  '/store/relval/CMSSW_2_1_9/RelValZEE/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/STARTUP_V7_v2/0001/6E9B44E2-0487-DD11-BFA7-001617C3B78C.root'
+ # '/store/relval/CMSSW_2_1_9/RelValZEE/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/STARTUP_V7_v2/0001/6E9B44E2-0487-DD11-BFA7-001617C3B78C.root'
     
         '/store/relval/CMSSW_2_1_9/RelValQCD_Pt_80_120/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V9_v2/0001/000AD2A4-6E86-DD11-AA99-000423D9863C.root',
         '/store/relval/CMSSW_2_1_9/RelValQCD_Pt_80_120/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/IDEAL_V9_v2/0001/02D641CC-6D86-DD11-B1AA-001617C3B64C.root',
@@ -50,7 +50,7 @@ process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAn
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi")
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
-#process.load("TrackingTools.TrackAssociator.default_cfi")
+process.load("TrackingTools.TrackAssociator.default_cfi")
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
@@ -90,6 +90,24 @@ process.photonJetFilter.MaxSecondJetPt = 5.
 process.photonJetFilter.MaxDeltaPhi = 0.10
 process.photonJetFilter.Debug = False
 
+process.zJetSample.Muons = 'globalMuons'
+process.zJetSample.GenZs = 'genParticles'
+process.zJetSample.Jets = 'sisCone5CaloJets'
+#process.zJetSample.Jets = 'midPointCone5CaloJets'
+process.zJetSample.GenJets = 'sisCone5GenJets'
+process.zJetSample.MinMuonPt = 15.
+process.zJetSample.MaxMuonEta = 2.3
+process.zJetSample.Z_Mass = 91.2
+process.zJetSample.Z_Mass_Tolerance = 10.
+#process.zJetFilter.MinZPt = 0.
+#process.zJetFilter.MaxZEta = 2.5
+process.zJetFilter.MinJetPt = 0.
+process.zJetFilter.MaxJetEta = 5.
+process.zJetFilter.MaxNonLeadingJetsPt = 5.
+process.zJetFilter.MaxSecondJetPt = 5.
+process.zJetFilter.MaxDeltaPhi = 0.10
+process.zJetFilter.Debug = False
+
 process.trackTrkIsolation.dRMax = 0.5
 process.trackTowerSample.MaxIsolation = 20.
 process.trackTowerSample.MinPt = 10.
@@ -125,9 +143,10 @@ process.triJetFilter.MaxJetEMF          = 0.95
 process.triJetFilter.MaxLastJetPt       = 5.
 
 #process.calibTreeMaker.OutputFile = 'NJet_Test_Track.root'
-#process.calibTreeMaker.OutputFile = 'Gamma25_30_Track.root'
-process.calibTreeMaker.OutputFile = 'DiJet_Track.root'
+#process.calibTreeMaker.OutputFile = 'Gamma_15_skim_hlt_Track.root'
+#process.calibTreeMaker.OutputFile = 'DiJet_Track_2600_3000.root'
 #process.calibTreeMaker.OutputFile = 'TriJet_Track.root'
+process.calibTreeMaker.OutputFile = 'ZJet_Track.root'
 
 process.calibTreeMaker.PhotonJetTreeName = 'GammaJetTree'
 process.calibTreeMaker.PhotonJetJets = 'photonJetSample:LeadingJet'
@@ -139,8 +158,23 @@ process.calibTreeMaker.PhotonJetMet          = 'met'
 process.calibTreeMaker.PhotonJetRecTracks    = 'generalTracks'
 process.calibTreeMaker.PhotonJetRecMuons     = 'globalMuons'
 process.calibTreeMaker.PhotonJetConeSize     = 0.5
-process.calibTreeMaker.PhotonJet_Weight      = 1.
+process.calibTreeMaker.PhotonJet_Weight      = -1.
 process.calibTreeMaker.PhotonJet_Weight_Tag  = 'genEventWeight'
+
+
+
+process.calibTreeMaker.ZJetTreeName = 'ZJetTree'
+process.calibTreeMaker.ZJetJets = 'zJetSample:LeadingJet'
+process.calibTreeMaker.ZJetGenJets = 'zJetSample:LeadingGenJet'
+process.calibTreeMaker.ZJetZs = 'zJetSample:LeadingZ'
+process.calibTreeMaker.ZJetGenZs = 'zJetSample:LeadingGenZ'
+process.calibTreeMaker.ZJetNonLeadingJetsPt = 'zJetSample:NonLeadingJetsPt'
+process.calibTreeMaker.ZJetMet          = 'met'
+process.calibTreeMaker.ZJetRecTracks    = 'generalTracks'
+process.calibTreeMaker.ZJetRecMuons     = 'globalMuons'
+process.calibTreeMaker.ZJetConeSize     = 0.5
+process.calibTreeMaker.ZJet_Weight      = -1.
+process.calibTreeMaker.ZJet_Weight_Tag  = 'genEventWeight'
 
 
 
@@ -160,15 +194,17 @@ process.calibTreeMaker.NJet_Weight       = -1.
 process.calibTreeMaker.TopTreeName     ='TopTree'
 
 
-process.calibTreeMaker.WritePhotonJetTree = False #True
-process.calibTreeMaker.WriteDiJetTree    = True #False
+process.calibTreeMaker.WritePhotonJetTree = False#True
+process.calibTreeMaker.WriteDiJetTree    = False
 process.calibTreeMaker.WriteTriJetTree   = False
+process.calibTreeMaker.WriteZJetTree   = True #False
 
 
 #process.p1 = cms.Path(process.dump)
 #process.p1 = cms.Path(process.midPointCone5CaloJets*process.dump)
 #process.p2 = cms.Path(process.midPointCone5CaloJets*process.makePhotonJetTree)
 #process.p2 = cms.Path(process.makePhotonJetTree)
-process.p2 = cms.Path(process.makeDiJetTree)
+#process.p2 = cms.Path(process.makeDiJetTree)
 #process.p2 = cms.Path(process.makeTriJetTree)
+process.p2 = cms.Path(process.makeZJetTree)
 process.schedule = cms.Schedule(process.p2)

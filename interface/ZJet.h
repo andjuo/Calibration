@@ -1,5 +1,5 @@
-#ifndef PhotonJet_H
-#define PhotonJet_H
+#ifndef ZJet_H
+#define ZJet_H
 
 #include <string>
 #include <vector>
@@ -23,7 +23,7 @@
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/EgammaCandidates/interface/Photon.h"
+//#include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
@@ -40,16 +40,16 @@
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 
-class PhotonJet {
+class ZJet {
 public:
-  PhotonJet(){}; 
-  ~PhotonJet(){}; 
+  ZJet(){}; 
+  ~ZJet(){}; 
 
   void setup(const edm::ParameterSet&, TTree*);
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
-  edm::InputTag jets_,genjets_, met_, photon_, genphotons_;                    
+  edm::InputTag jets_,genjets_, met_, z_, genzs_;                    
   edm::InputTag ebrechits_, nonleadingjetspt_;
   edm::InputTag recTracks_, recMuons_;
   edm::InputTag weight_tag;
@@ -63,8 +63,8 @@ private:
   float jcalpt, jcalphi, jcaleta, jcalet, jcale, jscalel2, jscalel3;
   float jgenpt, jgenphi, jgeneta, jgenet, jgene;
   float mcalmet,mcalphi,mcalsum, weight;
-  float photonpt, photonphi, photoneta, photonet, photone; 
-  float gphotonpt, gphotonphi, gphotoneta, gphotonet, gphotone; 
+  float zpt, zphi, zeta, zet, ze; 
+  float gzpt, gzphi, gzeta, gzet, gze; 
   int   NobjTowCal;
   int   *towid_phi, *towid_eta, *towid, *townum;
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
