@@ -335,7 +335,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   int iTrack = 0;
   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
     // skip low Pt tracks
-    if (it->pt() < 2) continue;
+    //if (it->pt() < 2) continue;
     bool saveTrack = false;
     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
