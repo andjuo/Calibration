@@ -67,7 +67,9 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   track_jetidx  = new int[ kMAX ];
   trackid       = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
   tracknhits    = new int[ kMAX ]; 
-  trackQuality  = new int[kMAX];
+  trackQualityL  = new bool[kMAX];
+  trackQualityT  = new bool[kMAX];
+  trackQualityHP = new bool[kMAX];
   trackchi2     = new float[ kMAX ];
   muDR          = new float[ kMAX ];
   muDE          = new float[ kMAX ];
@@ -79,7 +81,9 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
   CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
   CalibTree->Branch( "TrackNHits", tracknhits, "TrackNHits[NobjTrack]/I" );
-  CalibTree->Branch( "TrackQuality",trackQuality,"TrackQuality[NobjTrack]/I");
+  CalibTree->Branch( "TrackQualityL",trackQualityL,"TrackQualityL[NobjTrack]/O");
+  CalibTree->Branch( "TrackQualityT",trackQualityT,"TrackQualityT[NobjTrack]/O");
+  CalibTree->Branch( "TrackQualityHP",trackQualityHP,"TrackQualityHP[NobjTrack]/O");
   CalibTree->Branch( "TrackChi2",  trackchi2,  "TrackChi2[NobjTrack]/F"  );
   CalibTree->Branch( "TrackPt",    trackpt,    "TrackPt[NobjTrack]/F"    );
   CalibTree->Branch( "TrackEta",   tracketa,   "TrackEta[NobjTrack]/F"   );
@@ -118,6 +122,18 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetCorrL2", jscalel2,  "JetCorrL2[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL3", jscalel3,  "JetCorrL3[NobjJet]/F" );
 
+  genjetpt     = new float [ kjMAX ];
+  genjetphi    = new float [ kjMAX ];
+  genjeteta    = new float [ kjMAX ];
+  genjetet     = new float [ kjMAX ];
+  genjete      = new float [ kjMAX ];
+  // GenJet branches        );
+  CalibTree->Branch( "GenJetPt", genjetpt, "GenJetPt[NobjJet]/F" );
+  CalibTree->Branch( "GenJetPhi",genjetphi,"GenJetPhi[NobjJet]/F");
+  CalibTree->Branch( "GenJetEta",genjeteta,"GenJetEta[NobjJet]/F");
+  CalibTree->Branch( "GenJetEt", genjetet, "GenJetEt[NobjJet]/F" );
+  CalibTree->Branch( "GenJetE",  genjete,  "GenJetE[NobjJet]/F"  );
+
   //met
   CalibTree->Branch( "Met",   &mmet,"Met/F"   );
   CalibTree->Branch( "MetPhi",&mphi,"MetPhi/F");
@@ -145,6 +161,9 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   edm::Handle<CaloMETCollection> recmets;
   evt.getByLabel(met_, recmets);
 
+  edm::Handle<reco::GenJetCollection> genJets;
+  evt.getByLabel(genjets_,genJets);
+
 
   std::string l2name = "L2RelativeJetCorrector";
   std::string l3name = "L3AbsoluteJetCorrector";
@@ -165,6 +184,35 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     jeteta[ jtno ] = (*pJets)[jtno].eta();
     jetet[  jtno ] = (*pJets)[jtno].et();
     jete[   jtno ] = (*pJets)[jtno].energy();
+
+    double gjpt = 0;
+    double gjphi = 0;
+    double gjeta = 0;
+    double gjet = 0;
+    double gje = 0;
+    double DeltaRE = 1000;
+    double DeltaREtemp = 0;
+
+    for( reco::GenJetCollection::const_iterator genJet = genJets->begin(); genJet != genJets->end(); ++genJet)
+      {
+	DeltaREtemp = deltaR(genJet->eta(),genJet->phi(), (*pJets)[jtno].eta() , (*pJets)[jtno].phi() );
+ 	DeltaREtemp *= DeltaREtemp;  
+ 	DeltaREtemp += fabs((genJet->et() - (*pJets)[jtno].et())/ genJet->et()) * fabs((genJet->et() - (*pJets)[jtno].et())/ genJet->et());
+	if(DeltaREtemp < DeltaRE)
+	  {
+	    DeltaRE = DeltaREtemp;
+	    gjpt  = genJet->pt();
+	    gjphi = genJet->phi();
+	    gjeta = genJet->eta();
+	    gjet  = genJet->et();
+	    gje   = genJet->energy();
+	  }
+      }
+    genjetpt[  jtno ] = gjpt;
+    genjetphi[ jtno ] =	gjphi ;
+    genjeteta[ jtno ] =	gjeta ;
+    genjetet[  jtno ] =	gjet ;
+    genjete[   jtno ] = gje ;
 
     // uncomment for CMSSW_2_1_X compatibility
     std::vector<CaloTowerPtr> j_towers = (*pJets)[jtno].getCaloConstituents();
@@ -215,7 +263,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   int iTrack = 0;
   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
     // skip low Pt tracks
-    //if (it->pt() < 2) continue;
+    if (it->pt() < 1) continue;
     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
     for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
@@ -252,14 +300,17 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
           trackchi2[iTrack]     = it->normalizedChi2();
 	  tracknhits[iTrack]    = it->numberOfValidHits();
 
-	  trackQuality[iTrack] = -10;      
-	  if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
-	  if(it->quality(reco::TrackBase::loose))  trackQuality[iTrack] = 0;
-	  if(it->quality(reco::TrackBase::tight))  trackQuality[iTrack] = 1;
-	  if(it->quality(reco::TrackBase::highPurity)) trackQuality[iTrack] = 2; 
-	  if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
-	  if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
-	  if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
+   
+	  //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
+	  if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
+	  else  trackQualityL[iTrack] = false;
+	  if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
+	  else  trackQualityT[iTrack] = false;
+	  if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
+	  else  trackQualityHP[iTrack] = false;
+	  //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
+	  //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
+	  //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
 	  
 	  //Match track with muons
 	  muDR[iTrack] = -1;
