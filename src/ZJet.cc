@@ -19,6 +19,7 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   conesize_         = cfg.getParameter<double>("ZJetConeSize");
   weight_tag        = cfg.getParameter<edm::InputTag> ("ZJet_Weight_Tag");
   weight_            = (float)(cfg.getParameter<double> ("ZJet_Weight"));
+  zspJets_          = cfg.getParameter<edm::InputTag>("ZJetZSPJets");
    
   // TrackAssociator parameters
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
@@ -74,29 +75,31 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "ETowE",      etowe,       "ETowE[NobjETowCal]/F"     );
 
   //track branches
-  trackpt       = new float [ kMAX ];
-  tracketa      = new float [ kMAX ];
-  trackphi      = new float [ kMAX ];
-  trackp        = new float [ kMAX ];
-  trackdr       = new float [ kMAX ];
-  tracketaout   = new float [ kMAX ];
-  trackphiout   = new float [ kMAX ];
-  trackdrout    = new float [ kMAX ];
-  trackemc1     = new float [ kMAX ];
-  trackemc3     = new float [ kMAX ];
-  trackemc5     = new float [ kMAX ];
-  trackhac1     = new float [ kMAX ];
-  trackhac3     = new float [ kMAX ];
-  trackhac5     = new float [ kMAX ];
-  tracktowid    = new int [ kMAX ];
-  tracktowidphi = new int [ kMAX ];
-  tracktowideta = new int [ kMAX ];
-  trackid       = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
-  tracknhits    = new int[ kMAX ];
-  trackQuality  = new int[kMAX];
-  trackchi2     = new float[ kMAX ];
-  muDR          = new float[ kMAX ];
-  muDE          = new float[ kMAX ];
+  trackpt        = new float [ kMAX ];
+  tracketa       = new float [ kMAX ];
+  trackphi       = new float [ kMAX ];
+  trackp         = new float [ kMAX ];
+  trackdr        = new float [ kMAX ];
+  tracketaout    = new float [ kMAX ];
+  trackphiout    = new float [ kMAX ];
+  trackdrout     = new float [ kMAX ];
+  trackemc1      = new float [ kMAX ];
+  trackemc3      = new float [ kMAX ];
+  trackemc5      = new float [ kMAX ];
+  trackhac1      = new float [ kMAX ];
+  trackhac3      = new float [ kMAX ];
+  trackhac5      = new float [ kMAX ];
+  tracktowid     = new int [ kMAX ];
+  tracktowidphi  = new int [ kMAX ];
+  tracktowideta  = new int [ kMAX ];
+  trackid        = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
+  tracknhits     = new int[ kMAX ];
+  trackQualityL  = new bool[kMAX];
+  trackQualityT  = new bool[kMAX];
+  trackQualityHP = new bool[kMAX];
+  trackchi2      = new float[ kMAX ];
+  muDR           = new float[ kMAX ];
+  muDE           = new float[ kMAX ];
 
   //track branches
   CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
@@ -105,7 +108,9 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
   CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
   CalibTree->Branch( "TrackNHits", tracknhits, "TrackNHits[NobjTrack]/I" );
-  CalibTree->Branch( "TrackQuality",trackQuality,"TrackQuality[NobjTrack]/I");
+  CalibTree->Branch( "TrackQualityL",trackQualityL,"TrackQualityL[NobjTrack]/O");
+  CalibTree->Branch( "TrackQualityT",trackQualityT,"TrackQualityT[NobjTrack]/O");
+  CalibTree->Branch( "TrackQualityHP",trackQualityHP,"TrackQualityHP[NobjTrack]/O");
   CalibTree->Branch( "TrackChi2",  trackchi2,  "TrackChi2[NobjTrack]/F"  );
   CalibTree->Branch( "TrackPt",    trackpt,    "TrackPt[NobjTrack]/F"    );
   CalibTree->Branch( "TrackEta",   tracketa,   "TrackEta[NobjTrack]/F"   );
@@ -130,8 +135,10 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetCalEta", &jcaleta,   "JetCalEta/F" );
   CalibTree->Branch( "JetCalEt",  &jcalet,    "JetCalEt/F"  );
   CalibTree->Branch( "JetCalE",   &jcale,     "JetCalE/F"   );
+  CalibTree->Branch( "JetCorrZSP",&jscaleZSP, "JetCorrZSP/F" );
   CalibTree->Branch( "JetCorrL2", &jscalel2,  "JetCorrL2/F" );
   CalibTree->Branch( "JetCorrL3", &jscalel3,  "JetCorrL3/F" );
+  CalibTree->Branch( "JetCorrJPT",&jscaleJPT, "JetCorrJPT/F" );
   // GenJet branches 
   CalibTree->Branch( "JetGenPt",  &jgenpt,    "JetGenPt/F"  );
   CalibTree->Branch( "JetGenPhi", &jgenphi,   "JetGenPhi/F" );
@@ -190,7 +197,12 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   evt.getByLabel(met_,met);
 
   edm::Handle<double> NonLeadingJetsPt;
-  evt.getByLabel( nonleadingjetspt_, NonLeadingJetsPt );
+  evt.getByLabel( nonleadingjetspt_, NonLeadingJetsPt ); 
+
+  // get calo jet after zsp collection
+  edm::Handle<CaloJetCollection> zspJets;
+  evt.getByLabel(zspJets_, zspJets);
+
 
   const CaloJet& calojet = *jet;
   const GenJet& genjet = *genJet;
@@ -222,11 +234,27 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 
   std::string l2name = "L2RelativeJetCorrector";
   std::string l3name = "L3AbsoluteJetCorrector";
+  //std::string l1name = "ZSPJetCorrector";
+  std::string JPTname = "JetPlusTrackZSPCorrectorScone5";
 
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
+  //const JetCorrector* correctorL1   = JetCorrector::getJetCorrector (l1name,setup);   //Define the jet corrector
+  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname, setup); //Define the jet corrector
+
   jscalel2   = correctorL2  ->correction(calojet.p4());  //calculate the correction
   jscalel3   = correctorL3  ->correction(calojet.p4());  //calculate the correction
+
+  for( reco::CaloJetCollection::const_iterator zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet)
+      {
+	if( deltaR(zspJet->eta(),zspJet->phi(), calojet.eta() , calojet.phi()) < 0.01)//no change in R
+	  {
+	    jscaleZSP = zspJet->et()/calojet.et();
+	    jscaleJPT = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
+	  }
+      }
+  //jscalel1   = correctorL1  ->correction(calojet.p4());  //calculate the correction
+
   /*
   cout<<" Jet Pt = "<<calojet.pt()
       <<" Jet Eta = "<<calojet.eta()
@@ -325,8 +353,8 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   evt.getByLabel(recTracks_,tracks);
 
   //Muons
-  //edm::Handle<reco::MuonCollection> muons;
-  edm::Handle<reco::TrackCollection> muons;
+  edm::Handle<reco::MuonCollection> muons;
+  //edm::Handle<reco::TrackCollection> muons;
   evt.getByLabel(recMuons_,muons);
 
   // see here for detailed track cluster matching and jet track association
@@ -335,7 +363,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   int iTrack = 0;
   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
     // skip low Pt tracks
-    //if (it->pt() < 2) continue;
+    if (it->pt() < 1) continue;
     bool saveTrack = false;
     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
@@ -386,15 +414,17 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       tracktowid[iTrack]    = centerId.rawId();
       trackchi2[iTrack]     = it->normalizedChi2();
       tracknhits[iTrack]    = it->numberOfValidHits();
-
-      trackQuality[iTrack] = -10;      
-      if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
-      if(it->quality(reco::TrackBase::loose))  trackQuality[iTrack] = 0;
-      if(it->quality(reco::TrackBase::tight))  trackQuality[iTrack] = 1;
-      if(it->quality(reco::TrackBase::highPurity)) trackQuality[iTrack] = 2; 
-      if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
-      if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
-      if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
+   
+      //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
+      if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
+      else  trackQualityL[iTrack] = false;
+      if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
+      else  trackQualityT[iTrack] = false;
+      if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
+      else  trackQualityHP[iTrack] = false;
+      //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
+      //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
+      //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
       /*
 	std::cout<<"rawId: "<<centerId.rawId()
 	       <<"iphiId: "<<HcalCenterId.iphi()
@@ -406,8 +436,9 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       muDR[iTrack] = -1;
       muDE[iTrack] = -1;
       bool muonMatch = false;
-      //for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-      for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+      for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+	//for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+	if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
 	double dRm = deltaR(*im,*it);
 	double dE = fabs( (im->pt()-it->pt())/it->pt() );
 	muDR[iTrack] = dRm;

@@ -52,7 +52,7 @@ private:
   edm::InputTag jets_,genjets_, met_, z_, genzs_;                    
   edm::InputTag ebrechits_, nonleadingjetspt_;
   edm::InputTag recTracks_, recMuons_;
-  edm::InputTag weight_tag;
+  edm::InputTag weight_tag, zspJets_;
   double conesize_;
   float weight_;
   TrackDetectorAssociator trackAssociator_;
@@ -60,7 +60,7 @@ private:
 
 
   //tree variables
-  float jcalpt, jcalphi, jcaleta, jcalet, jcale, jscalel2, jscalel3;
+  float jcalpt, jcalphi, jcaleta, jcalet, jcale, jscalel2, jscalel3, jscaleZSP, jscaleJPT;
   float jgenpt, jgenphi, jgeneta, jgenet, jgene;
   float mcalmet,mcalphi,mcalsum, weight;
   float zpt, zphi, zeta, zet, ze; 
@@ -72,7 +72,8 @@ private:
   int   *etowid_phi, *etowid_eta, *etowid, *etownum;
   float *etowet, *etoweta, *etowphi, *etowe;
   float nonleadingjetspt;
-  int   NobjTrack, *trackQuality;
+  int   NobjTrack;
+  bool *trackQualityL, *trackQualityT, *trackQualityHP;
   float *trackpt, *tracketa, *trackphi, *trackp, *tracketaout, *trackphiout;
   float *trackdr, *trackdrout, *trackchi2;
   float *trackemc1, *trackemc3, *trackemc5;

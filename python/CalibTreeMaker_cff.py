@@ -7,6 +7,7 @@ from Calibration.CalibSamples.TriJetSample_cff import *
 #from Calibration.CalibSamples.TopSample_cff import *
 from Calibration.CalibSamples.ZJetSample_cff import *
 from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
+from Weights.Summer08WeightProducer.summer08weightproducer_cfi import *
 
 photonJetInput     = cms.Sequence(selectedPhotonJetSample)
 trackTowerInput    = cms.Sequence(selectedTrackTowerSample)
@@ -22,6 +23,8 @@ makeTriJetTree     = cms.Sequence(TriJetInput*calibTreeMaker)
 makeNJetTree       = cms.Sequence(DiJetInput+TriJetInput*calibTreeMaker)
 #makeTopTree        = cms.Sequence(TopInput*calibTreeMaker)
 makeZJetTree       = cms.Sequence(ZJetInput*calibTreeMaker)
+
+#makePhotonWeights  = cms.Sequence
 
 #makeAllTrees = cms.Sequence(photonJetInput+trackTowerInput+DiJetInput+TriJetInput*calibTreeMaker)
 

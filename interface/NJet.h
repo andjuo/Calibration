@@ -49,7 +49,7 @@ public:
 private:
   edm::InputTag jets_, genjets_, met_, weight_tag;                   
   edm::InputTag ebrechits_;
-  edm::InputTag recTracks_, recMuons_;
+  edm::InputTag recTracks_, recMuons_, zspJets_;
   double conesize_;
   float weight_;
   TrackDetectorAssociator trackAssociator_;
@@ -57,7 +57,7 @@ private:
 
   //tree variables
   int   NobjJet, NobjGJet;
-  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jscalel2, *jscalel3;
+  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT;
   float *genjetpt, *genjetphi, *genjeteta, *genjetet, *genjete;
   int   NobjTow;
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;

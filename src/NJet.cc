@@ -13,6 +13,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   recTracks_  = cfg.getParameter<edm::InputTag>("NJetRecTracks");
   recMuons_   = cfg.getParameter<edm::InputTag>("NJetRecMuons");
   conesize_   = cfg.getParameter<double>("NJetConeSize");
+  zspJets_    = cfg.getParameter<edm::InputTag>("NJetZSPJets");
 
   // TrackAssociator parameters
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
@@ -110,8 +111,10 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   jeteta    = new float [ kjMAX ];
   jetet     = new float [ kjMAX ];
   jete      = new float [ kjMAX ];
+  jscaleZSP = new float [ kjMAX ];
   jscalel2  = new float [ kjMAX ];
   jscalel3  = new float [ kjMAX ];
+  jscaleJPT  = new float [ kjMAX ];
   // Jet-specific branches of the tree 
   CalibTree->Branch( "NobjJet",&NobjJet,"NobjJet/I"             );
   CalibTree->Branch( "JetPt", jetpt, "JetPt[NobjJet]/F" );
@@ -119,8 +122,10 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetEta",jeteta,"JetEta[NobjJet]/F");
   CalibTree->Branch( "JetEt", jetet, "JetEt[NobjJet]/F" );
   CalibTree->Branch( "JetE",  jete,  "JetE[NobjJet]/F"  );
+  CalibTree->Branch( "JetCorrZSP",jscaleZSP, "JetCorrZSP[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2", jscalel2,  "JetCorrL2[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL3", jscalel3,  "JetCorrL3[NobjJet]/F" );
+  CalibTree->Branch( "JetCorrJPT",jscaleJPT, "JetCorrJPT[NobjJet]/F" );
 
   genjetpt     = new float [ kjMAX ];
   genjetphi    = new float [ kjMAX ];
@@ -164,12 +169,18 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   edm::Handle<reco::GenJetCollection> genJets;
   evt.getByLabel(genjets_,genJets);
 
+  // get calo jet after zsp collection
+  edm::Handle<CaloJetCollection> zspJets;
+  evt.getByLabel(zspJets_, zspJets);
+
 
   std::string l2name = "L2RelativeJetCorrector";
   std::string l3name = "L3AbsoluteJetCorrector";
+  std::string JPTname = "JetPlusTrackZSPCorrectorScone5";
 
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
+  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname, setup); //Define the jet corrector
 
   NobjTow=0;
   NobjJet = pJets->size();
@@ -179,6 +190,14 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     jscalel2[jtno]  = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
     jscalel3[jtno]  = correctorL3  ->correction( (*pJets)[jtno].p4());  //calculate the correction
 
+    for( reco::CaloJetCollection::const_iterator zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet)
+      {
+	if( deltaR(zspJet->eta(),zspJet->phi(), (*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
+	  {
+	    jscaleZSP[jtno] = zspJet->et()/ (*pJets)[jtno].et();
+	    jscaleJPT[jtno] = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
+	  }
+      }
     jetpt[  jtno ] = (*pJets)[jtno].pt();
     jetphi[ jtno ] = (*pJets)[jtno].phi();
     jeteta[ jtno ] = (*pJets)[jtno].eta();
@@ -196,7 +215,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     for( reco::GenJetCollection::const_iterator genJet = genJets->begin(); genJet != genJets->end(); ++genJet)
       {
 	DeltaREtemp = deltaR(genJet->eta(),genJet->phi(), (*pJets)[jtno].eta() , (*pJets)[jtno].phi() );
- 	DeltaREtemp *= DeltaREtemp;  
+	DeltaREtemp *= DeltaREtemp; 
  	DeltaREtemp += fabs((genJet->et() - (*pJets)[jtno].et())/ genJet->et()) * fabs((genJet->et() - (*pJets)[jtno].et())/ genJet->et());
 	if(DeltaREtemp < DeltaRE)
 	  {
@@ -253,8 +272,8 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   evt.getByLabel(recTracks_,tracks);
 
   //Muons
-  //edm::Handle<reco::MuonCollection> muons;
-  edm::Handle<reco::TrackCollection> muons;
+  edm::Handle<reco::MuonCollection> muons;
+  //edm::Handle<reco::TrackCollection> muons;
   evt.getByLabel(recMuons_,muons);
 
   // see here for detailed track cluster matching and jet track association
@@ -316,8 +335,9 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	  muDR[iTrack] = -1;
 	  muDE[iTrack] = -1;
 	  bool muonMatch = false;
-	  //for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-	  for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+	  for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+	    //for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+	    if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
 	    double dRm = deltaR(*im,*it);
 	    double dE = fabs( (im->pt()-it->pt())/it->pt() );
 	    muDR[iTrack] = dRm;
