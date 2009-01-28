@@ -184,10 +184,10 @@ process.triJetFilter.MaxJetEMF          = 0.95
 process.triJetFilter.MaxLastJetPt       = 5.
 
 #process.calibTreeMaker.OutputFile = 'NJet_Test_Track.root'
-#process.calibTreeMaker.OutputFile = 'Gamma_Track_test.root'
-#process.calibTreeMaker.OutputFile = 'DiJet_Track_30_50.root'
+process.calibTreeMaker.OutputFile = 'Gamma_Track_test.root'
+#process.calibTreeMaker.OutputFile = 'DiJet_Track_3000_3500_rereco.root'
 #process.calibTreeMaker.OutputFile = 'TriJet_Track.root'
-process.calibTreeMaker.OutputFile = 'ZJet_Track_test.root'
+#process.calibTreeMaker.OutputFile = 'ZJet_Track_test.root'
 
 process.calibTreeMaker.PhotonJetTreeName = 'GammaJetTree'
 process.calibTreeMaker.PhotonJetJets = 'photonJetSample:LeadingJet'
@@ -201,7 +201,7 @@ process.calibTreeMaker.PhotonJetRecTracks    = 'generalTracks'
 process.calibTreeMaker.PhotonJetRecMuons     = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
 process.calibTreeMaker.PhotonJetConeSize     = 0.5
 process.calibTreeMaker.PhotonJet_Weight      = -1.
-process.calibTreeMaker.PhotonJet_Weight_Tag  = 'Summer08WeightProducer' #'genEventWeight'
+process.calibTreeMaker.PhotonJet_Weight_Tag  = 'Summer08WeightProducer:weight' #'genEventWeight'
 
 
 
@@ -232,24 +232,24 @@ process.calibTreeMaker.NJetRecTracks     = 'generalTracks'
 process.calibTreeMaker.NJetRecMuons      = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
 process.calibTreeMaker.NJetConeSize      = 0.5
 process.calibTreeMaker.NJet_Weight_Tag   = 'genEventWeight'
-process.calibTreeMaker.NJet_Weight       = -1.
+process.calibTreeMaker.NJet_Weight       = 0.0000000395 #0.000005807 #0.00673362 #0.309074# 84858.871  #-1.
 
 
 process.calibTreeMaker.TopTreeName     ='TopTree'
 
 
-process.calibTreeMaker.WritePhotonJetTree = False #True
+process.calibTreeMaker.WritePhotonJetTree = True
 process.calibTreeMaker.WriteDiJetTree    = False
 process.calibTreeMaker.WriteTriJetTree   = False
-process.calibTreeMaker.WriteZJetTree   = True #False
+process.calibTreeMaker.WriteZJetTree   = False
 
 
 #process.p1 = cms.Path(process.dump)
 #process.p1 = cms.Path(process.midPointCone5CaloJets*process.dump)
 #process.p2 = cms.Path(process.midPointCone5CaloJets*process.makePhotonJetTree)
-#process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.Summer08WeightProducer* process.makePhotonJetTree)
+process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.Summer08WeightProducer* process.makePhotonJetTree)
 #process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeDiJetTree)
 #process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeTriJetTree)
-process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeZJetTree)
+#process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeZJetTree)
 
 process.schedule = cms.Schedule(process.p2)
