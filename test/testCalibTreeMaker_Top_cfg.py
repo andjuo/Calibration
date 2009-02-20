@@ -6,10 +6,10 @@ process = cms.Process("Calib")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.MessageLogger.cerr.threshold = 'INFO'
-process.MessageLogger.categories.append('TtSemiLeptonicEvent')
+#process.MessageLogger.categories.append('TtSemiLeptonicEvent')
 process.MessageLogger.cerr.INFO = cms.untracked.PSet(
     default             = cms.untracked.PSet( limit = cms.untracked.int32( 0) ),
-    TtSemiLeptonicEvent = cms.untracked.PSet( limit = cms.untracked.int32(-1) ),
+#    TtSemiLeptonicEvent = cms.untracked.PSet( limit = cms.untracked.int32(-1) ),
 )
 
 #
@@ -57,8 +57,6 @@ process.load("Calibration.CalibTreeMaker.CalibTreeMaker_Top_cff")
 
 process.load("RecoJets.Configuration.RecoJetsAll_cff")
 
-process.dump = cms.EDAnalyzer("EventContentAnalyzer")
-
 ##############   Define the L2 correction service #####
 #process.L2JetCorrector = cms.ESSource("L2RelativeCorrectionService", 
 #                                      tagName = cms.string('iCSA08_S156_L2Relative_Scone5'),
@@ -86,7 +84,7 @@ process.ttSemiLepJetPartonMatch.useMaxDist = True
 process.ttSemiLepJetPartonMatch.maxDist    = 0.3
 process.ttSemiLepJetPartonMatch.maxNJets   = 5
 # For debugging
-process.ttSemiLepEvent.verbosity = 1
+process.ttSemiLepEvent.verbosity = 0
 
 #
 # Choose name of output file
@@ -110,5 +108,5 @@ run22XonSummer08AODSIM(process)
 #
 # The path
 #
-process.p2 = cms.Path(process.makeTopTree)
-process.schedule = cms.Schedule(process.p2)
+process.p = cms.Path(process.makeTopTree)
+process.schedule = cms.Schedule(process.p)
