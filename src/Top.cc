@@ -1,11 +1,13 @@
 #include "Calibration/CalibTreeMaker/interface/Top.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
 
+#include "DataFormats/Math/interface/deltaR.h"
 
 void Top::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
   bjets_     = cfg.getParameter<edm::InputTag> ("TopHadBJets");
   wjets_     = cfg.getParameter<edm::InputTag> ("TopHadWJets");
+  genjets_   = cfg.getParameter<edm::InputTag> ("Top_GenJets");
   weight     = (float)(cfg.getParameter<double>("Top_Weight"));
   weight_tag = cfg.getParameter<edm::InputTag> ("Top_Weight_Tag");
 
@@ -53,6 +55,17 @@ void Top::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetE",  jete,  "JetE[NobjJet]/F"  );
   CalibTree->Branch( "JetFlavor", jetflavor,  "JetFlavor[NobjJet]/I" );
   CalibTree->Branch( "JetTopID",  jettopid,   "JetTopID[NobjJet]/I"  );
+  // GenJets
+  genjetpt  = new float [ kjMAX ];
+  genjetphi = new float [ kjMAX ];
+  genjeteta = new float [ kjMAX ];
+  genjetet  = new float [ kjMAX ];
+  genjete   = new float [ kjMAX ];
+  CalibTree->Branch( "GenJetPt", genjetpt, "GenJetPt[NobjJet]/F" );
+  CalibTree->Branch( "GenJetPhi",genjetphi,"GenJetPhi[NobjJet]/F");
+  CalibTree->Branch( "GenJetEta",genjeteta,"GenJetEta[NobjJet]/F");
+  CalibTree->Branch( "GenJetEt", genjetet, "GenJetEt[NobjJet]/F" );
+  CalibTree->Branch( "GenJetE",  genjete,  "GenJetE[NobjJet]/F"  );
 
   //EventWeight
   CalibTree->Branch( "Weight",&weight,"Weight/F"   );
@@ -76,6 +89,9 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
   //edm::Handle<edm::View<reco::Jet> > pWJets;
   evt.getByLabel(wjets_, pWJets);
 
+  edm::Handle<reco::GenJetCollection> genJets;
+  evt.getByLabel(genjets_, genJets);
+
   //Need 2*n W-jets and n B-jets, where n is the number of hypotheses
   if (pWJets->size()%2!=0 || pWJets->size()%pBJets->size()!=0)
     return;
@@ -94,18 +110,41 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
     jete  [ jtno ] = (*pWJets)[jtno].energy();
     jetflavor[jtno]= 1;//uds
     jettopid [jtno]= jtno/2;
+
+    double gjpt = 0;
+    double gjphi = 0;
+    double gjeta = 0;
+    double gjet = 0;
+    double gje = 0;
+    double DeltaRE = 1000;
+    double DeltaREtemp = 0;
+
+    for( reco::GenJetCollection::const_iterator genJet = genJets->begin(); genJet != genJets->end(); ++genJet)
+      {
+	DeltaREtemp = deltaR(genJet->eta() , genJet->phi() , (*pWJets)[jtno].eta() , (*pWJets)[jtno].phi() );
+	DeltaREtemp *= DeltaREtemp; 
+ 	DeltaREtemp += fabs((genJet->et() - (*pWJets)[jtno].et())/ genJet->et())
+	  * fabs((genJet->et() - (*pWJets)[jtno].et())/ genJet->et());
+	if(DeltaREtemp < DeltaRE)
+	  {
+	    DeltaRE = DeltaREtemp;
+	    gjpt  = genJet->pt();
+	    gjphi = genJet->phi();
+	    gjeta = genJet->eta();
+	    gjet  = genJet->et();
+	    gje   = genJet->energy();
+	  }
+      }
+    genjetpt [ jtno ] = gjpt;
+    genjetphi[ jtno ] =	gjphi;
+    genjeteta[ jtno ] =	gjeta;
+    genjetet [ jtno ] =	gjet;
+    genjete  [ jtno ] = gje;
     
-    // uncomment for CMSSW_2_1_X compatibility
     std::vector<CaloTowerPtr> j_towers = (*pWJets)[jtno].getCaloConstituents();
     NobjTow+=j_towers.size();
     for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
 	 tow != j_towers.end(); ++tow, ++towno){
-
-// uncomment for CMSSW_2_0_X compatibility
-//    std::vector<CaloTowerRef> j_towers = (*pWJets)[jtno].getConstituents(); 
-//    NobjTow+=j_towers.size();
-//    for (std::vector<CaloTowerRef>::const_iterator tow = j_towers.begin(); 
-//         tow != j_towers.end(); ++tow, ++towno){
 
       towet[towno]     = (*tow)->et();
       toweta[towno]    = (*tow)->eta();
@@ -133,17 +172,41 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
     jetflavor[jtno]= 3;//b
     jettopid [jtno]= jtno - pWJets->size();
 
-    // uncomment for CMSSW_2_1_X compatibility
+    double gjpt = 0;
+    double gjphi = 0;
+    double gjeta = 0;
+    double gjet = 0;
+    double gje = 0;
+    double DeltaRE = 1000;
+    double DeltaREtemp = 0;
+
+    for( reco::GenJetCollection::const_iterator genJet = genJets->begin(); genJet != genJets->end(); ++genJet)
+      {
+	DeltaREtemp = deltaR(genJet->eta() , genJet->phi(),
+			     (*pBJets)[jtno-pWJets->size()].eta() , (*pBJets)[jtno-pWJets->size()].phi() );
+	DeltaREtemp *= DeltaREtemp; 
+ 	DeltaREtemp += fabs((genJet->et() - (*pBJets)[jtno-pWJets->size()].et())/ genJet->et())
+	  * fabs((genJet->et() - (*pBJets)[jtno-pWJets->size()].et())/ genJet->et());
+	if(DeltaREtemp < DeltaRE)
+	  {
+	    DeltaRE = DeltaREtemp;
+	    gjpt  = genJet->pt();
+	    gjphi = genJet->phi();
+	    gjeta = genJet->eta();
+	    gjet  = genJet->et();
+	    gje   = genJet->energy();
+	  }
+      }
+    genjetpt [ jtno ] = gjpt;
+    genjetphi[ jtno ] =	gjphi;
+    genjeteta[ jtno ] =	gjeta;
+    genjetet [ jtno ] =	gjet;
+    genjete  [ jtno ] = gje;
+
     std::vector<CaloTowerPtr> j_towers = (*pBJets)[jtno-pWJets->size()].getCaloConstituents();
     NobjTow+=j_towers.size();
     for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
 	 tow != j_towers.end(); ++tow, ++towno){
-
-// uncomment for CMSSW_2_0_X compatibility
-//    std::vector<CaloTowerRef> j_towers = (*pBJets)[jtno-pWJets->size()].getConstituents(); 
-//    NobjTow+=j_towers.size();
-//    for (std::vector<CaloTowerRef>::const_iterator tow = j_towers.begin(); 
-//         tow != j_towers.end(); ++tow, ++towno){
 
       towet[towno]     = (*tow)->et();
       toweta[towno]    = (*tow)->eta();

@@ -77,6 +77,7 @@ process.load("RecoJets.Configuration.RecoJetsAll_cff")
 process.calibTreeMaker.TopTreeName    = 'TopTree'
 process.calibTreeMaker.TopHadBJets    = 'topSample:TopHadBJets'
 process.calibTreeMaker.TopHadWJets    = 'topSample:TopHadWJets'
+process.calibTreeMaker.Top_GenJets    = 'sisCone5GenJets'
 process.calibTreeMaker.Top_Weight_Tag = 'tag'
 process.calibTreeMaker.Top_Weight     = 1.
 process.ttSemiLepJetPartonMatch.algorithm  = 3

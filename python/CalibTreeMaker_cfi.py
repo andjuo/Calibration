@@ -64,6 +64,7 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
 
     TopHadBJets    = cms.InputTag("MyTopHadBJets"),
     TopHadWJets    = cms.InputTag("MyTopHadWJets"),
+    Top_GenJets    = cms.InputTag("MyTop_GenJets"),
     Top_Weight     = cms.double(1.),
     Top_Weight_Tag = cms.InputTag("MyTop_Weight_Tag"),
                                   
