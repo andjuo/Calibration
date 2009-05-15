@@ -40,6 +40,11 @@
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 
+#include <DataFormats/ParticleFlowCandidate/interface/PFCandidate.h>
+#include <DataFormats/ParticleFlowReco/interface/PFCluster.h>
+#include <DataFormats/ParticleFlowReco/interface/PFBlock.h>
+#include <DataFormats/JetReco/interface/PFJet.h>
+
 class ZJet {
 public:
   ZJet(){}; 
@@ -52,7 +57,7 @@ private:
   edm::InputTag jets_,genjets_, met_, z_, genzs_;                    
   edm::InputTag ebrechits_, nonleadingjetspt_;
   edm::InputTag recTracks_, recMuons_;
-  edm::InputTag weight_tag, zspJets_;
+  edm::InputTag weight_tag, zspJets_, pfJets_, caloJets_;
   double conesize_;
   float weight_;
   TrackDetectorAssociator trackAssociator_;
@@ -60,8 +65,8 @@ private:
 
 
   //tree variables
-  float jcalpt, jcalphi, jcaleta, jcalet, jcale, jscalel2, jscalel3, jscaleZSP, jscaleJPT;
-  float jgenpt, jgenphi, jgeneta, jgenet, jgene;
+  float jcalpt, jcalphi, jcaleta, jcalet, jcale, jscalel2, jscalel3, jscaleZSP, jscaleJPT, jscalePFLOW;
+  float jgenpt, jgenphi, jgeneta, jgenet, jgene, jEMF, jscalel2l3, jscalel2l3JPT, jscalel2l3PFLOW;
   float mcalmet,mcalphi,mcalsum, weight;
   float zpt, zphi, zeta, zet, ze; 
   float gzpt, gzphi, gzeta, gzet, gze; 
@@ -72,7 +77,7 @@ private:
   int   *etowid_phi, *etowid_eta, *etowid, *etownum;
   float *etowet, *etoweta, *etowphi, *etowe;
   float nonleadingjetspt;
-  int   NobjTrack;
+  int   NobjTrack, NobjCluster;
   bool *trackQualityL, *trackQualityT, *trackQualityHP;
   float *trackpt, *tracketa, *trackphi, *trackp, *tracketaout, *trackphiout;
   float *trackdr, *trackdrout, *trackchi2;
@@ -80,6 +85,8 @@ private:
   float *trackhac1, *trackhac3, *trackhac5;
   float *muDR, *muDE;
   int   *trackid, *tracktowid, *tracktowidphi, *tracktowideta, *tracknhits;
+  float *clusterenergy, *clustereta, *clusterphi,*clustHDR,*clustEDR,*clustPS1DR,*clustPS2DR, *clustHEnergy, *clustEEnergySum;
+  int *clusterid,*clustertype,*clustHID,*clustEID,*clustPS1ID,*clustPS2ID;
   //int   processid;
 };
 

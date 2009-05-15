@@ -20,6 +20,9 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   weight_tag        = cfg.getParameter<edm::InputTag> ("ZJet_Weight_Tag");
   weight_            = (float)(cfg.getParameter<double> ("ZJet_Weight"));
   zspJets_          = cfg.getParameter<edm::InputTag>("ZJetZSPJets");
+  pfJets_          = cfg.getParameter<edm::InputTag>("ZJetPFJets");
+  caloJets_          = cfg.getParameter<edm::InputTag>("ZJetCaloJets");
+
    
   // TrackAssociator parameters
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
@@ -52,6 +55,21 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "TowEm",     towem,      "TowEm[NobjTowCal]/F"     );
   CalibTree->Branch( "TowHad",    towhd,      "TowHad[NobjTowCal]/F"    );
   CalibTree->Branch( "TowOE",     towoe,      "TowOE[NobjTowCal]/F"     );
+
+  //PFCluster data
+  clusterenergy  = new float [ kMAX ];
+  clustereta = new float [ kMAX ];
+  clusterphi = new float [ kMAX ];
+  clustertype  = new int [ kMAX ];
+  clusterid    = new int [ kMAX ];
+
+  //PFClusterData
+  CalibTree->Branch( "NobjCluster", &NobjCluster, "NobjCluster/I" );
+  CalibTree->Branch( "ClusterEnergy", clusterenergy, "ClusterEnergy[NobjCluster]/F" );
+  CalibTree->Branch( "ClusterEta", clustereta, "ClusterEta[NobjCluster]/F" );
+  CalibTree->Branch( "ClusterPhi", clusterphi, "ClusterPhi[NobjCluster]/F" );
+  CalibTree->Branch( "ClusterType", clustertype, "ClusterType[NobjCluster]/I" ); //0=HCAL, 1=ECAL, 2=PS1, 3=PS4,      4=GSF, 5=Brems
+  CalibTree->Branch( "ClusterId", clusterid, "ClusterID[NobjCluster]/I" );
 
   //ecal cells data
   etowet  = new float [ kMAX ];
@@ -100,6 +118,16 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   trackchi2      = new float[ kMAX ];
   muDR           = new float[ kMAX ];
   muDE           = new float[ kMAX ];
+  clustHID       = new int  [ kMAX ];  //closest HCAL Cluster
+  clustHDR       = new float[ kMAX ];  //closest HCAL Cluster distance
+  clustEID       = new int  [ kMAX ];  //closest ECAL Cluster
+  clustEDR       = new float[ kMAX ];  //closest ECAL Cluster distance
+  clustPS1ID     = new int  [ kMAX ];  //closest PS1 Cluster
+  clustPS1DR     = new float[ kMAX ];  //closest PS1 Cluster distance
+  clustPS2ID     = new int  [ kMAX ];  //closest PS2 Cluster
+  clustPS2DR     = new float[ kMAX ];  //closest PS2 Cluster distance
+  clustHEnergy   = new float[ kMAX ]; 
+  clustEEnergySum = new float[ kMAX ];  //Sum of all linked ECAL Clusters
 
   //track branches
   CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
@@ -128,6 +156,16 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "TrackHAC5",  trackhac5,  "TrackHAC5[NobjTrack]/F"  );
   CalibTree->Branch( "MuDR", muDR,  "MuDR[NobjTrack]/F"  );
   CalibTree->Branch( "MuDE", muDE,  "MuDE[NobjTrack]/F"  );
+  CalibTree->Branch( "ClustHID",  clustHID,  "ClustHID[NobjTrack]/I"  );
+  CalibTree->Branch( "ClustHDR",  clustHDR,  "ClustHDR[NobjTrack]/F"  );
+  CalibTree->Branch( "ClustEID",  clustEID,  "ClustEID[NobjTrack]/I"  );
+  CalibTree->Branch( "ClustEDR",  clustEDR,  "ClustEDR[NobjTrack]/F"  );
+  CalibTree->Branch( "ClustPS1ID",  clustPS1ID,  "ClustPS1ID[NobjTrack]/I"  );
+  CalibTree->Branch( "ClustPS1DR",  clustPS1DR,  "ClustPS1DR[NobjTrack]/F"  );
+  CalibTree->Branch( "ClustPS2ID",  clustPS2ID,  "ClustPS2ID[NobjTrack]/I"  );
+  CalibTree->Branch( "ClustPS2DR",  clustPS2DR,  "ClustPS2DR[NobjTrack]/F"  );
+  CalibTree->Branch( "ClustHEnergy",  clustHEnergy,  "ClustHEnergy[NobjTrack]/F"  );
+  CalibTree->Branch( "ClustEEnergySum",  clustEEnergySum,  "ClustEEnergySum[NobjTrack]/F"  );
 
   // CaloJet branches 
   CalibTree->Branch( "JetCalPt",  &jcalpt,    "JetCalPt/F"  );
@@ -135,10 +173,15 @@ void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetCalEta", &jcaleta,   "JetCalEta/F" );
   CalibTree->Branch( "JetCalEt",  &jcalet,    "JetCalEt/F"  );
   CalibTree->Branch( "JetCalE",   &jcale,     "JetCalE/F"   );
+  CalibTree->Branch( "JetCalEMF",   &jEMF,     "JetCalEMF/F"   );
   CalibTree->Branch( "JetCorrZSP",&jscaleZSP, "JetCorrZSP/F" );
   CalibTree->Branch( "JetCorrL2", &jscalel2,  "JetCorrL2/F" );
   CalibTree->Branch( "JetCorrL3", &jscalel3,  "JetCorrL3/F" );
   CalibTree->Branch( "JetCorrJPT",&jscaleJPT, "JetCorrJPT/F" );
+  CalibTree->Branch( "JetCorrPFLOW",&jscalePFLOW, "JetCorrPFLOW/F" );
+  CalibTree->Branch( "JetCorrL2L3", &jscalel2l3,  "JetCorrL2L3/F" );
+  CalibTree->Branch( "JetCorrL2L3JPT", &jscalel2l3JPT,  "JetCorrL2L3JPT/F" );
+  CalibTree->Branch( "JetCorrL2L3PFLOW",&jscalel2l3PFLOW, "JetCorrL2L3PFLOW/F" );
   // GenJet branches 
   CalibTree->Branch( "JetGenPt",  &jgenpt,    "JetGenPt/F"  );
   CalibTree->Branch( "JetGenPhi", &jgenphi,   "JetGenPhi/F" );
@@ -181,16 +224,16 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     }
   else weight = weight_;
 
-  edm::Handle<CaloJet> jet;
+  edm::Handle<CaloJetCollection> jet;
   evt.getByLabel(jets_, jet);
 
-  edm::Handle<GenJet> genJet;
+  edm::Handle<GenJetCollection> genJet;
   evt.getByLabel(genjets_,genJet);
 
-  edm::Handle<Particle> z;
+  edm::Handle<std::vector<reco::Particle> > z;
   evt.getByLabel(z_,z);
 
-  edm::Handle<GenParticle> genZ;
+  edm::Handle<GenParticleCollection> genZ;
   evt.getByLabel(genzs_,genZ);
 
   edm::Handle<CaloMETCollection> met;
@@ -199,15 +242,26 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   edm::Handle<double> NonLeadingJetsPt;
   evt.getByLabel( nonleadingjetspt_, NonLeadingJetsPt ); 
 
-  // get calo jet after zsp collection
+  // get calo jet after zsp correction
   edm::Handle<CaloJetCollection> zspJets;
   evt.getByLabel(zspJets_, zspJets);
 
+  //PFlow
+  edm::Handle<PFJetCollection> pfJets;
+  evt.getByLabel(pfJets_, pfJets);
 
-  const CaloJet& calojet = *jet;
-  const GenJet& genjet = *genJet;
-  const GenParticle&  genz = *genZ; 
-  const GenParticle&  Z = *z; 
+  edm::Handle<PFBlockCollection> pfBlocks;
+  evt.getByLabel("particleFlowBlock", pfBlocks);
+
+  //calo jets to check for jet-track ambigueties
+  edm::Handle<CaloJetCollection> otherCaloJets;
+  evt.getByLabel(caloJets_, otherCaloJets);
+
+
+  const CaloJet calojet = *jet->begin();
+  const GenJet genjet = *genJet->begin();
+  const GenParticle  genz = *genZ->begin(); 
+  const GenParticle  Z = *z->begin(); 
   const CaloMETCollection& recmets = *met; 
 
   /*
@@ -236,14 +290,21 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   std::string l3name = "L3AbsoluteJetCorrector";
   //std::string l1name = "ZSPJetCorrector";
   std::string JPTname = "JetPlusTrackZSPCorrectorScone5";
+  std::string l2l3name = "L2L3JetCorrectorSC5Calo";
+  std::string l2l3JPTname = "L2L3JetCorrectorIC5JPT";
+  std::string l2l3PFlowname = "L2L3JetCorrectorSC5PF";
 
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
   //const JetCorrector* correctorL1   = JetCorrector::getJetCorrector (l1name,setup);   //Define the jet corrector
   const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3PFlow  = JetCorrector::getJetCorrector (l2l3PFlowname, setup); //Define the jet corrector
 
   jscalel2   = correctorL2  ->correction(calojet.p4());  //calculate the correction
   jscalel3   = correctorL3  ->correction(calojet.p4());  //calculate the correction
+  jscalel2l3   = correctorL2L3  ->correction(calojet.p4());  //calculate the correction
 
   for( reco::CaloJetCollection::const_iterator zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet)
       {
@@ -251,6 +312,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	  {
 	    jscaleZSP = zspJet->et()/calojet.et();
 	    jscaleJPT = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
+	    jscalel2l3JPT   = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT );  //calculate the correction
 	  }
       }
   //jscalel1   = correctorL1  ->correction(calojet.p4());  //calculate the correction
@@ -262,12 +324,88 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       <<" Scale L3 = "<<jscalel3
       <<endl;
   */
+  double deltaMin = 100;
+  reco::PFJet MyPFJet;
+  for( reco::PFJetCollection::const_iterator pfJet = pfJets->begin(); pfJet != pfJets->end(); ++pfJet)
+      {
+	double deltaTemp =  deltaR(pfJet->eta(),pfJet->phi(), calojet.eta() , calojet.phi());
+	if(deltaTemp < deltaMin) //closest in R
+	  {
+	    deltaMin = deltaTemp ;
+	    MyPFJet = *pfJet;
+	    //zspJet->et()/calojet.et();
+	    jscalePFLOW = pfJet->et()/calojet.et();
+	    jscalel2l3PFLOW   = correctorL2L3PFlow ->correction(pfJet->p4() );  //calculate the correction
+	  }
+      }
+  
+
+
+  /*
+  std::vector<const reco::PFCandidate*> MyPFConstituents=  MyPFJet.getPFConstituents();
+  double temp=0;
+  double temp1;
+  for( unsigned int prim=0; prim!= MyPFConstituents.size(); ++prim) {
+    temp +=MyPFConstituents.at(prim)->pt();
+    reco::TrackRef MyPFTrackRef = MyPFConstituents.at(prim)->trackRef();
+    temp1=0;
+    if(MyPFTrackRef.isNonnull())   temp1 = MyPFTrackRef->pt();
+    cout<<"TrackPt: "<<temp1<<"   ClusterPt - TrackPt: "<<MyPFConstituents.at(prim)->pt() - temp1<<endl;
+  }
+  
+  cout<<"DeltaR: "<<deltaMin<<" DeltaPt: "<<MyPFJet.pt() - calojet.pt()<<"  Jet: "<<MyPFJet.pt()<<"   SumConst: "<<temp<<"    Calo Jet: "<<calojet.pt()<<endl;
+  */
+  NobjCluster = 0;
+  int clusternumber = 0;
+  for(reco::PFBlockCollection::const_iterator pfBlock = pfBlocks->begin(); pfBlock != pfBlocks->end(); ++pfBlock)
+    {
+      edm::OwnVector<reco::PFBlockElement> MyPFBlockElements=  pfBlock->elements();
+      for(edm::OwnVector<reco::PFBlockElement>::const_iterator pfElement = MyPFBlockElements.begin(); pfElement != MyPFBlockElements.end();++pfElement) {
+	if(!(pfElement->type() == reco::PFBlockElement::TRACK || pfElement->type() == reco::PFBlockElement::NONE || pfElement->type() == reco::PFBlockElement::GSF || pfElement->type() == reco::PFBlockElement::BREM )){
+	  if(deltaR(pfElement->clusterRef()->eta(),pfElement->clusterRef()->phi(), calojet.eta() , calojet.phi())  < 0.5)  //in cone
+	    {
+	      clusterenergy[NobjCluster] = pfElement->clusterRef()->energy();
+	      clustereta[NobjCluster] = pfElement->clusterRef()->eta();
+	      clusterphi[NobjCluster] = pfElement->clusterRef()->phi();
+	      //clusterid[NobjCluster] = pfElement->clusterRef().id().id();  //index();
+	      clusterid[NobjCluster] =clusternumber;
+	      if(pfElement->type() == reco::PFBlockElement::HCAL)
+		clustertype[NobjCluster] = 0;
+	      if(pfElement->type() == reco::PFBlockElement::ECAL)
+		clustertype[NobjCluster] = 1;
+	      if(pfElement->type() == reco::PFBlockElement::PS1)
+		clustertype[NobjCluster] = 2;
+	      if(pfElement->type() == reco::PFBlockElement::PS2)
+		clustertype[NobjCluster] = 3;
+	      //if(pfElement->type() == reco::PFBlockElement::GSF)
+	      //clustertype[nocluster] = 4;
+	      //if(pfElement->type() == reco::PFBlockElement::BREM)
+	      //clustertype[nocluster] = 5;
+	      ++NobjCluster;		
+	    }
+	}
+	/*
+	  else{
+	  if(pfElement->type() == reco::PFBlockElement::TRACK){      //or linked track in cone
+	  DR = deltaR(pfElement->trackRef()->eta(),pfElement->trackRef()->phi(), it->eta() , it->phi());
+	  if(DR < DRmin){
+	  DRmin = DR;
+	  PFTrackIndex = pfElement->index();
+	  }
+	  }
+	  }
+	*/
+	++clusternumber;
+      }
+    }
+  
 
   jcalpt  = calojet.pt();
   jcalphi = calojet.phi();
   jcaleta = calojet.eta();
   jcalet  = calojet.et();
   jcale   = calojet.energy();
+  jEMF    = 1 - calojet.energyFractionHadronic();
 
   int jtow=0, icell=0;
 
@@ -363,7 +501,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   int iTrack = 0;
   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
     // skip low Pt tracks
-    if (it->pt() < 1) continue;
+    //if (it->pt() < 1) continue;
     bool saveTrack = false;
     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
@@ -371,6 +509,28 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     double outeta = info.trkGlobPosAtEcal.eta();
     double outphi = info.trkGlobPosAtEcal.phi();
     double dRout  = deltaR(calojet.eta(),calojet.phi(),outeta,outphi);
+
+    //loop over other jets to see, if that one is closer (dRin) or constituent (dRout)
+    for( reco::CaloJetCollection::const_iterator otherCaloJet = otherCaloJets->begin(); otherCaloJet != otherCaloJets->end(); ++otherCaloJet)
+      {
+	//inner part
+	if(deltaR(*it,*otherCaloJet) < dRin && (otherCaloJet->eta() != calojet.eta()) )
+	  dRin = 1000;
+	//outer part
+	bool inJet = false;
+	std::vector <CaloTowerPtr> towers = calojet.getCaloConstituents();
+	for(unsigned int i = 0; i<towers.size();++i)
+	  {
+	    //if(info.findMaxDeposition(TrackDetMatchInfo::EnergyType::TowerTotal) == towers[i].id())
+	    for(unsigned int a = 0; a < towers[i].get()->constituentsSize(); ++a)
+	      {
+		if(info.findMaxDeposition(TrackDetMatchInfo::TowerTotal).rawId() == towers[i].get()->constituent(a).rawId())
+		  inJet =true;
+	      }
+	  }
+	if(!inJet)   dRout = 1000;
+      }
+
     if (dRin < conesize_ || dRout < conesize_){
       saveTrack=true;
     }
@@ -393,6 +553,91 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     std::cout<<"trackhcalrh5["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2)<<std::endl;
     */
     if (saveTrack){
+      clustEEnergySum[iTrack] = 0;
+      clustHEnergy[iTrack] = 0;
+      clustHID[iTrack] = -1;
+      clustEID[iTrack] = -1;
+      int PFTrackIndex = 0;
+      double DRmin = 100;
+      reco::PFBlockCollection::const_iterator TrackBlock;
+      for(reco::PFBlockCollection::const_iterator pfBlock = pfBlocks->begin(); pfBlock != pfBlocks->end(); ++pfBlock)
+	{
+	  double DR;
+	  edm::OwnVector<reco::PFBlockElement> MyPFBlockElements=  pfBlock->elements();
+	  for(edm::OwnVector<reco::PFBlockElement>::const_iterator pfElement = MyPFBlockElements.begin(); pfElement != MyPFBlockElements.end();++pfElement) {
+	    if(pfElement->type() == reco::PFBlockElement::TRACK){
+	      DR = deltaR(pfElement->trackRef()->eta(),pfElement->trackRef()->phi(), it->eta() , it->phi());
+	      if(DR < DRmin){
+		DRmin = DR;
+		PFTrackIndex = pfElement->index();
+		TrackBlock = pfBlock;
+	      }
+	    }
+	  }
+	}
+      DRmin = 100;
+      double DRminE = 100;
+      double DRminPS1 = 100;
+      double DRminPS2 = 100; 
+      clusternumber = -1;
+      for(reco::PFBlockCollection::const_iterator pfBlock = pfBlocks->begin(); pfBlock != pfBlocks->end(); ++pfBlock)
+	{
+	  double dist;
+	  edm::OwnVector<reco::PFBlockElement> MyPFBlockElements=  pfBlock->elements();
+	  for(edm::OwnVector<reco::PFBlockElement>::const_iterator pfElement = MyPFBlockElements.begin(); pfElement != MyPFBlockElements.end();++pfElement) {
+	    ++clusternumber;
+	    if(TrackBlock != pfBlock)  continue;
+	    double temp =  pfBlock->dist(PFTrackIndex, pfElement->index(),pfBlock->linkData(),reco::PFBlock::LINKTEST_CHI2); 
+	    if(temp>-1)
+	      {	    
+	      dist = temp;
+	      }
+	    else 
+	      dist = 100;
+
+	    if(pfElement->type() == reco::PFBlockElement::HCAL){
+	      //if(deltaR(pfElement->trackRef()->eta(),pfElement->trackRef()->phi(), calojet.eta() , calojet.phi())<0.5)
+	      if(dist <DRmin){
+		DRmin = dist;
+		clustHID[iTrack] = clusternumber;//pfElement->clusterRef().id().id();  //index();
+		clustHEnergy[iTrack] = pfElement->clusterRef()->energy();
+	      }
+	    }
+	    if(pfElement->type() == reco::PFBlockElement::ECAL){
+	      //if(deltaR(pfElement->trackRef()->eta(),pfElement->trackRef()->phi(), calojet.eta() , calojet.phi())<0.5)
+	      if(dist <DRminE){
+		DRminE = dist;
+		clustEID[iTrack] = clusternumber;//pfElement->clusterRef().id().id();  //index();
+	      }
+	      if(dist < 0.5)
+		clustEEnergySum[iTrack] += pfElement->clusterRef()->energy();
+	    }
+	    if(pfElement->type() == reco::PFBlockElement::PS1){
+	      //if(deltaR(pfElement->trackRef()->eta(),pfElement->trackRef()->phi(), calojet.eta() , calojet.phi())<0.5)
+	      if(dist <DRminPS1){
+		DRminPS1 = dist;
+		clustPS1ID[iTrack] = clusternumber;//pfElement->clusterRef().id().id();  //index();
+	      }
+	    }
+	    if(pfElement->type() == reco::PFBlockElement::PS2){
+	      //if(deltaR(pfElement->trackRef()->eta(),pfElement->trackRef()->phi(), calojet.eta() , calojet.phi())<0.5)
+	      if(dist <DRminPS2){
+		DRminPS2 = dist;
+		clustPS2ID[iTrack] = clusternumber;//pfElement->clusterRef().id().id();  //index();
+	      }
+	    }
+
+	  }
+	}
+
+      //cout<<"Track: "<<it->p()<<"    HCAL-Cluster: "<<clustHEnergy[iTrack]<<"    ECAL Sum: "<<clustEEnergySum[iTrack]<<"     Sum: "<<clustEEnergySum[iTrack] + clustHEnergy[iTrack]<<endl;
+      clustHDR[iTrack] = DRmin;
+      clustEDR[iTrack] = DRminE;
+      clustPS1DR[iTrack] = DRminPS1;
+      clustPS2DR[iTrack] = DRminPS2;
+
+      
+      
       trackpt[iTrack]     = it->pt();
       tracketa[iTrack]    = it->eta();
       trackphi[iTrack]    = it->phi();
@@ -447,7 +692,8 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       }
       if (muonMatch) {
 	trackid[iTrack] = 13;
-      } else {
+      }
+      else {
 	trackid[iTrack] = 0;
       }
       ++iTrack;

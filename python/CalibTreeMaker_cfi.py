@@ -15,6 +15,7 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     ZJetTreeName       = cms.string('ZJetTree'),
                
     PhotonJetJets        = cms.InputTag("MyPhotonJetJets"),
+    PhotonJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
     PhotonJetPhotons     = cms.InputTag("MyPhotonJetPhotons"),
     PhotonJetGenPhotons  = cms.InputTag("MyPhotonJetGenPhotons"),
     PhotonJetGenJets     = cms.InputTag("MyPhotonJetGenJets"),
@@ -28,10 +29,12 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     PhotonJet_Weight     = cms.double(1.),
     PhotonJet_Weight_Tag = cms.InputTag("MyPhotonJet_Weight_Tag"),
     PhotonJetZSPJets     = cms.InputTag("MyPhotonJetZSPJets"),
+    PhotonJetPFJets      = cms.InputTag("MyZJetPFJets"),
 
 
                
     ZJetJets        = cms.InputTag("MyZJetJets"),
+    ZJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
     ZJetZs          = cms.InputTag("MyZJetZs"),
     ZJetGenZs  = cms.InputTag("MyZJetGenZs"),
     ZJetGenJets     = cms.InputTag("MyZJetGenJets"),
@@ -45,6 +48,7 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     ZJet_Weight_Tag = cms.InputTag("MyZJet_Weight_Tag"),
     ZJetGenZ        = cms.InputTag("MyZGenZs"),
     ZJetZSPJets     = cms.InputTag("MyZJetZSPJets"),
+    ZJetPFJets      = cms.InputTag("MyZJetPFJets"),
 
 
                               
