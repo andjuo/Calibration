@@ -74,6 +74,7 @@ process.JetPlusTrackZSPCorrectorScone5 = cms.ESSource("JetPlusTrackCorrectionSer
 process.load("Calibration.CalibTreeMaker.ZSPsisCone5JTA_cff")
 
 
+#process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer08Redigi_cff")
 #############   Define the L2 correction service #####
 process.L2JetCorrector = cms.ESSource("L2RelativeCorrectionService", 
                                       tagName = cms.string('Summer08Redigi_L2Relative_SC5Calo'),
@@ -84,11 +85,62 @@ process.L3JetCorrector = cms.ESSource("L3AbsoluteCorrectionService",
                                       tagName = cms.string('Summer08Redigi_L3Absolute_SC5Calo'),
                                       label = cms.string('L3AbsoluteJetCorrector')
                                       )
+process.L2JetCorrectorSC5PF= cms.ESSource("L2RelativeCorrectionService", 
+    tagName = cms.string('Summer08Redigi_L2Relative_SC5PF'),
+    label = cms.string('L2RelativeJetCorrectorSC5PF')
+)
+process.L2JetCorrectorIC5JPT= cms.ESSource("L2RelativeCorrectionService", 
+    tagName = cms.string('Summer08Redigi_L2Relative_IC5JPT'),
+    label = cms.string('L2RelativeJetCorrectorIC5JPT')
+)
+process.L3JetCorrectorIC5JPT = cms.ESSource("L3AbsoluteCorrectionService", 
+    tagName = cms.string('Summer08Redigi_L3Absolute_IC5JPT'),
+    label = cms.string('L3AbsoluteJetCorrectorIC5JPT')
+)
+process.L3JetCorrectorSC5PF = cms.ESSource("L3PFAbsoluteCorrectionService", 
+    tagName = cms.string('Summer08Redigi_L3Absolute_SC5PF'),
+    label = cms.string('L3AbsoluteJetCorrectorSC5PF')
+)
+process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
+    tagName = cms.string('Summer08Redigi_L2Relative_SC5Calo'),
+    label = cms.string('L2RelativeJetCorrectorSC5Calo')
+)
+process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
+    tagName = cms.string('Summer08Redigi_L3Absolute_SC5Calo'),
+    label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
+)
+
+
+
+
+#############   Define the L2+L3 correction service #####
+#process.L2L3JetCorrector = cms.ESSource("L2L3CorJetSC5Calo", 
+#                                      tagName = cms.string('Summer08Redigi_L2Relative_SC5Calo'),
+#                                      label = cms.string('L2RelativeJetCorrector')
+#      
+process.L2L3JetCorrectorSC5Calo = cms.ESSource("JetCorrectionServiceChain",  
+    correctors = cms.vstring('L2RelativeJetCorrectorSC5Calo','L3AbsoluteJetCorrectorSC5Calo'),
+    label = cms.string('L2L3JetCorrectorSC5Calo') 
+)
+
+#############   Define the L2+L3 JPT correction service #####
+process.L2L3JetCorrectorIC5JPT = cms.ESSource("JetCorrectionServiceChain",  
+    correctors = cms.vstring('L2RelativeJetCorrectorIC5JPT','L3AbsoluteJetCorrectorIC5JPT'),
+    label = cms.string('L2L3JetCorrectorIC5JPT') 
+)
+
+
+#############   Define the L2+L3 PFlow correction service ####
+process.L2L3JetCorrectorSC5PF = cms.ESSource("JetCorrectionServiceChain",  
+    correctors = cms.vstring('L2RelativeJetCorrectorSC5PF','L3AbsoluteJetCorrectorSC5PF'),
+    label = cms.string('L2L3JetCorrectorSC5PF') 
+)
+
 
 
 
 # set the record's IOV. Must be defined once. Choose ANY correction service. #
-process.prefer("L2JetCorrector")
+process.prefer("L2L3JetCorrectorSC5Calo")
 
 process.photonCalIsolation.src = 'photons'
 process.photonCalIsolation.dRMin = 0.20
@@ -139,15 +191,15 @@ process.trackTowerSample.GroupNTowers = 1
 
 
 process.diJetFilter.Jets               = 'sisCone5CaloJets'
-process.diJetFilter.MaxRefEta          = 1.5
+process.diJetFilter.MaxRefEta          = 5.0 # 1.5
 process.diJetFilter.MaxEta             = 5.0
-process.diJetFilter.MinJetPt           = 10.
+process.diJetFilter.MinJetPt           = 0. # 10.
 #process.diJetFilter.sumPtMaxFracThird  = 0.1 (in CalibCore config?)
 process.diJetFilter.MinJetPhiSum       = 0.1
 #process.diJetFilter.deltaPhiMETMax     = 0.15 (?)
 process.diJetFilter.MinJetEMF          = 0.05
 process.diJetFilter.MaxJetEMF          = 0.95
-process.diJetFilter.MaxLastJetPt       = 5.
+process.diJetFilter.MaxLastJetPt       =  5. # 0.
 
 process.triJetFilter.Jets               = 'sisCone5CaloJets'
 process.triJetFilter.MaxRefEta          = 1.5
@@ -160,21 +212,20 @@ process.triJetFilter.MinJetEMF          = 0.05
 process.triJetFilter.MaxJetEMF          = 0.95
 process.triJetFilter.MaxLastJetPt       = 5.
 
-#process.calibTreeMaker.OutputFile = 'NJet_Test_Track.root'
-#process.calibTreeMaker.OutputFile = 'Gamma_15_skim_hlt_Track.root'
-process.calibTreeMaker.OutputFile = 'DiJet_Track_170_230NJetTest3.root'
-#process.calibTreeMaker.OutputFile = 'Gamma_Track_800.root'
-process.calibTreeMaker.OutputFile = 'DiJet_Track_15_20_rereco_incomplete.root'
-#process.calibTreeMaker.OutputFile = 'TriJet_Track.root'
+process.calibTreeMaker.OutputFile = 'Gamma_Track_470_rereco.root'
+#process.calibTreeMaker.OutputFile = 'DiJet_Track_600_800_rereco_incomplete.root'
 #process.calibTreeMaker.OutputFile = 'ZJet_Track_0_15_rereco.root'
+#50_80_rereco.root'
 
 
 process.calibTreeMaker.PhotonJetTreeName = 'GammaJetTree'
 process.calibTreeMaker.PhotonJetJets = 'photonJetSample:LeadingJet'
+process.calibTreeMaker.PhotonJetCaloJets =  'sisCone5CaloJets'
 process.calibTreeMaker.PhotonJetGenJets = 'photonJetSample:LeadingGenJet'
 process.calibTreeMaker.PhotonJetPhotons = 'photonJetSample:LeadingPhoton'
 process.calibTreeMaker.PhotonJetGenPhotons = 'photonJetSample:LeadingGenPhoton'
 process.calibTreeMaker.PhotonJetZSPJets = 'ZSPJetCorJetScone5'
+process.calibTreeMaker.PhotonJetPFJets = 'sisCone5PFJets'
 process.calibTreeMaker.PhotonJetNonLeadingJetsPt = 'photonJetSample:NonLeadingJetsPt'
 process.calibTreeMaker.PhotonJetMet          = 'met'
 process.calibTreeMaker.PhotonJetRecTracks    = 'generalTracks'
@@ -187,16 +238,18 @@ process.calibTreeMaker.PhotonJet_Weight_Tag  = 'Summer08WeightProducer:weight' #
 
 process.calibTreeMaker.ZJetTreeName = 'ZJetTree'
 process.calibTreeMaker.ZJetJets = 'zJetSample:LeadingJet'
+process.calibTreeMaker.ZJetCaloJets =  'sisCone5CaloJets'
 process.calibTreeMaker.ZJetGenJets = 'zJetSample:LeadingGenJet'
 process.calibTreeMaker.ZJetZs = 'zJetSample:LeadingZ'
 process.calibTreeMaker.ZJetGenZs = 'zJetSample:LeadingGenZ'
 process.calibTreeMaker.ZJetZSPJets = 'ZSPJetCorJetScone5'
+process.calibTreeMaker.ZJetPFJets = 'sisCone5PFJets'
 process.calibTreeMaker.ZJetNonLeadingJetsPt = 'zJetSample:NonLeadingJetsPt'
 process.calibTreeMaker.ZJetMet          = 'met'
 process.calibTreeMaker.ZJetRecTracks    = 'generalTracks'
 process.calibTreeMaker.ZJetRecMuons     = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
 process.calibTreeMaker.ZJetConeSize     = 0.5
-process.calibTreeMaker.ZJet_Weight      = 2.8288 #0.000178 #0.000416 #0.00144 #0.004967 #0.00936 #0.0513 #0.0901 #0.1328  #? #2.8288 
+process.calibTreeMaker.ZJet_Weight      = 2.8288 #0.000178 #0.000416 #0.00144 #0.004967 #0.00936 #0.0513 #0.0901 #0.1328  #0.09384 #2.8288 
 process.calibTreeMaker.ZJet_Weight_Tag  = 'genEventWeight'
 
 
@@ -206,6 +259,7 @@ process.calibTreeMaker.TriJetTreeName    ='TriJetTree'
 process.calibTreeMaker.NJet_Jets         = 'sisCone5CaloJets'
 #prosess.calibTreeMaker.JetJetGenJets      = iterativeCone5GenJetsPt10
 process.calibTreeMaker.NJet_GenJets      = 'sisCone5GenJets'
+
 process.calibTreeMaker.NJet_GenParticles = 'genParticleCandidates'
 process.calibTreeMaker.NJetZSPJets       = 'ZSPJetCorJetScone5'
 process.calibTreeMaker.NJet_MET          = 'met'
@@ -213,26 +267,21 @@ process.calibTreeMaker.NJetRecTracks     = 'generalTracks'
 process.calibTreeMaker.NJetRecMuons      = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
 process.calibTreeMaker.NJetConeSize      = 0.5
 process.calibTreeMaker.NJet_Weight_Tag   = 'genEventWeight'
-process.calibTreeMaker.NJet_Weight       =  987735    #0.0000000395 #0.000005807 #0.00673362 #0.309074# 84858.871  #-1.                        #incomplete15-20: 987735 ;    20-30: 887521 ;     50-80: 12195.9;     80-120: 5445.253 ;      120-170: 938.712 ;       170-230: 99.434;     230-300: 33.92 ;    300-380: ; 13.862    380-470: 1.5477    470-600: 1.3282;
+process.calibTreeMaker.NJet_Weight       =   0.30943 #0.0000000395 #0.000005807 #0.00673362 # 0.30943# 84858.871  #-1.                        #incomplete 20-30: 887521 ;     50-80: 12460.7;     80-120: 5445.253 ;      120-170: 938.712 ;       170-230: 99.434;     230-300: 33.92 ;    300-380: ; 13.862    380-470: 1.5477    470-600: 1.3282;
 
 process.calibTreeMaker.TopTreeName     ='TopTree'
 
 
-process.calibTreeMaker.WritePhotonJetTree = False
-process.calibTreeMaker.WriteDiJetTree     = True 
-process.calibTreeMaker.WriteTriJetTree    = False
-process.calibTreeMaker.WriteZJetTree      = False
+process.calibTreeMaker.WritePhotonJetTree = True #False
+process.calibTreeMaker.WriteDiJetTree    = False #True
+process.calibTreeMaker.WriteTriJetTree   = False
+process.calibTreeMaker.WriteZJetTree   = False # True
 
 
 #process.p1 = cms.Path(process.dump)
-#process.p1 = cms.Path(process.midPointCone5CaloJets*process.dump)
-#process.p2 = cms.Path(process.midPointCone5CaloJets*process.makePhotonJetTree)
-#process.p2 = cms.Path(process.makePhotonJetTree)
 #process.p2 = cms.Path(process.myPartons*process.CaloJetPartonMatching*process.makeDiJetTree)
-process.p2 = cms.Path(process.myPartons*process.CaloJetPartonMatching*process.calibTreeMaker)
-#process.p2 = cms.Path(process.makeTriJetTree)
-#process.p2 = cms.Path(process.makeZJetTree)
-#process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.Summer08WeightProducer* process.makePhotonJetTree)
+#process.p2 = cms.Path(process.myPartons*process.CaloJetPartonMatching*process.calibTreeMaker)
+process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.Summer08WeightProducer* process.makePhotonJetTree)
 #process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeDiJetTree)
 #process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeTriJetTree)
 #process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeZJetTree)
