@@ -31,7 +31,7 @@ process.source = cms.Source("PoolSource",
     #'/store/relval/CMSSW_2_1_9/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/STARTUP_V7_v2/0000/4E31E969-1886-DD11-8398-000423D9989E.root',
     #'/store/relval/CMSSW_2_1_9/RelValTTbar/GEN-SIM-DIGI-RAW-HLTDEBUG-RECO/STARTUP_V7_v2/0000/4EEEA6AE-0886-DD11-90F9-000423D94990.root'
     ## Summer08 TauolaTTBar at DESY (just one file of the sample)
-   '/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v1/0004/16AAC418-218A-DD11-AC33-001F2908F0E4.root'
+   '/store/mc/Summer08/TauolaTTbar/GEN-SIM-RECO/IDEAL_V9_v2/0009/0054812D-26F7-DD11-99D7-001F2908F0E4.root'
     )
 )
 
@@ -80,7 +80,7 @@ process.calibTreeMaker.TopHadWJets    = 'topSample:TopHadWJets'
 process.calibTreeMaker.Top_GenJets    = 'sisCone5GenJets'
 process.calibTreeMaker.Top_Weight_Tag = 'tag'
 process.calibTreeMaker.Top_Weight     = 1.
-process.ttSemiLepJetPartonMatch.algorithm  = 3
+process.ttSemiLepJetPartonMatch.algorithm  = 'unambiguousOnly'
 process.ttSemiLepJetPartonMatch.useMaxDist = True
 process.ttSemiLepJetPartonMatch.maxDist    = 0.3
 process.ttSemiLepJetPartonMatch.maxNJets   = 5
