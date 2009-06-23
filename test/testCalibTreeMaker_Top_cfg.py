@@ -41,39 +41,14 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100) )
 
-
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FakeConditions_cff")
-process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi")
-process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
-#process.load("TrackingTools.TrackAssociator.default_cfi")
-
-process.load("Calibration.CalibTreeMaker.CalibTreeMaker_Top_cff")
-
-process.load("RecoJets.Configuration.RecoJetsAll_cff")
-
-##############   Define the L2 correction service #####
-#process.L2JetCorrector = cms.ESSource("L2RelativeCorrectionService", 
-#                                      tagName = cms.string('iCSA08_S156_L2Relative_Scone5'),
-#                                      label = cms.string('L2RelativeJetCorrector')
-#                                      )
-##############   Define the L3 correction service #####
-#process.L3JetCorrector = cms.ESSource("L3AbsoluteCorrectionService", 
-#                                      tagName = cms.string('iCSA08_S156_L3Absolute_Scone5'),
-#                                      label = cms.string('L3AbsoluteJetCorrector')
-#                                      )
-#
-## set the record's IOV. Must be defined once. Choose ANY correction service. #
-#process.prefer("L2JetCorrector")
 
 #
 # Configuration for Top
 #
+process.load("Calibration.CalibTreeMaker.CalibTreeMaker_Top_cff")
 process.calibTreeMaker.TopTreeName    = 'TopTree'
 process.calibTreeMaker.TopHadBJets    = 'topSample:TopHadBJets'
 process.calibTreeMaker.TopHadWJets    = 'topSample:TopHadWJets'
