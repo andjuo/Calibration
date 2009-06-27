@@ -13,6 +13,8 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     TrackTowerTreeName = cms.string('TrackTowerTree'),
     TopTreeName        = cms.string('TopTree'),
     ZJetTreeName       = cms.string('ZJetTree'),
+
+    GenEventScaleLabel   = cms.InputTag("genEventScale"),                             
                
     PhotonJetJets        = cms.InputTag("MyPhotonJetJets"),
     PhotonJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
@@ -72,6 +74,8 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     Top_GenJets    = cms.InputTag("MyTop_GenJets"),
     Top_Weight     = cms.double(1.),
     Top_Weight_Tag = cms.InputTag("MyTop_Weight_Tag"),
+
+    WriteEcalCells = cms.bool(False),
                                   
     WritePhotonJetTree  = cms.bool(False),
     WriteDiJetTree      = cms.bool(False),

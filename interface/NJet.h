@@ -55,14 +55,16 @@ private:
   edm::InputTag jets_, genjets_, genparticles_, met_, weight_tag;                   
   edm::InputTag ebrechits_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
+  edm::InputTag genEvtScale_;
   double conesize_;
   float weight_;
+  bool writeEcalCells;
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
 
   //tree variables
   int   NobjJet, NobjGJet;
-  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT;
+  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
   float *genjetpt, *genjetphi, *genjeteta, *genjetet, *genjete;
 
   //duplicated for ALGO and PHYS Def
@@ -83,6 +85,14 @@ private:
   float *trackhac1, *trackhac3, *trackhac5;
   float *muDR, *muDE;
   int   *trackid, *tracktowid, *tracktowidphi, *tracktowideta, *tracknhits, *track_jetidx;
+
+  // pthat
+  float genEvtScale;
+
+  // ECAL cells
+  int   NobjETowCal;
+  int   *etowid_phi, *etowid_eta, *etowid, *etownum, *etow_towidx, *etow_jetidx;
+  float *etowet, *etoweta, *etowphi, *etowe;
 };
 
 #endif
