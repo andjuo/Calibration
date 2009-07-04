@@ -45,7 +45,7 @@
 
 class NJet {
 public:
-  NJet(){}; 
+  NJet() : kjMAX(50), kMAX(10000) {}; 
   ~NJet(){}; 
 
   void setup(const edm::ParameterSet&, TTree*);
@@ -62,10 +62,23 @@ private:
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
 
-  //tree variables
-  int   NobjJet, NobjGJet;
-  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
+  //tree variables:
+  const int kjMAX;     // Max number of jets stored in an event
+  const int kMAX;      // Max number of towers stored in an event
+
+
+  // Calo jets
+  int    NobjJet;
+  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;
+  float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
+
+  // Gen jets matched to calo jets
   float *genjetpt, *genjetphi, *genjeteta, *genjetet, *genjete;
+
+  // Gen jet collection
+  int    NobjGenJet;
+  float *genjetcolpt, *genjetcolphi, *genjetcoleta, *genjetcolet, *genjetcole;
+  int   *genjetcol_jet_idx;
 
   //duplicated for ALGO and PHYS Def
   float *genpartpt_algo, *genpartphi_algo, *genparteta_algo, *genpartet_algo, *genparte_algo, *genpartm_algo;
