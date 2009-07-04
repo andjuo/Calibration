@@ -121,9 +121,10 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
 
     for( reco::GenJetCollection::const_iterator genJet = genJets->begin(); genJet != genJets->end(); ++genJet)
       {
-	DeltaREtemp = deltaR(genJet->eta() , genJet->phi() , (*pWJets)[jtno].eta() , (*pWJets)[jtno].phi() );
-	DeltaREtemp *= DeltaREtemp; 
- 	DeltaREtemp += fabs((genJet->et() - (*pWJets)[jtno].et())/ genJet->et())
+	DeltaREtemp = deltaR( genJet->eta(),         genJet->phi(),
+			     (*pWJets)[jtno].eta(), (*pWJets)[jtno].phi() );
+	//	DeltaREtemp *= DeltaREtemp; 
+ 	//DeltaREtemp += fabs((genJet->et() - (*pWJets)[jtno].et())/ genJet->et())
 	  * fabs((genJet->et() - (*pWJets)[jtno].et())/ genJet->et());
 	if(DeltaREtemp < DeltaRE)
 	  {
