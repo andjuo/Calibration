@@ -116,19 +116,16 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
     double gjeta = 0;
     double gjet = 0;
     double gje = 0;
-    double DeltaRE = 1000;
-    double DeltaREtemp = 0;
+    double DeltaR = 1000;
+    double DeltaRtemp = 0;
 
     for( reco::GenJetCollection::const_iterator genJet = genJets->begin(); genJet != genJets->end(); ++genJet)
       {
-	DeltaREtemp = deltaR( genJet->eta(),         genJet->phi(),
-			     (*pWJets)[jtno].eta(), (*pWJets)[jtno].phi() );
-	//	DeltaREtemp *= DeltaREtemp; 
- 	//DeltaREtemp += fabs((genJet->et() - (*pWJets)[jtno].et())/ genJet->et())
-	  * fabs((genJet->et() - (*pWJets)[jtno].et())/ genJet->et());
-	if(DeltaREtemp < DeltaRE)
+	DeltaRtemp = deltaR(genJet->eta(), genJet->phi(),
+			    (*pWJets)[jtno].eta(), (*pWJets)[jtno].phi() );
+	if(DeltaRtemp < DeltaR)
 	  {
-	    DeltaRE = DeltaREtemp;
+	    DeltaR = DeltaRtemp;
 	    gjpt  = genJet->pt();
 	    gjphi = genJet->phi();
 	    gjeta = genJet->eta();
@@ -178,19 +175,16 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
     double gjeta = 0;
     double gjet = 0;
     double gje = 0;
-    double DeltaRE = 1000;
-    double DeltaREtemp = 0;
+    double DeltaR = 1000;
+    double DeltaRtemp = 0;
 
     for( reco::GenJetCollection::const_iterator genJet = genJets->begin(); genJet != genJets->end(); ++genJet)
       {
-	DeltaREtemp = deltaR(genJet->eta() , genJet->phi(),
-			     (*pBJets)[jtno-pWJets->size()].eta() , (*pBJets)[jtno-pWJets->size()].phi() );
-	DeltaREtemp *= DeltaREtemp; 
- 	DeltaREtemp += fabs((genJet->et() - (*pBJets)[jtno-pWJets->size()].et())/ genJet->et())
-	  * fabs((genJet->et() - (*pBJets)[jtno-pWJets->size()].et())/ genJet->et());
-	if(DeltaREtemp < DeltaRE)
+	DeltaRtemp = deltaR(genJet->eta(), genJet->phi(),
+			    (*pBJets)[jtno-pWJets->size()].eta() , (*pBJets)[jtno-pWJets->size()].phi() );
+	if(DeltaRtemp < DeltaR)
 	  {
-	    DeltaRE = DeltaREtemp;
+	    DeltaR = DeltaRtemp;
 	    gjpt  = genJet->pt();
 	    gjphi = genJet->phi();
 	    gjeta = genJet->eta();
