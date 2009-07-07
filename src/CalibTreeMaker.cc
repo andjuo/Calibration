@@ -10,6 +10,7 @@ CalibTreeMaker::CalibTreeMaker(const edm::ParameterSet& cfg)
   _PJTreeName  = cfg.getParameter<std::string>("PhotonJetTreeName" );
   _JJTreeName  = cfg.getParameter<std::string>("DiJetTreeName");
   _JJJTreeName = cfg.getParameter<std::string>("TriJetTreeName");
+  _TopTreeName = cfg.getParameter<std::string>("TopTreeName");
   _ZJTreeName  = cfg.getParameter<std::string>("ZJetTreeName" );
 
   //select
@@ -17,6 +18,7 @@ CalibTreeMaker::CalibTreeMaker(const edm::ParameterSet& cfg)
   writeTrackTower_= cfg.getParameter<bool>("WriteTrackTowerTree");
   writeDiJet_     = cfg.getParameter<bool>("WriteDiJetTree");
   writeTriJet_    = cfg.getParameter<bool>("WriteTriJetTree");
+  writeTop_       = cfg.getParameter<bool>("WriteTopTree");
   writeZJet_      = cfg.getParameter<bool>("WriteZJetTree");
 
   //open tree file
@@ -39,6 +41,10 @@ CalibTreeMaker::CalibTreeMaker(const edm::ParameterSet& cfg)
   if (writeTriJet_){
     TriJetTree      = new TTree(_JJJTreeName.c_str(),"");
     TriJet_analysis_.setup( cfg, TriJetTree );
+  }
+  if (writeTop_){ 	 
+    TopTree      = new TTree(_TopTreeName.c_str(),""); 	 
+    Top_analysis_.setup( cfg, TopTree ); 	 
   }
   if( writeZJet_){
     ZJetTree   = new TTree(_ZJTreeName.c_str(),"");
@@ -68,6 +74,9 @@ void CalibTreeMaker::analyze(const edm::Event& evt, const edm::EventSetup& setup
   if (writeTriJet_){
     TriJet_analysis_.analyze(evt, setup, TriJetTree);
   }
+  if (writeTop_){ 	 
+    Top_analysis_.analyze(evt, setup, TopTree); 	 
+  }
   if( writeZJet_){
     zjet_analysis_.analyze(evt, setup, ZJetTree);
   }
@@ -96,6 +105,10 @@ void CalibTreeMaker::endJob()
     TriJetTree->Write();
     delete TriJetTree;
   } 
+  if(writeTop_){ 	 
+    TopTree->Write(); 	 
+    delete TopTree; 	 
+  }
   if( writeZJet_){
     ZJetTree->Write();
     delete ZJetTree;
