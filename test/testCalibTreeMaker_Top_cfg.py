@@ -6,11 +6,16 @@ process = cms.Process("Calib")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.MessageLogger.cerr.threshold = 'INFO'
-#process.MessageLogger.categories.append('TtSemiLeptonicEvent')
-process.MessageLogger.cerr.INFO = cms.untracked.PSet(
-    default             = cms.untracked.PSet( limit = cms.untracked.int32( 0) ),
-#    TtSemiLeptonicEvent = cms.untracked.PSet( limit = cms.untracked.int32(-1) ),
+process.MessageLogger.categories.append('TtSemiLeptonicEvent')
+process.MessageLogger.categories.append('JetPartonMatching')
+process.MessageLogger.cerr.TtSemiLeptonicEvent = cms.untracked.PSet(
+    limit = cms.untracked.int32(10)
 )
+process.MessageLogger.cerr.JetPartonMatching = cms.untracked.PSet(
+    limit = cms.untracked.int32(10)
+)
+
+#process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 #
 # Define input source
@@ -61,8 +66,22 @@ process.ttSemiLepJetPartonMatch.algorithm  = 'unambiguousOnly'
 process.ttSemiLepJetPartonMatch.useMaxDist = True
 process.ttSemiLepJetPartonMatch.maxDist    = 0.3
 process.ttSemiLepJetPartonMatch.maxNJets   = 5
+process.ttSemiLepJetPartonMatch.partonsToIgnore = ["HadB", "LepB"]
 # For debugging
-process.ttSemiLepEvent.verbosity = 0
+process.ttSemiLepJetPartonMatch.verbosity = 1
+process.ttSemiLepEvent.verbosity = 1
+
+#
+# Switch jet collection to sisCone5CaloJets
+#
+from PhysicsTools.PatAlgos.tools.jetTools import *
+switchJetCollection(process, 
+        cms.InputTag('sisCone5CaloJets'), # Jet collection; must be already in the event when patDefaultSequence is executed
+        doJTA=True,                       # Run Jet-Track association & JetCharge
+        doBTagging=True,                  # Run b-tagging
+        jetCorrLabel=('SC5','Calo'),      # Example jet correction name; set to None for no JEC
+        doType1MET=True,                  # Recompute Type1 MET using these jets
+        genJetCollection=cms.InputTag("sisCone5GenJets"))
 
 #
 # Choose name of output file
