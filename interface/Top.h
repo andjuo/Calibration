@@ -5,17 +5,15 @@
 #include <vector>
 #include <iostream>
 
-#include "TFile.h"
-#include "TNamed.h"
 #include "TChain.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "DataFormats/JetReco/interface/GenJet.h"
+
 #include "DataFormats/JetReco/interface/CaloJet.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 class Top {
 public:
@@ -26,11 +24,18 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
+
+  void fillRecJet(const reco::Jet& recJet, const unsigned int jtno, const unsigned int flavor, const unsigned int topid);
+  void fillTowers(const std::vector<CaloTowerPtr> &towers, unsigned int &towno, const unsigned int jtno);
+  void fillCorrFactors(const pat::Jet &jet, const unsigned int jtno, const std::string &flavor);
+  void fillGenJet(const reco::GenJetCollection &genJets, const reco::Jet& recJet, const unsigned int jtno);
+
   edm::InputTag wjets_, bjets_, genjets_, weight_tag;
 
   //tree variables
   int   NobjJet, *jetflavor, *jettopid;
   float *jetpt, *jetphi, *jeteta, *jetet, *jete;
+  float *jscaleL1, *jscaleL2, *jscaleL3, *jscaleL4, *jscaleL5;
   float *genjetpt, *genjetphi, *genjeteta, *genjetet, *genjete;
   int   NobjTow;
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
