@@ -45,8 +45,8 @@
 
 class NJet {
 public:
-  NJet() : kjMAX(50), kMAX(10000) {}; 
-  ~NJet(){}; 
+  NJet(); 
+  ~NJet(); 
 
   void setup(const edm::ParameterSet&, TTree*);
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
@@ -58,13 +58,13 @@ private:
   edm::InputTag genEvtScale_;
   double conesize_;
   float weight_;
-  bool writeEcalCells;
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
 
   //tree variables:
-  const int kjMAX;     // Max number of jets stored in an event
-  const int kMAX;      // Max number of towers stored in an event
+  const int kjMAX;               // Max number of jets stored in an event
+  const int kMAX;                // Max number of towers stored in an event
+  const int kMaxStableGenPart_;  // Max number of stable gen particles stored in an event
 
 
   // Calo jets
@@ -103,9 +103,22 @@ private:
   float genEvtScale;
 
   // ECAL cells
+  bool  writeEcalCells;
   int   NobjETowCal;
   int   *etowid_phi, *etowid_eta, *etowid, *etownum, *etow_towidx, *etow_jetidx;
   float *etowet, *etoweta, *etowphi, *etowe;
+
+  // Stable gen particles
+  bool    writeStableGenPart_;
+  int     NobjStableGenPart_;
+  float * stableGenPartM_;
+  float * stableGenPartE_;
+  float * stableGenPartEt_;
+  float * stableGenPartP_;
+  float * stableGenPartPt_;
+  float * stableGenPartEta_;
+  float * stableGenPartPhi_;
+  int   * stableGenPartPDGId_;
 };
 
 #endif

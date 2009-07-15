@@ -75,7 +75,8 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     Top_Weight     = cms.double(1.),
     Top_Weight_Tag = cms.InputTag("MyTop_Weight_Tag"),
 
-    WriteEcalCells = cms.bool(False),
+    WriteEcalCells          = cms.bool(False),
+    WriteStableGenParticles = cms.bool(False),                             
                                   
     WritePhotonJetTree  = cms.bool(False),
     WriteDiJetTree      = cms.bool(False),
