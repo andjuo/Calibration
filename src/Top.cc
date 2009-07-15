@@ -223,10 +223,10 @@ void Top::fillCorrFactors(const pat::Jet &jet, const unsigned int jtno, const st
 
   if( jet.hasCorrFactors() ) {
     jscaleL1[jtno] = jet.corrFactor("off");
-    jscaleL2[jtno] = jet.corrFactor("rel");
-    jscaleL3[jtno] = jet.corrFactor("abs");
-    jscaleL4[jtno] = jet.corrFactor("emf");
-    jscaleL5[jtno] = jet.corrFactor("had", flavor);
+    jscaleL2[jtno] = jet.corrFactor("rel")/jet.corrFactor("off");
+    jscaleL3[jtno] = jet.corrFactor("abs")/jet.corrFactor("rel");
+    jscaleL4[jtno] = jet.corrFactor("emf")/jet.corrFactor("abs");
+    jscaleL5[jtno] = jet.corrFactor("had", flavor)/jet.corrFactor("emf");
   }
 
 }
