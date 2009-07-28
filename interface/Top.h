@@ -28,9 +28,9 @@ private:
   void fillRecJet(const reco::Jet& recJet, const unsigned int jtno, const unsigned int flavor, const unsigned int topid);
   void fillTowers(const std::vector<CaloTowerPtr> &towers, unsigned int &towno, const unsigned int jtno);
   void fillCorrFactors(const pat::Jet &jet, const unsigned int jtno, const std::string &flavor);
-  void fillGenJet(const reco::GenJetCollection &genJets, const reco::Jet& recJet, const unsigned int jtno);
+  void fillGenJet(const reco::GenJet &genJet, const unsigned int jtno);
 
-  edm::InputTag wjets_, bjets_, genjets_, weight_tag;
+  edm::InputTag wjets_, bjets_, wgenjets_, bgenjets_, weight_tag;
 
   //tree variables
   int   NobjJet, *jetflavor, *jettopid;

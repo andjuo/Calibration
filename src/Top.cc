@@ -1,12 +1,11 @@
 #include "Calibration/CalibTreeMaker/interface/Top.h"
 
-#include "DataFormats/Math/interface/deltaR.h"
-
 void Top::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
   bjets_     = cfg.getParameter<edm::InputTag> ("TopHadBJets");
   wjets_     = cfg.getParameter<edm::InputTag> ("TopHadWJets");
-  genjets_   = cfg.getParameter<edm::InputTag> ("Top_GenJets");
+  bgenjets_  = cfg.getParameter<edm::InputTag> ("TopHadBGenJets");
+  wgenjets_  = cfg.getParameter<edm::InputTag> ("TopHadWGenJets");
   weight     = (float)(cfg.getParameter<double>("Top_Weight"));
   weight_tag = cfg.getParameter<edm::InputTag> ("Top_Weight_Tag");
 
@@ -101,8 +100,11 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
   edm::Handle<edm::View<reco::Jet> > pWJets;
   evt.getByLabel(wjets_, pWJets);
 
-  edm::Handle<reco::GenJetCollection> genJets;
-  evt.getByLabel(genjets_, genJets);
+  edm::Handle<std::vector<reco::GenJet> > pBGenJets;
+  evt.getByLabel(bgenjets_, pBGenJets);
+
+  edm::Handle<std::vector<reco::GenJet> > pWGenJets;
+  evt.getByLabel(wgenjets_, pWGenJets);
 
   // need 2*n W-jets and n B-jets, where n is the number of hypotheses
   if (pWJets->size()%2!=0 || pWJets->size()%pBJets->size()!=0)
@@ -120,7 +122,7 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
 
     // GenJets for W-jets
 
-    fillGenJet(*genJets, (*pWJets)[jtno], jtno);
+    fillGenJet( (*pWGenJets)[jtno], jtno);
 
     if( dynamic_cast<const reco::CaloJet*>( &((*pWJets)[jtno]) ) ) {
 
@@ -155,8 +157,8 @@ void Top::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* Ca
     fillRecJet( (*pBJets)[jtno-pWJets->size()], jtno, 3, jtno-pWJets->size() );
 
     // GenJets for b-jets
-
-    fillGenJet(*genJets, (*pBJets)[jtno-pWJets->size()], jtno);
+    
+    fillGenJet( (*pBGenJets)[jtno-pWJets->size()], jtno);
 
     if( dynamic_cast<const reco::CaloJet*>( &((*pBJets)[jtno-pWJets->size()]) ) ) {
     
@@ -231,36 +233,12 @@ void Top::fillCorrFactors(const pat::Jet &jet, const unsigned int jtno, const st
 
 }
 
-void Top::fillGenJet(const reco::GenJetCollection &genJets, const reco::Jet& recJet, const unsigned int jtno) {
-  
-  double gjpt   = 0;
-  double gjphi  = 0;
-  double gjeta  = 0;
-  double gjet   = 0;
-  double gje    = 0;
-  double dR     = 1000;
-  double dRtemp = 0;
+void Top::fillGenJet(const reco::GenJet &genJet, const unsigned int jtno) {
 
-  for(reco::GenJetCollection::const_iterator genJet = genJets.begin(); genJet != genJets.end(); ++genJet) {
-
-    dRtemp = deltaR(genJet->eta(), genJet->phi(),
-		    recJet.eta() , recJet.phi() );
-
-    if(dRtemp < dR) {
-      dR    = dRtemp;
-      gjpt  = genJet->pt();
-      gjphi = genJet->phi();
-      gjeta = genJet->eta();
-      gjet  = genJet->et();
-      gje   = genJet->energy();
-    }
-
-  }
-
-  genjetpt [jtno] = gjpt;
-  genjetphi[jtno] = gjphi;
-  genjeteta[jtno] = gjeta;
-  genjetet [jtno] = gjet;
-  genjete  [jtno] = gje;
+  genjetpt [jtno] = genJet.pt();
+  genjetphi[jtno] = genJet.phi();
+  genjeteta[jtno] = genJet.eta();
+  genjetet [jtno] = genJet.et();
+  genjete  [jtno] = genJet.energy();
 
 }
