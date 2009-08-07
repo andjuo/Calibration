@@ -5,12 +5,12 @@ process = cms.Process("Calib")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold             = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-  '/store/mc/Summer08/HerwigQCDPt300/GEN-SIM-RECO/IDEAL_V9_v1/0006/FE2897B5-C0A5-DD11-8F25-00145E552591.root'
+    '/store/mc/Summer09/QCD_Pt30/AODSIM/MC_31X_V3_AODSIM-v1/0013/FCBF7961-9C82-DE11-8B5B-0030487CAB55.root'
             )
                             )
 
@@ -20,7 +20,7 @@ process.maxEvents = cms.untracked.PSet(
 from RecoJets.Configuration.RecoJetAssociations_cff import *
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.StandardSequences.FakeConditions_cff")
+#process.load("Configuration.StandardSequences.FakeConditions_cff")
 process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
@@ -71,12 +71,12 @@ process.load("Calibration.CalibTreeMaker.ZSPsisCone5JTA_cff")
 
 #############   Define the L2 correction service #####
 process.L2JetCorrector = cms.ESSource("L2RelativeCorrectionService",
-                                      tagName = cms.string('Summer08_L2Relative_SC5Calo'),
+                                      tagName = cms.string('Winter09_L2Relative_SC5Calo'),
                                       label = cms.string('L2RelativeJetCorrector')
                                       )
 #############   Define the L3 correction service #####
 process.L3JetCorrector = cms.ESSource("L3AbsoluteCorrectionService", 
-                                      tagName = cms.string('Summer08_L3Absolute_SC5Calo'),
+                                      tagName = cms.string('Winter09_L3Absolute_SC5Calo'),
                                       label = cms.string('L3AbsoluteJetCorrector')
                                       )
 #process.L2JetCorrectorSC5PF= cms.ESSource("L2RelativeCorrectionService", 
@@ -133,10 +133,9 @@ process.prefer("L2JetCorrector")
 
 ###  Parameters for module calibTreeMaker
 process.calibTreeMaker.WriteDiJetTree          = True
-process.calibTreeMaker.WriteEcalCells          = False
 process.calibTreeMaker.WriteStableGenParticles = False
 
-process.calibTreeMaker.OutputFile         = 'DiJet_test.root'
+process.calibTreeMaker.OutputFile         = 'Summer09_QCD_Pt30.root'
 
 process.calibTreeMaker.DiJetTreeName      = 'DiJetTree'
 process.calibTreeMaker.GenEventScaleLabel = 'genEventScale'
@@ -149,15 +148,13 @@ process.calibTreeMaker.NJet_MET          = 'met'
 process.calibTreeMaker.NJetRecTracks     = 'generalTracks'
 process.calibTreeMaker.NJetRecMuons      = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
 process.calibTreeMaker.NJetConeSize      = 0.5
-process.calibTreeMaker.NJet_Weight_Tag   = 'Summer08WeightProducer:weight' #'genEventWeight'
+process.calibTreeMaker.NJet_Weight_Tag   = 'genEventWeight'
 process.calibTreeMaker.NJet_Weight       = 1
 
 
-process.genEventFilter.GenEventScaleMax  = 15.
-
+process.p1 = cms.Path( process.dump )
 process.p2 = cms.Path( process.ZSPJetCorrections
                        * process.ZSPsisCone5JTA
-                       * process.Summer08WeightProducer
                        * process.myPartons
                        * process.CaloJetPartonMatching
                        * process.calibTreeMaker)
