@@ -261,7 +261,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   const CaloJet calojet = *jet->begin();
   const GenJet genjet = *genJet->begin();
   const GenParticle  genz = *genZ->begin(); 
-  const GenParticle  Z = *z->begin(); 
+  const GenParticle  Z;//*z->begin(); 
   const CaloMETCollection& recmets = *met; 
 
   /*
@@ -464,11 +464,11 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   jgenet  = genjet.et();
   jgene   = genjet.energy();
  
-  zpt  = Z.pt();
-  zphi = Z.phi();
-  zeta = Z.eta();
-  zet  = Z.et();
-  ze   = Z.energy();
+//   zpt  = Z.pt();
+//   zphi = Z.phi();
+//   zeta = Z.eta();
+//   zet  = Z.et();
+//   ze   = Z.energy();
  
   gzpt  = genz.pt();
   gzphi = genz.phi();
@@ -587,7 +587,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	  for(edm::OwnVector<reco::PFBlockElement>::const_iterator pfElement = MyPFBlockElements.begin(); pfElement != MyPFBlockElements.end();++pfElement) {
 	    ++clusternumber;
 	    if(TrackBlock != pfBlock)  continue;
-	    double temp =  pfBlock->dist(PFTrackIndex, pfElement->index(),pfBlock->linkData(),reco::PFBlock::LINKTEST_CHI2); 
+	    double temp = 100;// pfBlock->dist(PFTrackIndex, pfElement->index(),pfBlock->linkData(),reco::PFBlock::LINKTEST_CHI2); 
 	    if(temp>-1)
 	      {	    
 	      dist = temp;
@@ -683,12 +683,12 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       bool muonMatch = false;
       for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
 	//for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-	if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
-	double dRm = deltaR(*im,*it);
-	double dE = fabs( (im->pt()-it->pt())/it->pt() );
-	muDR[iTrack] = dRm;
-	muDE[iTrack] = dE;
-	if (dRm<0.1 && dE < 0.2) muonMatch = true;
+// 	if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
+// 	double dRm = deltaR(*im,*it);
+// 	double dE = fabs( (im->pt()-it->pt())/it->pt() );
+// 	muDR[iTrack] = dRm;
+// 	muDE[iTrack] = dE;
+// 	if (dRm<0.1 && dE < 0.2) muonMatch = true;
       }
       if (muonMatch) {
 	trackid[iTrack] = 13;

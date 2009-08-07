@@ -430,15 +430,15 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
       muDR[iTrack] = -1;
       muDE[iTrack] = -1;
       bool muonMatch = false;
-      for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-	//for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-	if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
-	double dRm = deltaR(*im,*it);
-	double dE = fabs( (im->pt()-it->pt())/it->pt() );
-	muDR[iTrack] = dRm;
-	muDE[iTrack] = dE;
-	if (dRm<0.1 && dE < 0.2) muonMatch = true;
-      }
+//       for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+// 	//for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+// 	if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
+// 	double dRm = deltaR(*im,*it);
+// 	double dE = fabs( (im->pt()-it->pt())/it->pt() );
+// 	muDR[iTrack] = dRm;
+// 	muDE[iTrack] = dE;
+// 	if (dRm<0.1 && dE < 0.2) muonMatch = true;
+//       }
       if (muonMatch) {
 	trackid[iTrack] = 13;
       } else {

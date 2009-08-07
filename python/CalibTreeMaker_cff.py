@@ -7,7 +7,7 @@ from Calibration.CalibSamples.TriJetSample_cff import *
 #from Calibration.CalibSamples.TopSample_cff import *
 from Calibration.CalibSamples.ZJetSample_cff import *
 from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
-from Weights.Summer08WeightProducer.summer08weightproducer_cfi import *
+#from Weights.Summer08WeightProducer.summer08weightproducer_cfi import *
 
 photonJetInput     = cms.Sequence(selectedPhotonJetSample)
 trackTowerInput    = cms.Sequence(selectedTrackTowerSample)
