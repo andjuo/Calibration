@@ -3,6 +3,7 @@
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 
 
+
 NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
   // CaloTower branches for all jets
   NobjTow    = 0;
@@ -290,33 +291,33 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "Tow_jetidx",tow_jetidx, "Tow_jetidx[NobjTow]/I");
 
   // track branches
-//   CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
-//   CalibTree->Branch( "TrackTowId", tracktowid, "TrackTowId[NobjTrack]/I" );
-//   CalibTree->Branch( "TrackTowIdPhi", tracktowidphi, "TrackTowIdPhi[NobjTrack]/I" );
-//   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
-//   CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
-//   CalibTree->Branch( "TrackNHits", tracknhits, "TrackNHits[NobjTrack]/I" );
-//   CalibTree->Branch( "TrackQualityL",trackQualityL,"TrackQualityL[NobjTrack]/O");
-//   CalibTree->Branch( "TrackQualityT",trackQualityT,"TrackQualityT[NobjTrack]/O");
-//   CalibTree->Branch( "TrackQualityHP",trackQualityHP,"TrackQualityHP[NobjTrack]/O");
-//   CalibTree->Branch( "TrackChi2",  trackchi2,  "TrackChi2[NobjTrack]/F"  );
-//   CalibTree->Branch( "TrackPt",    trackpt,    "TrackPt[NobjTrack]/F"    );
-//   CalibTree->Branch( "TrackEta",   tracketa,   "TrackEta[NobjTrack]/F"   );
-//   CalibTree->Branch( "TrackPhi",   trackphi,   "TrackPhi[NobjTrack]/F"   );
-//   CalibTree->Branch( "TrackP" ,    trackp,     "TrackP[NobjTrack]/F"     );
-//   CalibTree->Branch( "TrackDR" ,   trackdr,    "TrackDR[NobjTrack]/F"    );
-//   CalibTree->Branch( "TrackPhiOut",trackphiout,"TrackPhiout[NobjTrack]/F");
-//   CalibTree->Branch( "TrackEtaOut",tracketaout,"TrackEtaout[NobjTrack]/F");
-//   CalibTree->Branch( "TrackDROut", trackdrout, "TrackDRout[NobjTrack]/F" );
-//   CalibTree->Branch( "TrackEMC1",  trackemc1,  "TrackEMC1[NobjTrack]/F"  );
-//   CalibTree->Branch( "TrackEMC3",  trackemc3,  "TrackEMC3[NobjTrack]/F"  );
-//   CalibTree->Branch( "TrackEMC5",  trackemc5,  "TrackEMC5[NobjTrack]/F"  );
-//   CalibTree->Branch( "TrackHAC1",  trackhac1,  "TrackHAC1[NobjTrack]/F"  );
-//   CalibTree->Branch( "TrackHAC3",  trackhac3,  "TrackHAC3[NobjTrack]/F"  );
-//   CalibTree->Branch( "TrackHAC5",  trackhac5,  "TrackHAC5[NobjTrack]/F"  );
-//   CalibTree->Branch( "Track_jetidx",track_jetidx, "Track_jetidx[NobjTrack]/I");
-//   CalibTree->Branch( "MuDR", muDR,  "MuDR[NobjTrack]/F"  );
-//   CalibTree->Branch( "MuDE", muDE,  "MuDE[NobjTrack]/F"  );
+   CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
+   CalibTree->Branch( "TrackTowId", tracktowid, "TrackTowId[NobjTrack]/I" );
+   CalibTree->Branch( "TrackTowIdPhi", tracktowidphi, "TrackTowIdPhi[NobjTrack]/I" );
+   CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
+   CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
+   CalibTree->Branch( "TrackNHits", tracknhits, "TrackNHits[NobjTrack]/I" );
+   CalibTree->Branch( "TrackQualityL",trackQualityL,"TrackQualityL[NobjTrack]/O");
+   CalibTree->Branch( "TrackQualityT",trackQualityT,"TrackQualityT[NobjTrack]/O");
+   CalibTree->Branch( "TrackQualityHP",trackQualityHP,"TrackQualityHP[NobjTrack]/O");
+   CalibTree->Branch( "TrackChi2",  trackchi2,  "TrackChi2[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackPt",    trackpt,    "TrackPt[NobjTrack]/F"    );
+   CalibTree->Branch( "TrackEta",   tracketa,   "TrackEta[NobjTrack]/F"   );
+   CalibTree->Branch( "TrackPhi",   trackphi,   "TrackPhi[NobjTrack]/F"   );
+   CalibTree->Branch( "TrackP" ,    trackp,     "TrackP[NobjTrack]/F"     );
+   CalibTree->Branch( "TrackDR" ,   trackdr,    "TrackDR[NobjTrack]/F"    );
+   CalibTree->Branch( "TrackPhiOut",trackphiout,"TrackPhiout[NobjTrack]/F");
+   CalibTree->Branch( "TrackEtaOut",tracketaout,"TrackEtaout[NobjTrack]/F");
+   CalibTree->Branch( "TrackDROut", trackdrout, "TrackDRout[NobjTrack]/F" );
+   CalibTree->Branch( "TrackEMC1",  trackemc1,  "TrackEMC1[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackEMC3",  trackemc3,  "TrackEMC3[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackEMC5",  trackemc5,  "TrackEMC5[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackHAC1",  trackhac1,  "TrackHAC1[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackHAC3",  trackhac3,  "TrackHAC3[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackHAC5",  trackhac5,  "TrackHAC5[NobjTrack]/F"  );
+   CalibTree->Branch( "Track_jetidx",track_jetidx, "Track_jetidx[NobjTrack]/I");
+   CalibTree->Branch( "MuDR", muDR,  "MuDR[NobjTrack]/F"  );
+   CalibTree->Branch( "MuDE", muDE,  "MuDE[NobjTrack]/F"  );
 
   //All calo jets
   CalibTree->Branch( "NobjJet",            &NobjJet,         "NobjJet/I"             );
@@ -424,6 +425,11 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   edm::Handle<JetMatchedPartonsCollection> matchedParticleMap;
   evt.getByLabel("CaloJetPartonMatching", matchedParticleMap); 
 
+  //3_1_X
+  //edm::ESHandle<TrackerGeometry> theG;
+  //setup.get<TrackerDigiGeometryRecord>().get(theG);
+
+
   // get calo jet after zsp collection
   edm::Handle<CaloJetCollection> zspJets;
   evt.getByLabel(zspJets_, zspJets);
@@ -443,9 +449,9 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
-//   const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname, setup); //Define the jet corrector
-//   const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name, setup); //Define the jet corrector
-//   const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname, setup); //Define the jet corrector
+  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname, setup); //Define the jet corrector
   //const JetCorrector* correctorL2L3PFlow  = JetCorrector::getJetCorrector (l2l3PFlowname, setup); //Define the jet corrector
 
   NobjTow=0;
@@ -469,18 +475,18 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     // L2L3 correction
     jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
     jscalel3[jtno]   = correctorL3  ->correction( jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
-    //    jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno].p4());  //calculate the correction
+    jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno].p4());  //calculate the correction
 
 
-//     // JPT correction (uses ZSP corrected jets)
-//     for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
-//       if( deltaR(zspJet->eta(),zspJet->phi(),(*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
-// 	  {
-// 	    jscaleZSP[jtno]     = zspJet->et()/ (*pJets)[jtno].et();
-// 	    jscaleJPT[jtno]     = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
-// 	    jscalel2l3JPT[jtno] = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT[jtno] );  //calculate the correction
-// 	  }
-//       }
+   // JPT correction (uses ZSP corrected jets)
+     for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
+       if( deltaR(zspJet->eta(),zspJet->phi(),(*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
+ 	  {
+ 	    jscaleZSP[jtno]     = zspJet->et()/ (*pJets)[jtno].et();
+ 	    jscaleJPT[jtno]     = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
+ 	    jscalel2l3JPT[jtno] = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT[jtno] );  //calculate the correction
+ 	  }
+       }
 
 
 
@@ -625,92 +631,94 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 
 
   //Tracks
-//   edm::Handle<reco::TrackCollection> tracks;
-//   evt.getByLabel(recTracks_,tracks);
+   edm::Handle<reco::TrackCollection> tracks;
+   evt.getByLabel(recTracks_,tracks);
 
-//   //Muons
-//   edm::Handle<reco::MuonCollection> muons;
-//   //edm::Handle<reco::TrackCollection> muons;
-//   evt.getByLabel(recMuons_,muons);
+   //Muons
+   edm::Handle<reco::MuonCollection> muons;
+   //edm::Handle<reco::TrackCollection> muons;
+   evt.getByLabel(recMuons_,muons);
 
-//   // see here for detailed track cluster matching and jet track association
-//   //   -> CMSSW/TrackingTools/TrackAssociator/test/CaloMatchingExample.cc
+   // see here for detailed track cluster matching and jet track association
+   //   -> CMSSW/TrackingTools/TrackAssociator/test/CaloMatchingExample.cc
 
-//   int iTrack = 0;
-//   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
-//     // skip low Pt tracks
-//     if (it->pt() < 1) continue;
-//     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
+   int iTrack = 0;
+   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
+     // skip low Pt tracks
+     if (it->pt() < 1) continue;
+     //TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
-//     for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
-//       {
-// 	bool saveTrack = false;
-// 	double dRin   = deltaR(*it,(*pJets)[jtno]);
-// 	double outeta = info.trkGlobPosAtEcal.eta();
-// 	double outphi = info.trkGlobPosAtEcal.phi();
-// 	double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
-// 	if (dRin < conesize_ ) { //|| dRout < conesize_){
-// 	  saveTrack=true;
-// 	}
-// 	if (saveTrack){
-// 	  trackpt[iTrack]     = it->pt();
-// 	  tracketa[iTrack]    = it->eta();
-// 	  trackphi[iTrack]    = it->phi();
-// 	  trackp[iTrack]      = it->p();
-// 	  trackdr[iTrack]     = dRin;
-// 	  trackdrout[iTrack]  = dRout;
-// 	  tracketaout[iTrack] = outeta;
-// 	  trackphiout[iTrack] = outphi;
-// 	  trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
-// 	  trackemc3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1);
-// 	  trackemc5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2);
-// 	  trackhac1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0);
-// 	  trackhac3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1);
-// 	  trackhac5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2);
-// 	  DetId centerId = info.findMaxDeposition(TrackDetMatchInfo::HcalRecHits);
-// 	  HcalDetId HcalCenterId(centerId);
-// 	  tracktowidphi[iTrack] = HcalCenterId.iphi();
-// 	  tracktowideta[iTrack] = HcalCenterId.ieta();
-// 	  tracktowid[iTrack]    = centerId.rawId();
-// 	  track_jetidx[iTrack]  = jtno;
-//           trackchi2[iTrack]     = it->normalizedChi2();
-// 	  tracknhits[iTrack]    = it->numberOfValidHits();
+     for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
+       {
+ 	bool saveTrack = false;
+ 	double dRin   = deltaR(*it,(*pJets)[jtno]);
+	//double outeta = info.trkGlobPosAtEcal.eta();
+	//double outphi = info.trkGlobPosAtEcal.phi();
+ 	//double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
+ 	if (dRin < conesize_ ) { //|| dRout < conesize_){
+ 	  saveTrack=true;
+ 	}
+ 	if (saveTrack){
+ 	  trackpt[iTrack]     = it->pt();
+ 	  tracketa[iTrack]    = it->eta();
+ 	  trackphi[iTrack]    = it->phi();
+ 	  trackp[iTrack]      = it->p();
+ 	  trackdr[iTrack]     = dRin;
+	  /*
+ 	  trackdrout[iTrack]  = dRout;
+	  tracketaout[iTrack] = outeta;
+ 	  trackphiout[iTrack] = outphi;
+	  trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
+ 	  trackemc3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1);
+ 	  trackemc5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2);
+ 	  trackhac1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0);
+ 	  trackhac3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1);
+ 	  trackhac5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2);
+ 	  DetId centerId = info.findMaxDeposition(TrackDetMatchInfo::HcalRecHits);
+ 	  HcalDetId HcalCenterId(centerId);
+ 	  tracktowidphi[iTrack] = HcalCenterId.iphi();
+ 	  tracktowideta[iTrack] = HcalCenterId.ieta();
+ 	  tracktowid[iTrack]    = centerId.rawId();
+	  */
+ 	  track_jetidx[iTrack]  = jtno;
+	  trackchi2[iTrack]     = it->normalizedChi2();
+ 	  tracknhits[iTrack]    = it->numberOfValidHits();
 
    
-// 	  //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
-// 	  if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
-// 	  else  trackQualityL[iTrack] = false;
-// 	  if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
-// 	  else  trackQualityT[iTrack] = false;
-// 	  if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
-// 	  else  trackQualityHP[iTrack] = false;
-// 	  //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
-// 	  //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
-// 	  //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
-	  
-// 	  //Match track with muons
-// 	  muDR[iTrack] = -1;
-// 	  muDE[iTrack] = -1;
-// 	  bool muonMatch = false;
-// 	  for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-// 	    //for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-// 	    if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
-// 	    double dRm = deltaR(*im,*it);
-// 	    double dE = fabs( (im->pt()-it->pt())/it->pt() );
-// 	    muDR[iTrack] = dRm;
-// 	    muDE[iTrack] = dE;
-// 	    if (dRm<0.1 && dE < 0.2) muonMatch = true;
-// 	  }
-// 	  if (muonMatch) {
-// 	    trackid[iTrack] = 13;
-// 	  } else {
-// 	    trackid[iTrack] = 0;
-// 	  }
-// 	  ++iTrack;
-// 	}
-//       }
-//   }
-//   NobjTrack=iTrack;
+ 	  //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
+ 	  if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
+ 	  else  trackQualityL[iTrack] = false;
+ 	  if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
+ 	  else  trackQualityT[iTrack] = false;
+ 	  if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
+ 	  else  trackQualityHP[iTrack] = false;
+ 	  //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
+ 	  //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
+ 	  //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
+ 
+ 	  //Match track with muons
+ 	  muDR[iTrack] = -1;
+ 	  muDE[iTrack] = -1;
+ 	  bool muonMatch = false;
+ 	  for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+ 	    //for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+ 	    if(muon::isGoodMuon(*im, muon::AllGlobalMuons) && muon::isGoodMuon(*im, muon::TMLastStationLoose)) continue;
+ 	    double dRm = deltaR(*im,*it);
+ 	    double dE = fabs( (im->pt()-it->pt())/it->pt() );
+ 	    muDR[iTrack] = dRm;
+ 	    muDE[iTrack] = dE;
+ 	    if (dRm<0.1 && dE < 0.2) muonMatch = true;
+ 	  }
+ 	  if (muonMatch) {
+ 	    trackid[iTrack] = 13;
+ 	  } else {
+ 	    trackid[iTrack] = 0;
+ 	  }
+ 	  ++iTrack;
+ 	}
+       }
+   }
+   NobjTrack=iTrack;
 
 
 
