@@ -21,13 +21,35 @@ from RecoJets.Configuration.RecoJetAssociations_cff import *
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 #process.load("Configuration.StandardSequences.FakeConditions_cff")
-process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
+#process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
+process.load("Geometry.CommonDetUnit.globalTrackingGeometry_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi")
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
+
+
+#Test for 3_1_0
+process.load("Geometry.CommonDetUnit.globalTrackingGeometryDB_cfi")
+
+
+
+#hopefully not needed any more soon:
+#this is still old config code
+#include "CondCore/DBCommon/data/CondDBSetup_cfi"
+#es_source inertGlobalPositionRcd = PoolDBESSource {
+#    using CondDBSetup
+#    string connect = "sqlite_file:inertGlobalPositionRcd.db"
+#    VPSet toGet = {
+#        {
+#            string record = "GlobalPositionRcd"
+#            string tag = "inertGlobalPositionRcd"
+#        }
+#    }
+#}
+
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
@@ -83,41 +105,41 @@ process.L3JetCorrector = cms.ESSource("L3AbsoluteCorrectionService",
 #                                          tagName = cms.string('Summer08Redigi_L2Relative_SC5PF'),
 #                                          label = cms.string('L2RelativeJetCorrectorSC5PF')
 #)
-#process.L2JetCorrectorIC5JPT= cms.ESSource("L2RelativeCorrectionService", 
-#                                           tagName = cms.string('Summer08Redigi_L2Relative_IC5JPT'),
-#                                           label = cms.string('L2RelativeJetCorrectorIC5JPT')
-#)
-#process.L3JetCorrectorIC5JPT = cms.ESSource("L3AbsoluteCorrectionService", 
-#                                            tagName = cms.string('Summer08Redigi_L3Absolute_IC5JPT'),
-#                                            label = cms.string('L3AbsoluteJetCorrectorIC5JPT')
-#)
+process.L2JetCorrectorIC5JPT= cms.ESSource("L2RelativeCorrectionService", 
+                                           tagName = cms.string('Winter09_L2Relative_IC5JPT'),
+                                           label = cms.string('L2RelativeJetCorrectorIC5JPT')
+)
+process.L3JetCorrectorIC5JPT = cms.ESSource("L3AbsoluteCorrectionService", 
+                                            tagName = cms.string('Winter09_L3Absolute_IC5JPT'),
+                                            label = cms.string('L3AbsoluteJetCorrectorIC5JPT')
+)
 #process.L3JetCorrectorSC5PF = cms.ESSource("L3PFAbsoluteCorrectionService", 
 #                                           tagName = cms.string('Summer08Redigi_L3Absolute_SC5PF'),
 #                                           label = cms.string('L3AbsoluteJetCorrectorSC5PF')
 #)
-#process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
-#                                             tagName = cms.string('Summer08_L2Relative_SC5Calo'),
-#                                             label = cms.string('L2RelativeJetCorrectorSC5Calo')
-#)
-#process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
-#                                             tagName = cms.string('Summer08_L3Absolute_SC5Calo'),
-#                                             label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
-#)
+process.L2JetCorrectorSC5Calo = cms.ESSource("L2RelativeCorrectionService", 
+                                             tagName = cms.string('Winter09_L2Relative_SC5Calo'),
+                                             label = cms.string('L2RelativeJetCorrectorSC5Calo')
+)
+process.L3JetCorrectorSC5Calo = cms.ESSource("L3AbsoluteCorrectionService", 
+                                             tagName = cms.string('Winter09_L3Absolute_SC5Calo'),
+                                             label = cms.string('L3AbsoluteJetCorrectorSC5Calo')
+)
 
 
 
 
-#############   Define the L2+L3 correction service #####
-#process.L2L3JetCorrectorSC5Calo = cms.ESSource("JetCorrectionServiceChain",  
-#    correctors = cms.vstring('L2RelativeJetCorrectorSC5Calo','L3AbsoluteJetCorrectorSC5Calo'),
-#    label = cms.string('L2L3JetCorrectorSC5Calo') 
-#)
+############   Define the L2+L3 correction service #####
+process.L2L3JetCorrectorSC5Calo = cms.ESSource("JetCorrectionServiceChain",  
+    correctors = cms.vstring('L2RelativeJetCorrectorSC5Calo','L3AbsoluteJetCorrectorSC5Calo'),
+    label = cms.string('L2L3JetCorrectorSC5Calo') 
+)
 
-#############   Define the L2+L3 JPT correction service #####
-#process.L2L3JetCorrectorIC5JPT = cms.ESSource("JetCorrectionServiceChain",  
-#    correctors = cms.vstring('L2RelativeJetCorrectorIC5JPT','L3AbsoluteJetCorrectorIC5JPT'),
-#    label = cms.string('L2L3JetCorrectorIC5JPT') 
-#)
+############   Define the L2+L3 JPT correction service #####
+process.L2L3JetCorrectorIC5JPT = cms.ESSource("JetCorrectionServiceChain",  
+    correctors = cms.vstring('L2RelativeJetCorrectorIC5JPT','L3AbsoluteJetCorrectorIC5JPT'),
+    label = cms.string('L2L3JetCorrectorIC5JPT') 
+)
 
 
 #############   Define the L2+L3 PFlow correction service ####
@@ -135,7 +157,7 @@ process.prefer("L2JetCorrector")
 process.calibTreeMaker.WriteDiJetTree          = True
 process.calibTreeMaker.WriteStableGenParticles = False
 
-process.calibTreeMaker.OutputFile         = 'Summer09_QCD_Pt30.root'
+process.calibTreeMaker.OutputFile         = 'Summer09_QCD_Test.root'
 
 process.calibTreeMaker.DiJetTreeName      = 'DiJetTree'
 process.calibTreeMaker.GenEventScaleLabel = 'genEventScale'
