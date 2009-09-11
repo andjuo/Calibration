@@ -1,8 +1,7 @@
 #include "Calibration/CalibTreeMaker/interface/NJet.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
-
-
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
 
 NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
   // CaloTower branches for all jets
