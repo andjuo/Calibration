@@ -9,10 +9,10 @@ process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.categories.append('TtSemiLeptonicEvent')
 process.MessageLogger.categories.append('JetPartonMatching')
 process.MessageLogger.cerr.TtSemiLeptonicEvent = cms.untracked.PSet(
-    limit = cms.untracked.int32(0)
+    limit = cms.untracked.int32(100)
 )
 process.MessageLogger.cerr.JetPartonMatching = cms.untracked.PSet(
-    limit = cms.untracked.int32(0)
+    limit = cms.untracked.int32(100)
 )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
@@ -22,7 +22,7 @@ process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 #
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/mc/Fall08/TTJets-madgraph/GEN-SIM-RECO/IDEAL_V11_redigi_v10/0010/B493FB91-EA00-DE11-B852-00E081791899.root'
+    '/store/mc/Summer09/TTbar/AODSIM/MC_31X_V3_AODSIM-v1/0026/F2B6764A-6D89-DE11-8585-0018FEFAC384.root'
     )
 )
 
@@ -32,9 +32,10 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100) )
 
-process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.StandardSequences.FakeConditions_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
 
 #
 # Configuration for Top
@@ -42,20 +43,20 @@ process.load("Configuration.StandardSequences.FakeConditions_cff")
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_Top_cff")
 process.ttSemiLepJetPartonMatch.algorithm  = 'unambiguousOnly'
 process.ttSemiLepJetPartonMatch.useMaxDist = True
-process.ttSemiLepJetPartonMatch.maxDist    = 0.3
-process.ttSemiLepJetPartonMatch.maxNJets   = 5
+process.ttSemiLepJetPartonMatch.maxDist    = 0.5
+process.ttSemiLepJetPartonMatch.maxNJets   = -1
 process.ttSemiLepJetPartonMatch.partonsToIgnore = ["HadB", "LepB"]
 process.ttSemiLepGenJetPartonMatch.algorithm  = "unambiguousOnly"
 process.ttSemiLepGenJetPartonMatch.useMaxDist = True
-process.ttSemiLepGenJetPartonMatch.maxDist    = 0.3
-process.ttSemiLepGenJetPartonMatch.maxNJets   = 5
+process.ttSemiLepGenJetPartonMatch.maxDist    = 0.5
+process.ttSemiLepGenJetPartonMatch.maxNJets   = -1
 process.ttSemiLepGenJetPartonMatch.partonsToIgnore = ["HadB", "LepB"]
 
 #
 # Printout for debugging
 #
-process.ttSemiLepJetPartonMatch.verbosity = 100
-process.ttSemiLepGenJetPartonMatch.verbosity = 100
+process.ttSemiLepJetPartonMatch.verbosity = 1
+process.ttSemiLepGenJetPartonMatch.verbosity = 1
 process.ttSemiLepEvent.verbosity = 1
 
 #
@@ -69,17 +70,22 @@ setupEventSelection()
 #
 process.jetCorrFactors.sampleType = "ttbar" # dijet or ttbar
 
+## restrict input to AOD
+from PhysicsTools.PatAlgos.tools.coreTools import *
+restrictInputToAOD(process,['All'])
+
 #
-# Switch jet collection to sisCone5CaloJets
+# Switch jet collection to anti-kt
 #
 from PhysicsTools.PatAlgos.tools.jetTools import *
 switchJetCollection(process, 
-        cms.InputTag('sisCone5CaloJets'), # Jet collection; must be already in the event when patDefaultSequence is executed
-        doJTA=True,                       # Run Jet-Track association & JetCharge
-        doBTagging=True,                  # Run b-tagging
-        jetCorrLabel=('SC5','Calo'),      # Example jet correction name; set to None for no JEC
-        doType1MET=True,                  # Recompute Type1 MET using these jets
-        genJetCollection=cms.InputTag("sisCone5GenJets"))
+                    cms.InputTag('antikt5CaloJets'),   
+                    doJTA            = True,            
+                    doBTagging       = True,            
+                    jetCorrLabel     = ('AK5','Calo'),  
+                    doType1MET       = True,            
+                    genJetCollection = cms.InputTag("antikt5GenJets")
+                    ) 
 
 #
 # Choose name of output file
