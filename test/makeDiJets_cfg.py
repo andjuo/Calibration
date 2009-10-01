@@ -30,9 +30,12 @@ process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff") 
 
-#Test for 3_1_0
-process.load("Geometry.CommonDetUnit.globalTrackingGeometryDB_cfi")
+#Test for 3_1_X
+process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
+
+#process.load("Geometry.CommonDetUnit.globalTrackingGeometryDB_cfi")
 
 
 
@@ -157,7 +160,7 @@ process.prefer("L2JetCorrector")
 process.calibTreeMaker.WriteDiJetTree          = True
 process.calibTreeMaker.WriteStableGenParticles = False
 
-process.calibTreeMaker.OutputFile         = 'Summer09_QCD_Test.root'
+process.calibTreeMaker.OutputFile         = 'Summer09_QCDDiJet_0000To0015.root'
 
 process.calibTreeMaker.DiJetTreeName      = 'DiJetTree'
 process.calibTreeMaker.GenEventScaleLabel = 'genEventScale'
@@ -171,7 +174,8 @@ process.calibTreeMaker.NJetRecTracks     = 'generalTracks'
 process.calibTreeMaker.NJetRecMuons      = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
 process.calibTreeMaker.NJetConeSize      = 0.5
 process.calibTreeMaker.NJet_Weight_Tag   = 'genEventWeight'
-process.calibTreeMaker.NJet_Weight       = 1
+process.calibTreeMaker.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.8 (fuer 1mio ca 600000);   20-30: 21194.22 ;   50-80: 10193.66  ;    120-170: 469.1156 ;170-230: 89.325 ; 230-300:19.6624 ; 300-380: 5.1781 ; 380-470: 1.32352 ; 470-600: 0.43106 ; 600-800: 0.29169 ;  800-1k: 0.044800 ; 1k-1.4k: 0.010758 ; 1.4k-1.8k: 0.0007192 ; 1.8-2.2k: 0.000063557 ; 2.2k - 2.6k : 0.000005888; 2.6k-3k: 0.000000517 ; 3k-3.5k: 0.00000004 ; 3.5k-Inf: 0.000000001
+#Unfinished  15-20: 47035.54 ; 30-50: 8650.123 ; 80-120: 293.22
 
 
 process.p1 = cms.Path( process.dump )
