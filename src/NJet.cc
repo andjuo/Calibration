@@ -645,16 +645,16 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
    for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
      // skip low Pt tracks
      if (it->pt() < 1) continue;
-     //TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
+     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
      for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
        {
  	bool saveTrack = false;
  	double dRin   = deltaR(*it,(*pJets)[jtno]);
-	//double outeta = info.trkGlobPosAtEcal.eta();
-	//double outphi = info.trkGlobPosAtEcal.phi();
- 	//double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
- 	if (dRin < conesize_ ) { //|| dRout < conesize_){
+	double outeta = info.trkGlobPosAtEcal.eta();
+	double outphi = info.trkGlobPosAtEcal.phi();
+ 	double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
+ 	if (dRin < conesize_  || dRout < conesize_){
  	  saveTrack=true;
  	}
  	if (saveTrack){
@@ -663,8 +663,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
  	  trackphi[iTrack]    = it->phi();
  	  trackp[iTrack]      = it->p();
  	  trackdr[iTrack]     = dRin;
-	  /*
- 	  trackdrout[iTrack]  = dRout;
+	  trackdrout[iTrack]  = dRout;
 	  tracketaout[iTrack] = outeta;
  	  trackphiout[iTrack] = outphi;
 	  trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
@@ -678,8 +677,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
  	  tracktowidphi[iTrack] = HcalCenterId.iphi();
  	  tracktowideta[iTrack] = HcalCenterId.ieta();
  	  tracktowid[iTrack]    = centerId.rawId();
-	  */
- 	  track_jetidx[iTrack]  = jtno;
+	  track_jetidx[iTrack]  = jtno;
 	  trackchi2[iTrack]     = it->normalizedChi2();
  	  tracknhits[iTrack]    = it->numberOfValidHits();
 
