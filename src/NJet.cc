@@ -435,9 +435,10 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   reco::CaloJetCollection::const_iterator zspJet;
 
   // Get pthat
-//   edm::Handle<double> pthat;
-//   evt.getByLabel(genEvtScale_,pthat);
-  genEvtScale = 0.;//static_cast<float>(*pthat);
+  edm::Handle<double> pthat;
+  //  evt.getByLabel(genEvtScale_,pthat);
+  //  genEvtScale = static_cast<float>(*pthat);
+
 
   std::string l2name = "L2RelativeJetCorrector";
   std::string l3name = "L3AbsoluteJetCorrector";
@@ -462,14 +463,12 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 
   // Loop over calo jets
   for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno) {
-
     // Write jet kinematics
     jetpt[  jtno ] = (*pJets)[jtno].pt();
     jetphi[ jtno ] = (*pJets)[jtno].phi();
     jeteta[ jtno ] = (*pJets)[jtno].eta();
     jetet[  jtno ] = (*pJets)[jtno].et();
     jete[   jtno ] = (*pJets)[jtno].energy();
-
 
     // L2L3 correction
     jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
@@ -488,11 +487,9 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
        }
 
 
-
-
     // Find closest genjet (DeltaR) to the current calo jet
     double closestDeltaR    = 1000;
-    int    closestGenJetIdx = 0;
+    int    closestGenJetIdx = -1;
     for(size_t gjidx = 0; gjidx < genJets->size(); gjidx++) {
       double deltaRtmp  = deltaR( (*genJets)[gjidx].eta(), (*genJets)[gjidx].phi(),
 				  (*pJets)[jtno].eta(),    (*pJets)[jtno].phi()     );
@@ -504,13 +501,19 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     }
     jetgenjetDeltaR[ jtno ] = closestDeltaR;
 
-    genjetpt[  jtno ] = (*genJets)[closestGenJetIdx].pt();
-    genjetphi[ jtno ] =	(*genJets)[closestGenJetIdx].phi();
-    genjeteta[ jtno ] =	(*genJets)[closestGenJetIdx].eta();
-    genjetet[  jtno ] =	(*genJets)[closestGenJetIdx].et();
-    genjete[   jtno ] = (*genJets)[closestGenJetIdx].energy();
-
-
+    if( closestGenJetIdx > -1 ) {
+      genjetpt[  jtno ] = (*genJets)[closestGenJetIdx].pt();
+      genjetphi[ jtno ] = (*genJets)[closestGenJetIdx].phi();
+      genjeteta[ jtno ] = (*genJets)[closestGenJetIdx].eta();
+      genjetet[  jtno ] = (*genJets)[closestGenJetIdx].et();
+      genjete[   jtno ] = (*genJets)[closestGenJetIdx].energy();
+    } else {
+      genjetpt[  jtno ] = 0.;
+      genjetphi[ jtno ] = 0.;
+      genjeteta[ jtno ] = 0.;
+      genjetet[  jtno ] = 0.;
+      genjete[   jtno ] = 0.;
+    }
 
     // Write calo towers
     std::vector<CaloTowerPtr> j_towers = (*pJets)[jtno].getCaloConstituents();
@@ -548,7 +551,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     double gpe_phys = 0;
     double gpm_phys = 0;
     int gpid_phys = 0;
-
 
     JetMatchedPartonsCollection::const_iterator j_sel;
     bool matchedPartonFound=false;
@@ -619,7 +621,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   NobjETowCal = icell;
 
 
-
   typedef CaloMETCollection::const_iterator cmiter;
   for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
     mmet = i->pt();
@@ -627,7 +628,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     msum = i->sumEt();
     break;
   }
-
 
   //Tracks
    edm::Handle<reco::TrackCollection> tracks;
@@ -716,7 +716,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
        }
    }
    NobjTrack=iTrack;
-
 
 
 
