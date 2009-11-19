@@ -56,6 +56,11 @@ private:
   edm::InputTag ebrechits_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   edm::InputTag genEvtScale_;
+  std::string l2name_;
+  std::string l3name_;
+  std::string JPTname_;
+  std::string l2l3name_;
+  std::string l2l3JPTname_;
   double conesize_;
   float weight_;
   TrackDetectorAssociator trackAssociator_;

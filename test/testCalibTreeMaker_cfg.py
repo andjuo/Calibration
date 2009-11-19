@@ -11,22 +11,27 @@ process.source = cms.Source("PoolSource",
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(100) )
+process.options = cms.untracked.PSet(
+    Rethrow = cms.untracked.vstring('ProductNotFound'),
+    wantSummary = cms.untracked.bool(True)
+)
 
 from RecoJets.Configuration.RecoJetAssociations_cff import *
-process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.StandardSequences.FakeConditions_cff")
-process.load("Geometry.CommonDetUnit.bareGlobalTrackingGeometry_cfi")
+process.load('Configuration/StandardSequences/Services_cff')
+process.load('Configuration/StandardSequences/GeometryExtended_cff')
+process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi")
 process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = 'MC_31X_V9::All'
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
-process.load("RecoJets.Configuration.RecoJetsAll_cff")
+process.load("RecoJets.Configuration.RecoJets_cff")
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
@@ -43,35 +48,10 @@ process.CaloJetPartonMatching = cms.EDFilter("JetPartonMatcher",
 
 from JetMETCorrections.Configuration.JetPlusTrackCorrections_cff import *
 
-#JetPlusTrackZSPCorrectorIcone5.NonEfficiencyFileResp = cms.string('CMSSW_167_TrackLeakage_one')
-#JetPlusTrackZSPCorrectorIcone5.NonEfficiencyFile = cms.string('CMSSW_167_TrackNonEff_one')
+process.load("JetMETCorrections.Configuration.ZSPJetCorrections219_cff")
+process.load("JetMETCorrections.Configuration.JetPlusTrackCorrections_cff")
 
 
-#The following file are in ZSPJetCorrections219_cff, but with SisConeJets. ZSP correction factors are derived for Iterative though.
-#process.load("JetMETCorrections.Configuration.ZSPJetCorrections219_cff")
-process.load("Calibration.CalibTreeMaker.ZSPJetCorrections219Sis_cff")
-
-
-
-process.JetPlusTrackZSPCorrectorScone5 = cms.ESSource("JetPlusTrackCorrectionService",
-    JetTrackCollectionAtCalo = cms.InputTag("ZSPsisCone5JetTracksAssociatorAtCaloFace"),
-    respalgo = cms.int32(5),
-    JetTrackCollectionAtVertex = cms.InputTag("ZSPsisCone5JetTracksAssociatorAtVertex"),
-    muonSrc = cms.InputTag("globalMuons"),
-    AddOutOfConeTracks = cms.bool(True),
-    NonEfficiencyFile = cms.string('CMSSW_167_TrackNonEff'),
-    NonEfficiencyFileResp = cms.string('CMSSW_167_TrackLeakage'),
-    ResponseFile = cms.string('CMSSW_167_response'),
-    label = cms.string('JetPlusTrackZSPCorrectorScone5'),
-    TrackQuality = cms.string('highPurity'),
-    UseQuality = cms.bool(True)
-)
-
-
-
-#from RecoJets.JetAssociationProducers.sisCone5JTA_cff import *
-#process.load("RecoJets.JetAssociationProducers.sisCone5JTA_cff")
-process.load("Calibration.CalibTreeMaker.ZSPsisCone5JTA_cff")
 
 
 #process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer08Redigi_cff")
@@ -262,6 +242,11 @@ process.calibTreeMaker.NJet_GenJets      = 'sisCone5GenJets'
 
 process.calibTreeMaker.NJet_GenParticles = 'genParticleCandidates'
 process.calibTreeMaker.NJetZSPJets       = 'ZSPJetCorJetScone5'
+process.calibTreeMaker.NJet_L2JetCorrector      = cms.string('L2RelativeJetCorrector')
+process.calibTreeMaker.NJet_L3JetCorrector      = cms.string('L3AbsoluteJetCorrector')
+process.calibTreeMaker.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorScone5')
+process.calibTreeMaker.NJet_L2L3JetCorrector    = cms.string('L2L3JetCorrectorSC5Calo')
+process.calibTreeMaker.NJet_L2L3JetCorrectorJPT = cms.string('L2L3JetCorrectorIC5JPT')
 process.calibTreeMaker.NJet_MET          = 'met'
 process.calibTreeMaker.NJetRecTracks     = 'generalTracks'
 process.calibTreeMaker.NJetRecMuons      = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
@@ -277,13 +262,15 @@ process.calibTreeMaker.WriteDiJetTree    = False #True
 process.calibTreeMaker.WriteTriJetTree   = False
 process.calibTreeMaker.WriteZJetTree   = False # True
 
+process.ZSPJetCorrections = cms.Sequence(process.ZSPJetCorrectionsSisCone5
+                       * process.ZSPrecoJetAssociationsSisCone5)
 
 #process.p1 = cms.Path(process.dump)
 #process.p2 = cms.Path(process.myPartons*process.CaloJetPartonMatching*process.makeDiJetTree)
 #process.p2 = cms.Path(process.myPartons*process.CaloJetPartonMatching*process.calibTreeMaker)
-process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.Summer08WeightProducer* process.makePhotonJetTree)
-#process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeDiJetTree)
-#process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeTriJetTree)
-#process.p2 = cms.Path(process.ZSPJetCorrections* process.ZSPsisCone5JTA * process.makeZJetTree)
+process.p2 = cms.Path(process.ZSPJetCorrections * process.makePhotonJetTree)
+#process.p2 = cms.Path(process.ZSPJetCorrections* process.makeDiJetTree)
+#process.p2 = cms.Path(process.ZSPJetCorrections* process.makeTriJetTree)
+#process.p2 = cms.Path(process.ZSPJetCorrections* process.makeZJetTree)
 
 process.schedule = cms.Schedule(process.p2)

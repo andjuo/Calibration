@@ -266,8 +266,11 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
   genEvtScale_        = cfg.getParameter<edm::InputTag>("GenEventScaleLabel");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
-
-  // TrackAssociator parameters
+  l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
+  l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
+  JPTname_ = cfg.getParameter<std::string>("NJet_JPTZSPCorrector");
+  l2l3name_ = cfg.getParameter<std::string>("NJet_L2L3JetCorrector");
+  l2l3JPTname_ = cfg.getParameter<std::string>("NJet_L2L3JetCorrectorJPT");
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
   parameters_.loadParameters( parameters );
   trackAssociator_.useDefaultPropagator();
@@ -439,19 +442,13 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   //  evt.getByLabel(genEvtScale_,pthat);
   //  genEvtScale = static_cast<float>(*pthat);
 
-
-  std::string l2name = "L2RelativeJetCorrector";
-  std::string l3name = "L3AbsoluteJetCorrector";
-  std::string JPTname = "JetPlusTrackZSPCorrectorScone5";
-  std::string l2l3name = "L2L3JetCorrectorSC5Calo";
-  std::string l2l3JPTname = "L2L3JetCorrectorIC5JPT";
   //std::string l2l3PFlowname = "L2L3JetCorrectorSC5PF";
 
-  const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name,setup);   //Define the jet corrector
-  const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
-  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname, setup); //Define the jet corrector
-  const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name, setup); //Define the jet corrector
-  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname, setup); //Define the jet corrector
+  const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name_,setup);   //Define the jet corrector
+  const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name_,setup);   //Define the jet corrector
+  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname_, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name_, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname_, setup); //Define the jet corrector
   //const JetCorrector* correctorL2L3PFlow  = JetCorrector::getJetCorrector (l2l3PFlowname, setup); //Define the jet corrector
 
   NobjTow=0;
