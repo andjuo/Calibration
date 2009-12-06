@@ -2,8 +2,11 @@
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
+  isData_ = true;
+
   // CaloTower branches for all jets
   NobjTow    = 0;
   towet      = new float [ kMAX ];
@@ -254,6 +257,7 @@ NJet::~NJet() {
 void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
   // Read parameters
+  isData_             = cfg.getParameter<bool>("IsData");
   jets_               = cfg.getParameter<edm::InputTag>("NJet_Jets");
   genjets_            = cfg.getParameter<edm::InputTag>("NJet_GenJets");
   genparticles_       = cfg.getParameter<edm::InputTag>("NJet_GenParticles");
@@ -274,6 +278,8 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
   parameters_.loadParameters( parameters );
   trackAssociator_.useDefaultPropagator();
+
+  if( isData_ ) writeStableGenPart_ = false;
 
 
   // Set up branches
@@ -328,7 +334,6 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetEta",              jeteta,          "JetEta[NobjJet]/F");
   CalibTree->Branch( "JetEt",               jetet,           "JetEt[NobjJet]/F" );
   CalibTree->Branch( "JetE",                jete,            "JetE[NobjJet]/F"  );
-  CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
   CalibTree->Branch( "JetCorrZSP",          jscaleZSP,       "JetCorrZSP[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2",           jscalel2,        "JetCorrL2[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL3",           jscalel3,        "JetCorrL3[NobjJet]/F" );
@@ -336,49 +341,51 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetCorrL2L3",         jscalel2l3,      "JetCorrL2L3[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2L3JPT",      jscalel2l3JPT,   "JetCorrL2L3JPT[NobjJet]/F" );
 
-  // Gen jets (matched to calo jets)
-  CalibTree->Branch( "GenJetPt",            genjetpt,       "GenJetPt[NobjJet]/F" );
-  CalibTree->Branch( "GenJetPhi",           genjetphi,      "GenJetPhi[NobjJet]/F");
-  CalibTree->Branch( "GenJetEta",           genjeteta,      "GenJetEta[NobjJet]/F");
-  CalibTree->Branch( "GenJetEt",            genjetet,       "GenJetEt[NobjJet]/F" );
-  CalibTree->Branch( "GenJetE",             genjete,        "GenJetE[NobjJet]/F"  );
+  if( isData_ ) {
+    // Gen jets (matched to calo jets)
+    CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
+    CalibTree->Branch( "GenJetPt",            genjetpt,       "GenJetPt[NobjJet]/F" );
+    CalibTree->Branch( "GenJetPhi",           genjetphi,      "GenJetPhi[NobjJet]/F");
+    CalibTree->Branch( "GenJetEta",           genjeteta,      "GenJetEta[NobjJet]/F");
+    CalibTree->Branch( "GenJetEt",            genjetet,       "GenJetEt[NobjJet]/F" );
+    CalibTree->Branch( "GenJetE",             genjete,        "GenJetE[NobjJet]/F"  );
+    
+    // Gen jet collection
+    CalibTree->Branch( "NobjGenJet",     &NobjGenJet,        "NobjGenJet/I"                 );
+    CalibTree->Branch( "GenJetColPt",     genjetcolpt,       "GenJetColPt[NobjGenJet]/F"    );
+    CalibTree->Branch( "GenJetColPhi",    genjetcolphi,      "GenJetColPhi[NobjGenJet]/F"   );
+    CalibTree->Branch( "GenJetColEta",    genjetcoleta,      "GenJetColEta[NobjGenJet]/F"   );
+    CalibTree->Branch( "GenJetColEt",     genjetcolet,       "GenJetColEt[NobjGenJet]/F"    );
+    CalibTree->Branch( "GenJetColE",      genjetcole,        "GenJetColE[NobjGenJet]/F"     );
+    CalibTree->Branch( "GenJetColJetIdx", genjetcol_jet_idx, "GenJetColJetIdx[NobjGenJet]/I");
+    
+    // Matched gen particles
+    // Alogrithmic matching
+    // GenPart_algo branches        );
+    CalibTree->Branch( "GenPartPt_algo", genpartpt_algo, "GenPartPt_algo[NobjJet]/F" );
+    CalibTree->Branch( "GenPartPhi_algo",genpartphi_algo,"GenPartPhi_algo[NobjJet]/F");
+    CalibTree->Branch( "GenPartEta_algo",genparteta_algo,"GenPartEta_algo[NobjJet]/F");
+    CalibTree->Branch( "GenPartEt_algo", genpartet_algo, "GenPartEt_algo[NobjJet]/F" );
+    CalibTree->Branch( "GenPartE_algo",  genparte_algo,  "GenPartE_algo[NobjJet]/F"  );
+    CalibTree->Branch( "GenPartM_algo",  genpartm_algo,  "GenPartM_algo[NobjJet]/F"  );
+    CalibTree->Branch( "GenPartId_algo", genpartid_algo, "GenPartId_algo[NobjJet]/I" );
+    // Physical matching
+    // GenPart_phys branches        );
+    CalibTree->Branch( "GenPartPt_phys", genpartpt_phys, "GenPartPt_phys[NobjJet]/F" );
+    CalibTree->Branch( "GenPartPhi_phys",genpartphi_phys,"GenPartPhi_phys[NobjJet]/F");
+    CalibTree->Branch( "GenPartEta_phys",genparteta_phys,"GenPartEta_phys[NobjJet]/F");
+    CalibTree->Branch( "GenPartEt_phys", genpartet_phys, "GenPartEt_phys[NobjJet]/F" );
+    CalibTree->Branch( "GenPartE_phys",  genparte_phys,  "GenPartE_phys[NobjJet]/F"  );
+    CalibTree->Branch( "GenPartM_phys",  genpartm_phys,  "GenPartM_phys[NobjJet]/F"  );
+    CalibTree->Branch( "GenPartId_phys", genpartid_phys, "GenPartId_phys[NobjJet]/I" );
 
-  // Gen jet collection
-  CalibTree->Branch( "NobjGenJet",     &NobjGenJet,        "NobjGenJet/I"                 );
-  CalibTree->Branch( "GenJetColPt",     genjetcolpt,       "GenJetColPt[NobjGenJet]/F"    );
-  CalibTree->Branch( "GenJetColPhi",    genjetcolphi,      "GenJetColPhi[NobjGenJet]/F"   );
-  CalibTree->Branch( "GenJetColEta",    genjetcoleta,      "GenJetColEta[NobjGenJet]/F"   );
-  CalibTree->Branch( "GenJetColEt",     genjetcolet,       "GenJetColEt[NobjGenJet]/F"    );
-  CalibTree->Branch( "GenJetColE",      genjetcole,        "GenJetColE[NobjGenJet]/F"     );
-  CalibTree->Branch( "GenJetColJetIdx", genjetcol_jet_idx, "GenJetColJetIdx[NobjGenJet]/I");
-
-  // Matched gen particles
-  // Alogrithmic matching
-  // GenPart_algo branches        );
-  CalibTree->Branch( "GenPartPt_algo", genpartpt_algo, "GenPartPt_algo[NobjJet]/F" );
-  CalibTree->Branch( "GenPartPhi_algo",genpartphi_algo,"GenPartPhi_algo[NobjJet]/F");
-  CalibTree->Branch( "GenPartEta_algo",genparteta_algo,"GenPartEta_algo[NobjJet]/F");
-  CalibTree->Branch( "GenPartEt_algo", genpartet_algo, "GenPartEt_algo[NobjJet]/F" );
-  CalibTree->Branch( "GenPartE_algo",  genparte_algo,  "GenPartE_algo[NobjJet]/F"  );
-  CalibTree->Branch( "GenPartM_algo",  genpartm_algo,  "GenPartM_algo[NobjJet]/F"  );
-  CalibTree->Branch( "GenPartId_algo", genpartid_algo, "GenPartId_algo[NobjJet]/I" );
-  // Physical matching
-  // GenPart_phys branches        );
-  CalibTree->Branch( "GenPartPt_phys", genpartpt_phys, "GenPartPt_phys[NobjJet]/F" );
-  CalibTree->Branch( "GenPartPhi_phys",genpartphi_phys,"GenPartPhi_phys[NobjJet]/F");
-  CalibTree->Branch( "GenPartEta_phys",genparteta_phys,"GenPartEta_phys[NobjJet]/F");
-  CalibTree->Branch( "GenPartEt_phys", genpartet_phys, "GenPartEt_phys[NobjJet]/F" );
-  CalibTree->Branch( "GenPartE_phys",  genparte_phys,  "GenPartE_phys[NobjJet]/F"  );
-  CalibTree->Branch( "GenPartM_phys",  genpartm_phys,  "GenPartM_phys[NobjJet]/F"  );
-  CalibTree->Branch( "GenPartId_phys", genpartid_phys, "GenPartId_phys[NobjJet]/I" );
- 
+    // GenEventScale (pthat)
+    CalibTree->Branch( "GenEvtScale",&genEvtScale,"GenEvtScale/F");
+  }
   //met
   CalibTree->Branch( "Met",   &mmet,"Met/F"   );
   CalibTree->Branch( "MetPhi",&mphi,"MetPhi/F");
   CalibTree->Branch( "MetSum",&msum,"MetSum/F");
-
-  // GenEventScale (pthat)
-  CalibTree->Branch( "GenEvtScale",&genEvtScale,"GenEvtScale/F");
 
   //EventWeight
   CalibTree->Branch( "Weight",&weight,"Weight/F"   );
@@ -417,15 +424,15 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   evt.getByLabel(met_, recmets);
 
   edm::Handle<reco::GenJetCollection> genJets;
-  evt.getByLabel(genjets_,genJets);
+  if( !isData_ ) evt.getByLabel(genjets_,genJets);
   reco::GenJetCollection::const_iterator genJet;
 
   edm::Handle<reco::GenParticleCollection> genParticles;
-  evt.getByLabel(genparticles_,genParticles);
+  if( !isData_ ) evt.getByLabel(genparticles_,genParticles);
   reco::GenParticleCollection::const_iterator genParticle;
 
   edm::Handle<JetMatchedPartonsCollection> matchedParticleMap;
-  evt.getByLabel("CaloJetPartonMatching", matchedParticleMap); 
+  if( !isData_ ) evt.getByLabel("CaloJetPartonMatching", matchedParticleMap); 
 
   //3_1_X
   //edm::ESHandle<TrackerGeometry> theG;
@@ -438,9 +445,11 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   reco::CaloJetCollection::const_iterator zspJet;
 
   // Get pthat
-  edm::Handle<double> pthat;
-  //  evt.getByLabel(genEvtScale_,pthat);
-  //  genEvtScale = static_cast<float>(*pthat);
+  edm::Handle<GenEventInfoProduct> genInfoHandle;
+  if( isData_ ) {
+    evt.getByLabel("generator", genInfoHandle);
+    genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]);
+  }
 
   //std::string l2l3PFlowname = "L2L3JetCorrectorSC5PF";
 
@@ -484,33 +493,35 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
        }
 
 
-    // Find closest genjet (DeltaR) to the current calo jet
-    double closestDeltaR    = 1000;
-    int    closestGenJetIdx = -1;
-    for(size_t gjidx = 0; gjidx < genJets->size(); gjidx++) {
-      double deltaRtmp  = deltaR( (*genJets)[gjidx].eta(), (*genJets)[gjidx].phi(),
-				  (*pJets)[jtno].eta(),    (*pJets)[jtno].phi()     );
-
-      if( deltaRtmp < closestDeltaR ) {
-	closestDeltaR    = deltaRtmp;
-	closestGenJetIdx = gjidx;
-      }
-    }
-    jetgenjetDeltaR[ jtno ] = closestDeltaR;
-
-    if( closestGenJetIdx > -1 ) {
-      genjetpt[  jtno ] = (*genJets)[closestGenJetIdx].pt();
-      genjetphi[ jtno ] = (*genJets)[closestGenJetIdx].phi();
-      genjeteta[ jtno ] = (*genJets)[closestGenJetIdx].eta();
-      genjetet[  jtno ] = (*genJets)[closestGenJetIdx].et();
-      genjete[   jtno ] = (*genJets)[closestGenJetIdx].energy();
-    } else {
-      genjetpt[  jtno ] = 0.;
-      genjetphi[ jtno ] = 0.;
-      genjeteta[ jtno ] = 0.;
-      genjetet[  jtno ] = 0.;
-      genjete[   jtno ] = 0.;
-    }
+     if( !isData_ ) {
+       // Find closest genjet (DeltaR) to the current calo jet
+       double closestDeltaR    = 1000;
+       int    closestGenJetIdx = -1;
+       for(size_t gjidx = 0; gjidx < genJets->size(); gjidx++) {
+	 double deltaRtmp  = deltaR( (*genJets)[gjidx].eta(), (*genJets)[gjidx].phi(),
+				     (*pJets)[jtno].eta(),    (*pJets)[jtno].phi()     );
+	 
+	 if( deltaRtmp < closestDeltaR ) {
+	   closestDeltaR    = deltaRtmp;
+	   closestGenJetIdx = gjidx;
+	 }
+       }
+       jetgenjetDeltaR[ jtno ] = closestDeltaR;
+       
+       if( closestGenJetIdx > -1 ) {
+	 genjetpt[  jtno ] = (*genJets)[closestGenJetIdx].pt();
+	 genjetphi[ jtno ] = (*genJets)[closestGenJetIdx].phi();
+	 genjeteta[ jtno ] = (*genJets)[closestGenJetIdx].eta();
+	 genjetet[  jtno ] = (*genJets)[closestGenJetIdx].et();
+	 genjete[   jtno ] = (*genJets)[closestGenJetIdx].energy();
+       } else {
+	 genjetpt[  jtno ] = 0.;
+	 genjetphi[ jtno ] = 0.;
+	 genjeteta[ jtno ] = 0.;
+	 genjetet[  jtno ] = 0.;
+	 genjete[   jtno ] = 0.;
+       }
+     }
 
     // Write calo towers
     std::vector<CaloTowerPtr> j_towers = (*pJets)[jtno].getCaloConstituents();
@@ -532,89 +543,89 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     } // End loop over towers
 
     //// GenParticle Matching ALGO and PHYSICS
-
-    double gppt_algo = 0;
-    double gpphi_algo = 0;
-    double gpeta_algo = 0;
-    double gpet_algo = 0;
-    double gpe_algo = 0;
-    double gpm_algo = 0;
-    int gpid_algo = 0;
-
-    double gppt_phys = 0;
-    double gpphi_phys = 0;
-    double gpeta_phys = 0;
-    double gpet_phys = 0;
-    double gpe_phys = 0;
-    double gpm_phys = 0;
-    int gpid_phys = 0;
-
-    JetMatchedPartonsCollection::const_iterator j_sel;
-    bool matchedPartonFound=false;
-    //       //cout<<"calo Jet (pt,eta,phi): "<< (*pJets)[jtno].et() << " " << (*pJets)[jtno].eta() << " " << (*pJets)[jtno].phi() <<endl;
-    for (JetMatchedPartonsCollection::const_iterator j = matchedParticleMap->begin(); j != matchedParticleMap->end(); j ++) {
-      const Jet *aJet = (*j).first.get();
-      //cout<<"maped Jet (pt,eta,phi): "<< ((aJet))->et() << " " << ((aJet))->eta() << " " << ((aJet))->phi() <<endl;
-      if (((*pJets)[jtno].eta()==((aJet))->eta()) && ((*pJets)[jtno].phi()==((aJet))->phi())) {
-    	j_sel=j;
-    	matchedPartonFound=true;
-    	break;
+    if( !isData_ ) {
+      double gppt_algo = 0;
+      double gpphi_algo = 0;
+      double gpeta_algo = 0;
+      double gpet_algo = 0;
+      double gpe_algo = 0;
+      double gpm_algo = 0;
+      int gpid_algo = 0;
+      
+      double gppt_phys = 0;
+      double gpphi_phys = 0;
+      double gpeta_phys = 0;
+      double gpet_phys = 0;
+      double gpe_phys = 0;
+      double gpm_phys = 0;
+      int gpid_phys = 0;
+      
+      JetMatchedPartonsCollection::const_iterator j_sel;
+      bool matchedPartonFound=false;
+      //       //cout<<"calo Jet (pt,eta,phi): "<< (*pJets)[jtno].et() << " " << (*pJets)[jtno].eta() << " " << (*pJets)[jtno].phi() <<endl;
+      for (JetMatchedPartonsCollection::const_iterator j = matchedParticleMap->begin(); j != matchedParticleMap->end(); j ++) {
+	const Jet *aJet = (*j).first.get();
+	//cout<<"maped Jet (pt,eta,phi): "<< ((aJet))->et() << " " << ((aJet))->eta() << " " << ((aJet))->phi() <<endl;
+	if (((*pJets)[jtno].eta()==((aJet))->eta()) && ((*pJets)[jtno].phi()==((aJet))->phi())) {
+	  j_sel=j;
+	  matchedPartonFound=true;
+	  break;
+	}
       }
-    }
-
-    if (matchedPartonFound) {
-      const MatchedPartons aMatch = (*j_sel).second;
-
-
       
-      //           cout<<"matched Jet (pt,eta,phi):         "<< aJet->et() <<" "<< aJet->eta()<<" "<< aJet->phi()<<endl;
-      
-      GenParticleRef theAlgoDef = aMatch.algoDefinitionParton();
-      if (theAlgoDef.isNonnull()) {
+      if (matchedPartonFound) {
+	const MatchedPartons aMatch = (*j_sel).second;
 	
-	gppt_algo = theAlgoDef->pt();
-	gpphi_algo = theAlgoDef->phi();
-	gpeta_algo = theAlgoDef->eta();
-	gpet_algo = theAlgoDef->et();
-	gpe_algo = theAlgoDef->energy();
-	gpm_algo = theAlgoDef->mass();
-	gpid_algo = theAlgoDef->pdgId();
-      }
+
+	
+	//           cout<<"matched Jet (pt,eta,phi):         "<< aJet->et() <<" "<< aJet->eta()<<" "<< aJet->phi()<<endl;
+	
+	GenParticleRef theAlgoDef = aMatch.algoDefinitionParton();
+	if (theAlgoDef.isNonnull()) {
+	  
+	  gppt_algo = theAlgoDef->pt();
+	  gpphi_algo = theAlgoDef->phi();
+	  gpeta_algo = theAlgoDef->eta();
+	  gpet_algo = theAlgoDef->et();
+	  gpe_algo = theAlgoDef->energy();
+	  gpm_algo = theAlgoDef->mass();
+	  gpid_algo = theAlgoDef->pdgId();
+	}
+	
+	GenParticleRef thePhyDef = aMatch.physicsDefinitionParton();
+	if (thePhyDef.isNonnull()) {
+	  //          cout<<"matched parton PhysDef:        "<< thePhyDef->et() <<" "<< thePhyDef->eta()<<" "<< thePhyDef->phi()<<endl;
+	  gppt_phys = thePhyDef->pt();
+	  gpphi_phys = thePhyDef->phi();
+	  gpeta_phys = thePhyDef->eta();
+	  gpet_phys = thePhyDef->et();
+	  gpe_phys = thePhyDef->energy();
+	  gpm_phys = thePhyDef->mass();
+	  gpid_phys = thePhyDef->pdgId();
+	  
+	}
+	
+	
+      } 
+      genpartpt_algo[  jtno ] = gppt_algo;
+      genpartphi_algo[ jtno ] = gpphi_algo ;
+      genparteta_algo[ jtno ] = gpeta_algo ;
+      genpartet_algo[  jtno ] = gpet_algo ;
+      genparte_algo[   jtno ] = gpe_algo ;
+      genpartm_algo[   jtno ] = gpm_algo ;
+      genpartid_algo[  jtno ] = gpid_algo ;
       
-      GenParticleRef thePhyDef = aMatch.physicsDefinitionParton();
-      if (thePhyDef.isNonnull()) {
-	//          cout<<"matched parton PhysDef:        "<< thePhyDef->et() <<" "<< thePhyDef->eta()<<" "<< thePhyDef->phi()<<endl;
-	gppt_phys = thePhyDef->pt();
-	gpphi_phys = thePhyDef->phi();
-	gpeta_phys = thePhyDef->eta();
-	gpet_phys = thePhyDef->et();
-	gpe_phys = thePhyDef->energy();
-	gpm_phys = thePhyDef->mass();
-	gpid_phys = thePhyDef->pdgId();
+
+      genpartpt_phys[  jtno ] = gppt_phys;
+      genpartphi_phys[ jtno ] = gpphi_phys ;
+      genparteta_phys[ jtno ] = gpeta_phys ;
+      genpartet_phys[  jtno ] = gpet_phys ;
+      genparte_phys[   jtno ] = gpe_phys ;
+      genpartm_phys[   jtno ] = gpm_phys ;
+      genpartid_phys[  jtno ] = gpid_phys ;
       
-      }
-
-
-    } 
-    genpartpt_algo[  jtno ] = gppt_algo;
-    genpartphi_algo[ jtno ] = gpphi_algo ;
-    genparteta_algo[ jtno ] = gpeta_algo ;
-    genpartet_algo[  jtno ] = gpet_algo ;
-    genparte_algo[   jtno ] = gpe_algo ;
-    genpartm_algo[   jtno ] = gpm_algo ;
-    genpartid_algo[  jtno ] = gpid_algo ;
-  
-
-    genpartpt_phys[  jtno ] = gppt_phys;
-    genpartphi_phys[ jtno ] = gpphi_phys ;
-    genparteta_phys[ jtno ] = gpeta_phys ;
-    genpartet_phys[  jtno ] = gpet_phys ;
-    genparte_phys[   jtno ] = gpe_phys ;
-    genpartm_phys[   jtno ] = gpm_phys ;
-    genpartid_phys[  jtno ] = gpid_phys ;
-  
-  } // End of loop over calo jets
-  
+    } // End of loop over calo jets
+  }
   NobjETowCal = icell;
 
 
@@ -718,37 +729,38 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 
   /////////// Write genjet collection ///////////////////
 
-  // Loop over genjets
-  NobjGenJet = genJets->size();
-  if(NobjGenJet > kjMAX) NobjGenJet = kjMAX;
-
-  for(int gjidx = 0; gjidx < NobjGenJet; gjidx++) {
-
-    // Write genjet kinematics
-    genjetcolpt[  gjidx ] = genJets->at(gjidx).pt();
-    genjetcolphi[ gjidx ] = genJets->at(gjidx).phi();
-    genjetcoleta[ gjidx ] = genJets->at(gjidx).eta();
-    genjetcolet[  gjidx ] = genJets->at(gjidx).et();
-    genjetcole[   gjidx ] = genJets->at(gjidx).energy();
-
-
-    // Find closest calojet to this genjet
-    // Note: NobjJet was set above to min( pJets->size(), kjMAX )
-    double closestDeltaR = 1000;
-    int    closestJetIdx = 0;
-    for(int cjidx = 0; cjidx < NobjJet; cjidx++) {
-      double deltaRtmp = deltaR( genJets->at(gjidx).eta(), genJets->at(gjidx).phi(),
-				 pJets->at(cjidx).eta(),    pJets->at(cjidx).phi()     );
-    
-      if( deltaRtmp < closestDeltaR ) {
-	closestDeltaR = deltaRtmp;
-	closestJetIdx = cjidx;
-      }
-    }
-    genjetcol_jet_idx[gjidx] = closestJetIdx;
-  
-  } // End of loop over genjets
-
+   if( !isData_ ) {
+     // Loop over genjets
+     NobjGenJet = genJets->size();
+     if(NobjGenJet > kjMAX) NobjGenJet = kjMAX;
+     
+     for(int gjidx = 0; gjidx < NobjGenJet; gjidx++) {
+       
+       // Write genjet kinematics
+       genjetcolpt[  gjidx ] = genJets->at(gjidx).pt();
+       genjetcolphi[ gjidx ] = genJets->at(gjidx).phi();
+       genjetcoleta[ gjidx ] = genJets->at(gjidx).eta();
+       genjetcolet[  gjidx ] = genJets->at(gjidx).et();
+       genjetcole[   gjidx ] = genJets->at(gjidx).energy();
+       
+       
+       // Find closest calojet to this genjet
+       // Note: NobjJet was set above to min( pJets->size(), kjMAX )
+       double closestDeltaR = 1000;
+       int    closestJetIdx = 0;
+       for(int cjidx = 0; cjidx < NobjJet; cjidx++) {
+	 double deltaRtmp = deltaR( genJets->at(gjidx).eta(), genJets->at(gjidx).phi(),
+				    pJets->at(cjidx).eta(),    pJets->at(cjidx).phi()     );
+	 
+	 if( deltaRtmp < closestDeltaR ) {
+	   closestDeltaR = deltaRtmp;
+	   closestJetIdx = cjidx;
+	 }
+       }
+       genjetcol_jet_idx[gjidx] = closestJetIdx;
+       
+     } // End of loop over genjets
+   }
 
 
   /////////// Write uncharged stable genparticles ///////////////////

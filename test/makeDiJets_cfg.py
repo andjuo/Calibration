@@ -79,6 +79,7 @@ process.L2L3JetCorrectorIC5JPT = cms.ESSource("JetCorrectionServiceChain",
 
 ###  Parameters for module calibTreeMaker
 process.calibTreeMaker.WriteDiJetTree          = True
+process.calibTreeMaker.IsData                  = True
 process.calibTreeMaker.WriteStableGenParticles = False
 
 process.calibTreeMaker.OutputFile         = 'Summer09_QCD_Pt50.root'
@@ -106,10 +107,10 @@ process.calibTreeMaker.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.
 process.p1 = cms.Path( process.dump )
 process.p2 = cms.Path( process.ZSPJetCorrectionsAntiKt5
                        * process.ZSPrecoJetAssociationsAntiKt5
-                       * process.myPartons
-                       * process.CaloJetPartonMatching
-                       * process.genJetParticles
-                       * process.ak5GenJets
+                       #* process.myPartons
+                       #* process.CaloJetPartonMatching
+                       #* process.genJetParticles
+                       #* process.ak5GenJets
                        #* process.dump
                        * process.calibTreeMaker
                        )

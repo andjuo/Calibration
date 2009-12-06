@@ -4,6 +4,8 @@ from TrackingTools.TrackAssociator.default_cfi import *
 calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     TrackAssociatorParameters,
     TrackAssociatorParameterBlock,
+
+    IsData  = cms.bool(True),
                               
     OutputFile         = cms.string('calib.root'),
 
