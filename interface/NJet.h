@@ -73,7 +73,7 @@ private:
 
   // Calo jets
   int    NobjJet;
-  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;
+  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetemf, *jetgenjetDeltaR;
   float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
 
   // Gen jets matched to calo jets

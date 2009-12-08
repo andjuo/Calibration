@@ -56,6 +56,7 @@ NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
   jeteta          = new float [ kjMAX ];
   jetet           = new float [ kjMAX ];
   jete            = new float [ kjMAX ];
+  jetemf          = new float [ kjMAX ];
   jetgenjetDeltaR = new float [ kjMAX ];
 
   // Correction factors
@@ -233,7 +234,8 @@ NJet::~NJet() {
   delete [] jetphi;         
   delete [] jeteta;         
   delete [] jetet;          
-  delete [] jete;           
+  delete [] jete;        
+  delete [] jetemf;
   delete [] jetgenjetDeltaR;
 
   delete [] jscaleZSP;    
@@ -372,6 +374,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetEta",              jeteta,          "JetEta[NobjJet]/F");
   CalibTree->Branch( "JetEt",               jetet,           "JetEt[NobjJet]/F" );
   CalibTree->Branch( "JetE",                jete,            "JetE[NobjJet]/F"  );
+  CalibTree->Branch( "JetEMF",              jetemf,          "JetEMF[NobjJet]/F"  );
   CalibTree->Branch( "JetCorrZSP",          jscaleZSP,       "JetCorrZSP[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2",           jscalel2,        "JetCorrL2[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL3",           jscalel3,        "JetCorrL3[NobjJet]/F" );
@@ -512,6 +515,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     jeteta[ jtno ] = (*pJets)[jtno].eta();
     jetet[  jtno ] = (*pJets)[jtno].et();
     jete[   jtno ] = (*pJets)[jtno].energy();
+    jetemf[ jtno ] = (*pJets)[jtno].emEnergyFraction();
 
     // L2L3 correction
     jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
