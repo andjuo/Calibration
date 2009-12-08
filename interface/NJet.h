@@ -71,8 +71,6 @@ private:
   const int kMAX;                // Max number of towers stored in an event
   const int kMaxStableGenPart_;  // Max number of stable gen particles stored in an event
 
-  bool isData_;
-
   // Calo jets
   int    NobjJet;
   float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;

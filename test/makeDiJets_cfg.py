@@ -5,12 +5,12 @@ process = cms.Process("Calib")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold             = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/mc/Summer09/QCDDiJet_Pt120to170/GEN-SIM-RECO/MC_31X_V9_7TeV-v1/0000/B0538D08-02CA-DE11-9436-003048C692AC.root'
+    '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/596/F67BCF17-48E2-DE11-98B1-000423D94534.root'
             )
                             )
 
@@ -57,7 +57,8 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 
 # Jet Energy Corrections
-process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_7TeV_cff")
+#process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_7TeV_cff")
+process.load("JetMETCorrections.Configuration.L2L3Corrections_900GeV_cff")
 
 # ZSP and JPT corrections
 
@@ -79,10 +80,9 @@ process.L2L3JetCorrectorIC5JPT = cms.ESSource("JetCorrectionServiceChain",
 
 ###  Parameters for module calibTreeMaker
 process.calibTreeMaker.WriteDiJetTree          = True
-process.calibTreeMaker.IsData                  = True
 process.calibTreeMaker.WriteStableGenParticles = False
 
-process.calibTreeMaker.OutputFile         = 'Summer09_QCD_Pt50.root'
+process.calibTreeMaker.OutputFile         = 'BeamCommissioning09_MinBias_000123596.root'
 
 process.calibTreeMaker.DiJetTreeName      = 'DiJetTree'
 process.calibTreeMaker.GenEventScaleLabel = 'genEventScale'
