@@ -5,7 +5,7 @@ process = cms.Process("Calib")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold             = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 process.source = cms.Source("PoolSource",
@@ -15,12 +15,20 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100) )
+    input = cms.untracked.int32(1000) )
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),
     wantSummary = cms.untracked.bool(True)
 )
+
+
+# Trigger
+process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
+process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
+process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
+process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41)')
+
 
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('Configuration/StandardSequences/GeometryExtended_cff')
@@ -105,14 +113,21 @@ process.calibTreeMaker.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.
 
 
 process.p1 = cms.Path( process.dump )
-process.p2 = cms.Path( process.ZSPJetCorrectionsAntiKt5
-                       * process.ZSPrecoJetAssociationsAntiKt5
-                       #* process.myPartons
-                       #* process.CaloJetPartonMatching
-                       #* process.genJetParticles
-                       #* process.ak5GenJets
-                       #* process.dump
-                       * process.calibTreeMaker
-                       )
 
-process.schedule = cms.Schedule(process.p2)
+process.pMC = cms.Path( process.ZSPJetCorrectionsAntiKt5
+                        * process.ZSPrecoJetAssociationsAntiKt5
+                        * process.myPartons
+                        * process.CaloJetPartonMatching
+                        * process.genJetParticles
+                        * process.ak5GenJets
+                        * process.dump
+                        * process.calibTreeMaker
+                        )
+
+process.pData = cms.Path( process.hltLevel1GTSeed
+                          * process.ZSPJetCorrectionsAntiKt5
+                          * process.ZSPrecoJetAssociationsAntiKt5
+                          * process.calibTreeMaker
+                          )
+
+process.schedule = cms.Schedule(process.pData)
