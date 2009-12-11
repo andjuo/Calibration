@@ -1,10 +1,17 @@
 #include "Calibration/CalibTreeMaker/interface/NJet.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
-#include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
+#include "DataFormats/Provenance/interface/EventAuxiliary.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
+
 NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
+
+  // Event info
+  runNumber_ = 0;
+  luminosityBlockNumber_ = 0;
+  eventNumber_ = 0;
 
   // CaloTower branches for all jets
   NobjTow    = 0;
@@ -324,6 +331,11 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 
   // Set up branches
 
+  // Event info
+  CalibTree->Branch("RunNumber",&runNumber_,"RunNumber/i");
+  CalibTree->Branch("LumiBlockNumber",&luminosityBlockNumber_,"LumiBlockNumber/i");
+  CalibTree->Branch("EventNumber",&eventNumber_,"EventNumber/i");
+
   // CaloTower branches for all jets
   CalibTree->Branch( "NobjTow",&NobjTow,"NobjTow/I"             );
   CalibTree->Branch( "TowId",     towid,      "TowId[NobjTow]/I"    );
@@ -448,6 +460,11 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   
 void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
+  edm::EventAuxiliary aux = evt.eventAuxiliary();
+  runNumber_ = aux.run();
+  luminosityBlockNumber_ = aux.luminosityBlock();
+  eventNumber_ = aux.event();
+
   //Event Weighting
   if(weight_ < 0)
     {
@@ -503,332 +520,334 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   NobjTow=0;
   NobjETowCal = 0;
   NobjJet = pJets->size();
-  if(NobjJet > kjMAX) NobjJet = kjMAX;
-  unsigned int towno = 0;   // Calo tower counting index
-  unsigned int icell = 0;   // Ecal cell counting index
+  if( NobjJet > 0 ) { // Discard events with no jets
+    if(NobjJet > kjMAX) NobjJet = kjMAX;
+    unsigned int towno = 0;   // Calo tower counting index
+    unsigned int icell = 0;   // Ecal cell counting index
 
-  // Loop over calo jets
-  for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno) {
-    // Write jet kinematics
-    jetpt[  jtno ] = (*pJets)[jtno].pt();
-    jetphi[ jtno ] = (*pJets)[jtno].phi();
-    jeteta[ jtno ] = (*pJets)[jtno].eta();
-    jetet[  jtno ] = (*pJets)[jtno].et();
-    jete[   jtno ] = (*pJets)[jtno].energy();
-    jetemf[ jtno ] = (*pJets)[jtno].emEnergyFraction();
+    // Loop over calo jets
+    for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno) {
+      // Write jet kinematics
+      jetpt[  jtno ] = (*pJets)[jtno].pt();
+      jetphi[ jtno ] = (*pJets)[jtno].phi();
+      jeteta[ jtno ] = (*pJets)[jtno].eta();
+      jetet[  jtno ] = (*pJets)[jtno].et();
+      jete[   jtno ] = (*pJets)[jtno].energy();
+      jetemf[ jtno ] = (*pJets)[jtno].emEnergyFraction();
 
-    // L2L3 correction
-    jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
-    jscalel3[jtno]   = correctorL3  ->correction( jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
-    jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno].p4());  //calculate the correction
+      // L2L3 correction
+      jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
+      jscalel3[jtno]   = correctorL3  ->correction( jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
+      jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno].p4());  //calculate the correction
 
 
-   // JPT correction (uses ZSP corrected jets)
-     for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
-       if( deltaR(zspJet->eta(),zspJet->phi(),(*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
+      // JPT correction (uses ZSP corrected jets)
+      for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
+	if( deltaR(zspJet->eta(),zspJet->phi(),(*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
  	  {
  	    jscaleZSP[jtno]     = zspJet->et()/ (*pJets)[jtno].et();
  	    jscaleJPT[jtno]     = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
  	    jscalel2l3JPT[jtno] = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT[jtno] );  //calculate the correction
  	  }
-       }
+      }
 
 
-     if( genJets.isValid() ) {
-       // Find closest genjet (DeltaR) to the current calo jet
-       double closestDeltaR    = 1000;
-       int    closestGenJetIdx = -1;
-       for(size_t gjidx = 0; gjidx < genJets->size(); gjidx++) {
-	 double deltaRtmp  = deltaR( (*genJets)[gjidx].eta(), (*genJets)[gjidx].phi(),
-				     (*pJets)[jtno].eta(),    (*pJets)[jtno].phi()     );
+      if( genJets.isValid() ) {
+	// Find closest genjet (DeltaR) to the current calo jet
+	double closestDeltaR    = 1000;
+	int    closestGenJetIdx = -1;
+	for(size_t gjidx = 0; gjidx < genJets->size(); gjidx++) {
+	  double deltaRtmp  = deltaR( (*genJets)[gjidx].eta(), (*genJets)[gjidx].phi(),
+				      (*pJets)[jtno].eta(),    (*pJets)[jtno].phi()     );
 	 
-	 if( deltaRtmp < closestDeltaR ) {
-	   closestDeltaR    = deltaRtmp;
-	   closestGenJetIdx = gjidx;
-	 }
-       }
-       jetgenjetDeltaR[ jtno ] = closestDeltaR;
+	  if( deltaRtmp < closestDeltaR ) {
+	    closestDeltaR    = deltaRtmp;
+	    closestGenJetIdx = gjidx;
+	  }
+	}
+	jetgenjetDeltaR[ jtno ] = closestDeltaR;
        
-       if( closestGenJetIdx > -1 ) {
-	 genjetpt[  jtno ] = (*genJets)[closestGenJetIdx].pt();
-	 genjetphi[ jtno ] = (*genJets)[closestGenJetIdx].phi();
-	 genjeteta[ jtno ] = (*genJets)[closestGenJetIdx].eta();
-	 genjetet[  jtno ] = (*genJets)[closestGenJetIdx].et();
-	 genjete[   jtno ] = (*genJets)[closestGenJetIdx].energy();
-       } else {
-	 genjetpt[  jtno ] = 0.;
-	 genjetphi[ jtno ] = 0.;
-	 genjeteta[ jtno ] = 0.;
-	 genjetet[  jtno ] = 0.;
-	 genjete[   jtno ] = 0.;
-       }
-     }
-
-    // Write calo towers
-    std::vector<CaloTowerPtr> j_towers = (*pJets)[jtno].getCaloConstituents();
-    NobjTow+=j_towers.size();
-    for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
-	 tow != j_towers.end(); ++tow, ++towno){
-
-      towet[towno]     = (*tow)->et();
-      toweta[towno]    = (*tow)->eta();
-      towphi[towno]    = (*tow)->phi();
-      towen[towno]     = (*tow)->energy();
-      towem[towno]     = (*tow)->emEnergy();
-      towhd[towno]     = (*tow)->hadEnergy();
-      towoe[towno]     = (*tow)->outerEnergy();
-      towid_phi[towno] = (*tow)->id().iphi();
-      towid_eta[towno] = (*tow)->id().ieta();
-      towid[towno]     = (*tow)->id().rawId();
-      tow_jetidx[towno]= jtno;
-    } // End loop over towers
-
-    //// GenParticle Matching ALGO and PHYSICS
-    if( matchedParticleMap.isValid() ) {
-      double gppt_algo = 0;
-      double gpphi_algo = 0;
-      double gpeta_algo = 0;
-      double gpet_algo = 0;
-      double gpe_algo = 0;
-      double gpm_algo = 0;
-      int gpid_algo = 0;
-      
-      double gppt_phys = 0;
-      double gpphi_phys = 0;
-      double gpeta_phys = 0;
-      double gpet_phys = 0;
-      double gpe_phys = 0;
-      double gpm_phys = 0;
-      int gpid_phys = 0;
-      
-      JetMatchedPartonsCollection::const_iterator j_sel;
-      bool matchedPartonFound=false;
-      //       //cout<<"calo Jet (pt,eta,phi): "<< (*pJets)[jtno].et() << " " << (*pJets)[jtno].eta() << " " << (*pJets)[jtno].phi() <<endl;
-      for (JetMatchedPartonsCollection::const_iterator j = matchedParticleMap->begin(); j != matchedParticleMap->end(); j ++) {
-	const Jet *aJet = (*j).first.get();
-	//cout<<"maped Jet (pt,eta,phi): "<< ((aJet))->et() << " " << ((aJet))->eta() << " " << ((aJet))->phi() <<endl;
-	if (((*pJets)[jtno].eta()==((aJet))->eta()) && ((*pJets)[jtno].phi()==((aJet))->phi())) {
-	  j_sel=j;
-	  matchedPartonFound=true;
-	  break;
+	if( closestGenJetIdx > -1 ) {
+	  genjetpt[  jtno ] = (*genJets)[closestGenJetIdx].pt();
+	  genjetphi[ jtno ] = (*genJets)[closestGenJetIdx].phi();
+	  genjeteta[ jtno ] = (*genJets)[closestGenJetIdx].eta();
+	  genjetet[  jtno ] = (*genJets)[closestGenJetIdx].et();
+	  genjete[   jtno ] = (*genJets)[closestGenJetIdx].energy();
+	} else {
+	  genjetpt[  jtno ] = 0.;
+	  genjetphi[ jtno ] = 0.;
+	  genjeteta[ jtno ] = 0.;
+	  genjetet[  jtno ] = 0.;
+	  genjete[   jtno ] = 0.;
 	}
       }
-      
-      if (matchedPartonFound) {
-	const MatchedPartons aMatch = (*j_sel).second;
-	
 
-	
-	//           cout<<"matched Jet (pt,eta,phi):         "<< aJet->et() <<" "<< aJet->eta()<<" "<< aJet->phi()<<endl;
-	
-	GenParticleRef theAlgoDef = aMatch.algoDefinitionParton();
-	if (theAlgoDef.isNonnull()) {
-	  
-	  gppt_algo = theAlgoDef->pt();
-	  gpphi_algo = theAlgoDef->phi();
-	  gpeta_algo = theAlgoDef->eta();
-	  gpet_algo = theAlgoDef->et();
-	  gpe_algo = theAlgoDef->energy();
-	  gpm_algo = theAlgoDef->mass();
-	  gpid_algo = theAlgoDef->pdgId();
+      // Write calo towers
+      std::vector<CaloTowerPtr> j_towers = (*pJets)[jtno].getCaloConstituents();
+      NobjTow+=j_towers.size();
+      for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
+	   tow != j_towers.end(); ++tow, ++towno){
+
+	towet[towno]     = (*tow)->et();
+	toweta[towno]    = (*tow)->eta();
+	towphi[towno]    = (*tow)->phi();
+	towen[towno]     = (*tow)->energy();
+	towem[towno]     = (*tow)->emEnergy();
+	towhd[towno]     = (*tow)->hadEnergy();
+	towoe[towno]     = (*tow)->outerEnergy();
+	towid_phi[towno] = (*tow)->id().iphi();
+	towid_eta[towno] = (*tow)->id().ieta();
+	towid[towno]     = (*tow)->id().rawId();
+	tow_jetidx[towno]= jtno;
+      } // End loop over towers
+
+      //// GenParticle Matching ALGO and PHYSICS
+      if( matchedParticleMap.isValid() ) {
+	double gppt_algo = 0;
+	double gpphi_algo = 0;
+	double gpeta_algo = 0;
+	double gpet_algo = 0;
+	double gpe_algo = 0;
+	double gpm_algo = 0;
+	int gpid_algo = 0;
+      
+	double gppt_phys = 0;
+	double gpphi_phys = 0;
+	double gpeta_phys = 0;
+	double gpet_phys = 0;
+	double gpe_phys = 0;
+	double gpm_phys = 0;
+	int gpid_phys = 0;
+      
+	JetMatchedPartonsCollection::const_iterator j_sel;
+	bool matchedPartonFound=false;
+	//       //cout<<"calo Jet (pt,eta,phi): "<< (*pJets)[jtno].et() << " " << (*pJets)[jtno].eta() << " " << (*pJets)[jtno].phi() <<endl;
+	for (JetMatchedPartonsCollection::const_iterator j = matchedParticleMap->begin(); j != matchedParticleMap->end(); j ++) {
+	  const Jet *aJet = (*j).first.get();
+	  //cout<<"maped Jet (pt,eta,phi): "<< ((aJet))->et() << " " << ((aJet))->eta() << " " << ((aJet))->phi() <<endl;
+	  if (((*pJets)[jtno].eta()==((aJet))->eta()) && ((*pJets)[jtno].phi()==((aJet))->phi())) {
+	    j_sel=j;
+	    matchedPartonFound=true;
+	    break;
+	  }
 	}
+      
+	if (matchedPartonFound) {
+	  const MatchedPartons aMatch = (*j_sel).second;
 	
-	GenParticleRef thePhyDef = aMatch.physicsDefinitionParton();
-	if (thePhyDef.isNonnull()) {
-	  //          cout<<"matched parton PhysDef:        "<< thePhyDef->et() <<" "<< thePhyDef->eta()<<" "<< thePhyDef->phi()<<endl;
-	  gppt_phys = thePhyDef->pt();
-	  gpphi_phys = thePhyDef->phi();
-	  gpeta_phys = thePhyDef->eta();
-	  gpet_phys = thePhyDef->et();
-	  gpe_phys = thePhyDef->energy();
-	  gpm_phys = thePhyDef->mass();
-	  gpid_phys = thePhyDef->pdgId();
+
+	
+	  //           cout<<"matched Jet (pt,eta,phi):         "<< aJet->et() <<" "<< aJet->eta()<<" "<< aJet->phi()<<endl;
+	
+	  GenParticleRef theAlgoDef = aMatch.algoDefinitionParton();
+	  if (theAlgoDef.isNonnull()) {
 	  
-	}
+	    gppt_algo = theAlgoDef->pt();
+	    gpphi_algo = theAlgoDef->phi();
+	    gpeta_algo = theAlgoDef->eta();
+	    gpet_algo = theAlgoDef->et();
+	    gpe_algo = theAlgoDef->energy();
+	    gpm_algo = theAlgoDef->mass();
+	    gpid_algo = theAlgoDef->pdgId();
+	  }
+	
+	  GenParticleRef thePhyDef = aMatch.physicsDefinitionParton();
+	  if (thePhyDef.isNonnull()) {
+	    //          cout<<"matched parton PhysDef:        "<< thePhyDef->et() <<" "<< thePhyDef->eta()<<" "<< thePhyDef->phi()<<endl;
+	    gppt_phys = thePhyDef->pt();
+	    gpphi_phys = thePhyDef->phi();
+	    gpeta_phys = thePhyDef->eta();
+	    gpet_phys = thePhyDef->et();
+	    gpe_phys = thePhyDef->energy();
+	    gpm_phys = thePhyDef->mass();
+	    gpid_phys = thePhyDef->pdgId();
+	  
+	  }
 	
 	
-      } 
-      genpartpt_algo[  jtno ] = gppt_algo;
-      genpartphi_algo[ jtno ] = gpphi_algo ;
-      genparteta_algo[ jtno ] = gpeta_algo ;
-      genpartet_algo[  jtno ] = gpet_algo ;
-      genparte_algo[   jtno ] = gpe_algo ;
-      genpartm_algo[   jtno ] = gpm_algo ;
-      genpartid_algo[  jtno ] = gpid_algo ;
+	} 
+	genpartpt_algo[  jtno ] = gppt_algo;
+	genpartphi_algo[ jtno ] = gpphi_algo ;
+	genparteta_algo[ jtno ] = gpeta_algo ;
+	genpartet_algo[  jtno ] = gpet_algo ;
+	genparte_algo[   jtno ] = gpe_algo ;
+	genpartm_algo[   jtno ] = gpm_algo ;
+	genpartid_algo[  jtno ] = gpid_algo ;
       
 
-      genpartpt_phys[  jtno ] = gppt_phys;
-      genpartphi_phys[ jtno ] = gpphi_phys ;
-      genparteta_phys[ jtno ] = gpeta_phys ;
-      genpartet_phys[  jtno ] = gpet_phys ;
-      genparte_phys[   jtno ] = gpe_phys ;
-      genpartm_phys[   jtno ] = gpm_phys ;
-      genpartid_phys[  jtno ] = gpid_phys ;
+	genpartpt_phys[  jtno ] = gppt_phys;
+	genpartphi_phys[ jtno ] = gpphi_phys ;
+	genparteta_phys[ jtno ] = gpeta_phys ;
+	genpartet_phys[  jtno ] = gpet_phys ;
+	genparte_phys[   jtno ] = gpe_phys ;
+	genpartm_phys[   jtno ] = gpm_phys ;
+	genpartid_phys[  jtno ] = gpid_phys ;
       
-    } // End of loop over calo jets
-  }
-  NobjETowCal = icell;
+      } // End of loop over calo jets
+    }
+    NobjETowCal = icell;
 
 
-  typedef CaloMETCollection::const_iterator cmiter;
-  for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
-    mmet = i->pt();
-    mphi = i->phi();
-    msum = i->sumEt();
-    break;
-  }
+    typedef CaloMETCollection::const_iterator cmiter;
+    for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
+      mmet = i->pt();
+      mphi = i->phi();
+      msum = i->sumEt();
+      break;
+    }
 
-  //Tracks
-   edm::Handle<reco::TrackCollection> tracks;
-   evt.getByLabel(recTracks_,tracks);
+    //Tracks
+    edm::Handle<reco::TrackCollection> tracks;
+    evt.getByLabel(recTracks_,tracks);
 
-   //Muons
-   edm::Handle<reco::MuonCollection> muons;
-   //edm::Handle<reco::TrackCollection> muons;
-   evt.getByLabel(recMuons_,muons);
+    //Muons
+    edm::Handle<reco::MuonCollection> muons;
+    //edm::Handle<reco::TrackCollection> muons;
+    evt.getByLabel(recMuons_,muons);
 
-   // see here for detailed track cluster matching and jet track association
-   //   -> CMSSW/TrackingTools/TrackAssociator/test/CaloMatchingExample.cc
+    // see here for detailed track cluster matching and jet track association
+    //   -> CMSSW/TrackingTools/TrackAssociator/test/CaloMatchingExample.cc
 
-   int iTrack = 0;
-   for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
-     // skip low Pt tracks
-     if (it->pt() < 1) continue;
-     TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
+    int iTrack = 0;
+    for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
+      // skip low Pt tracks
+      if (it->pt() < 1) continue;
+      TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
 
-     for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
-       {
- 	bool saveTrack = false;
- 	double dRin   = deltaR(*it,(*pJets)[jtno]);
-	double outeta = info.trkGlobPosAtEcal.eta();
-	double outphi = info.trkGlobPosAtEcal.phi();
- 	double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
- 	if (dRin < conesize_  || dRout < conesize_){
- 	  saveTrack=true;
- 	}
- 	if (saveTrack){
- 	  trackpt[iTrack]     = it->pt();
- 	  tracketa[iTrack]    = it->eta();
- 	  trackphi[iTrack]    = it->phi();
- 	  trackp[iTrack]      = it->p();
- 	  trackdr[iTrack]     = dRin;
-	  trackdrout[iTrack]  = dRout;
-	  tracketaout[iTrack] = outeta;
- 	  trackphiout[iTrack] = outphi;
-	  trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
- 	  trackemc3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1);
- 	  trackemc5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2);
- 	  trackhac1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0);
- 	  trackhac3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1);
- 	  trackhac5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2);
- 	  DetId centerId = info.findMaxDeposition(TrackDetMatchInfo::HcalRecHits);
- 	  HcalDetId HcalCenterId(centerId);
- 	  tracktowidphi[iTrack] = HcalCenterId.iphi();
- 	  tracktowideta[iTrack] = HcalCenterId.ieta();
- 	  tracktowid[iTrack]    = centerId.rawId();
-	  track_jetidx[iTrack]  = jtno;
-	  trackchi2[iTrack]     = it->normalizedChi2();
- 	  tracknhits[iTrack]    = it->numberOfValidHits();
+      for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
+	{
+	  bool saveTrack = false;
+	  double dRin   = deltaR(*it,(*pJets)[jtno]);
+	  double outeta = info.trkGlobPosAtEcal.eta();
+	  double outphi = info.trkGlobPosAtEcal.phi();
+	  double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
+	  if (dRin < conesize_  || dRout < conesize_){
+	    saveTrack=true;
+	  }
+	  if (saveTrack){
+	    trackpt[iTrack]     = it->pt();
+	    tracketa[iTrack]    = it->eta();
+	    trackphi[iTrack]    = it->phi();
+	    trackp[iTrack]      = it->p();
+	    trackdr[iTrack]     = dRin;
+	    trackdrout[iTrack]  = dRout;
+	    tracketaout[iTrack] = outeta;
+	    trackphiout[iTrack] = outphi;
+	    trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
+	    trackemc3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1);
+	    trackemc5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2);
+	    trackhac1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0);
+	    trackhac3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1);
+	    trackhac5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2);
+	    DetId centerId = info.findMaxDeposition(TrackDetMatchInfo::HcalRecHits);
+	    HcalDetId HcalCenterId(centerId);
+	    tracktowidphi[iTrack] = HcalCenterId.iphi();
+	    tracktowideta[iTrack] = HcalCenterId.ieta();
+	    tracktowid[iTrack]    = centerId.rawId();
+	    track_jetidx[iTrack]  = jtno;
+	    trackchi2[iTrack]     = it->normalizedChi2();
+	    tracknhits[iTrack]    = it->numberOfValidHits();
 
    
- 	  //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
- 	  if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
- 	  else  trackQualityL[iTrack] = false;
- 	  if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
- 	  else  trackQualityT[iTrack] = false;
- 	  if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
- 	  else  trackQualityHP[iTrack] = false;
- 	  //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
- 	  //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
- 	  //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
+	    //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
+	    if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
+	    else  trackQualityL[iTrack] = false;
+	    if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
+	    else  trackQualityT[iTrack] = false;
+	    if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
+	    else  trackQualityHP[iTrack] = false;
+	    //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
+	    //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
+	    //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
  
- 	  //Match track with muons
- 	  muDR[iTrack] = -1;
- 	  muDE[iTrack] = -1;
- 	  bool muonMatch = false;
- 	  for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
- 	    //for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
- 	    if(muon::isGoodMuon(*im, muon::AllGlobalMuons) && muon::isGoodMuon(*im, muon::TMLastStationLoose)) continue;
- 	    double dRm = deltaR(*im,*it);
- 	    double dE = fabs( (im->pt()-it->pt())/it->pt() );
- 	    muDR[iTrack] = dRm;
- 	    muDE[iTrack] = dE;
- 	    if (dRm<0.1 && dE < 0.2) muonMatch = true;
- 	  }
- 	  if (muonMatch) {
- 	    trackid[iTrack] = 13;
- 	  } else {
- 	    trackid[iTrack] = 0;
- 	  }
- 	  ++iTrack;
- 	}
-       }
-   }
-   NobjTrack=iTrack;
+	    //Match track with muons
+	    muDR[iTrack] = -1;
+	    muDE[iTrack] = -1;
+	    bool muonMatch = false;
+	    for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+	      //for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+	      if(muon::isGoodMuon(*im, muon::AllGlobalMuons) && muon::isGoodMuon(*im, muon::TMLastStationLoose)) continue;
+	      double dRm = deltaR(*im,*it);
+	      double dE = fabs( (im->pt()-it->pt())/it->pt() );
+	      muDR[iTrack] = dRm;
+	      muDE[iTrack] = dE;
+	      if (dRm<0.1 && dE < 0.2) muonMatch = true;
+	    }
+	    if (muonMatch) {
+	      trackid[iTrack] = 13;
+	    } else {
+	      trackid[iTrack] = 0;
+	    }
+	    ++iTrack;
+	  }
+	}
+    }
+    NobjTrack=iTrack;
 
 
 
-  /////////// Write genjet collection ///////////////////
+    /////////// Write genjet collection ///////////////////
 
-   if( genJets.isValid() ) {
-     // Loop over genjets
-     NobjGenJet = genJets->size();
-     if(NobjGenJet > kjMAX) NobjGenJet = kjMAX;
+    if( genJets.isValid() ) {
+      // Loop over genjets
+      NobjGenJet = genJets->size();
+      if(NobjGenJet > kjMAX) NobjGenJet = kjMAX;
      
-     for(int gjidx = 0; gjidx < NobjGenJet; gjidx++) {
+      for(int gjidx = 0; gjidx < NobjGenJet; gjidx++) {
        
-       // Write genjet kinematics
-       genjetcolpt[  gjidx ] = genJets->at(gjidx).pt();
-       genjetcolphi[ gjidx ] = genJets->at(gjidx).phi();
-       genjetcoleta[ gjidx ] = genJets->at(gjidx).eta();
-       genjetcolet[  gjidx ] = genJets->at(gjidx).et();
-       genjetcole[   gjidx ] = genJets->at(gjidx).energy();
+	// Write genjet kinematics
+	genjetcolpt[  gjidx ] = genJets->at(gjidx).pt();
+	genjetcolphi[ gjidx ] = genJets->at(gjidx).phi();
+	genjetcoleta[ gjidx ] = genJets->at(gjidx).eta();
+	genjetcolet[  gjidx ] = genJets->at(gjidx).et();
+	genjetcole[   gjidx ] = genJets->at(gjidx).energy();
        
        
-       // Find closest calojet to this genjet
-       // Note: NobjJet was set above to min( pJets->size(), kjMAX )
-       double closestDeltaR = 1000;
-       int    closestJetIdx = 0;
-       for(int cjidx = 0; cjidx < NobjJet; cjidx++) {
-	 double deltaRtmp = deltaR( genJets->at(gjidx).eta(), genJets->at(gjidx).phi(),
-				    pJets->at(cjidx).eta(),    pJets->at(cjidx).phi()     );
+	// Find closest calojet to this genjet
+	// Note: NobjJet was set above to min( pJets->size(), kjMAX )
+	double closestDeltaR = 1000;
+	int    closestJetIdx = 0;
+	for(int cjidx = 0; cjidx < NobjJet; cjidx++) {
+	  double deltaRtmp = deltaR( genJets->at(gjidx).eta(), genJets->at(gjidx).phi(),
+				     pJets->at(cjidx).eta(),    pJets->at(cjidx).phi()     );
 	 
-	 if( deltaRtmp < closestDeltaR ) {
-	   closestDeltaR = deltaRtmp;
-	   closestJetIdx = cjidx;
-	 }
-       }
-       genjetcol_jet_idx[gjidx] = closestJetIdx;
+	  if( deltaRtmp < closestDeltaR ) {
+	    closestDeltaR = deltaRtmp;
+	    closestJetIdx = cjidx;
+	  }
+	}
+	genjetcol_jet_idx[gjidx] = closestJetIdx;
        
-     } // End of loop over genjets
-   }
+      } // End of loop over genjets
+    }
 
 
-  /////////// Write uncharged stable genparticles ///////////////////
+    /////////// Write uncharged stable genparticles ///////////////////
   
-  // Loop over genparticles
-  if( genParticles.isValid() ) {
-    NobjStableGenPart_ = 0;
-    genParticle = genParticles->begin();
-    for(; genParticle != genParticles->end(); genParticle++) {
-      // Write only stable particles
-      if( genParticle->status() != 1 ) continue;
-      // Write only neutral particles
-      if( genParticle->charge() != 0 ) continue;
+    // Loop over genparticles
+    if( genParticles.isValid() ) {
+      NobjStableGenPart_ = 0;
+      genParticle = genParticles->begin();
+      for(; genParticle != genParticles->end(); genParticle++) {
+	// Write only stable particles
+	if( genParticle->status() != 1 ) continue;
+	// Write only neutral particles
+	if( genParticle->charge() != 0 ) continue;
       
-      stableGenPartM_[NobjStableGenPart_]     = genParticle->mass();
-      stableGenPartE_[NobjStableGenPart_]     = genParticle->energy();
-      stableGenPartEt_[NobjStableGenPart_]    = genParticle->et();
-      stableGenPartP_[NobjStableGenPart_]     = genParticle->p();
-      stableGenPartPt_[NobjStableGenPart_]    = genParticle->pt();
-      stableGenPartEta_[NobjStableGenPart_]   = genParticle->eta();
-      stableGenPartPhi_[NobjStableGenPart_]   = genParticle->phi();
-      stableGenPartPDGId_[NobjStableGenPart_] = genParticle->pdgId();
+	stableGenPartM_[NobjStableGenPart_]     = genParticle->mass();
+	stableGenPartE_[NobjStableGenPart_]     = genParticle->energy();
+	stableGenPartEt_[NobjStableGenPart_]    = genParticle->et();
+	stableGenPartP_[NobjStableGenPart_]     = genParticle->p();
+	stableGenPartPt_[NobjStableGenPart_]    = genParticle->pt();
+	stableGenPartEta_[NobjStableGenPart_]   = genParticle->eta();
+	stableGenPartPhi_[NobjStableGenPart_]   = genParticle->phi();
+	stableGenPartPDGId_[NobjStableGenPart_] = genParticle->pdgId();
       
-      NobjStableGenPart_++;
-      if( NobjStableGenPart_ == kMaxStableGenPart_ ) break;
-    } // End of loop over genparticles  
-  }
+	NobjStableGenPart_++;
+	if( NobjStableGenPart_ == kMaxStableGenPart_ ) break;
+      } // End of loop over genparticles  
+    }
 
-  CalibTree->Fill();
+    CalibTree->Fill();
+  }
 }
