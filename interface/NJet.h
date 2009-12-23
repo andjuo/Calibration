@@ -52,7 +52,7 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
-  edm::InputTag jets_, genjets_, genparticles_, met_, weight_tag;                   
+  edm::InputTag jets_, jetIDs_, genjets_, genparticles_, met_, weight_tag;                   
   edm::InputTag ebrechits_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   edm::InputTag genEvtScale_;
@@ -75,10 +75,17 @@ private:
   unsigned int runNumber_;
   unsigned int luminosityBlockNumber_;
   unsigned int eventNumber_;
+  int vtxNTracks_;
+  float vtxPosX_, vtxPosY_, vtxPosZ_;
+  float vtxNormalizedChi2_;
 
-  // Calo jets
+  // Calo jets and jet ID
+  int    minNumJets_;
   int    NobjJet;
-  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetemf, *jetgenjetDeltaR;
+  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;
+  int *n90Hits_;
+  float *fEMF_, *fHPD_, *fRBX_;
+  float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_;
   float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
 
   // Gen jets matched to calo jets
@@ -99,6 +106,10 @@ private:
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
   int   *towid_phi, *towid_eta, *towid, *tow_jetidx;
   float mmet, mphi, msum, weight;
+  unsigned int *numBadEcalCells_, *numBadHcalCells_;
+  unsigned int *numProblematicEcalCells_, *numProblematicHcalCells_;
+  unsigned int *numRecoveredEcalCells_, *numRecoveredHcalCells_;
+
   int   NobjTrack;
   bool *trackQualityL, *trackQualityT, *trackQualityHP;
   float *trackpt, *tracketa, *trackphi, *trackp, *tracketaout, *trackphiout;

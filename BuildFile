@@ -24,6 +24,9 @@
 <use name=JetMETCorrections/Objects>
 <use name=JetMETCorrections/MCJet>
 <use name=SimDataFormats/JetMatching>
+
+<use name=DataFormats/Common>
+
 <flags EDM_PLUGIN=1>
 
 <export>

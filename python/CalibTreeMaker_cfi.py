@@ -59,6 +59,8 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
     TrackTowerTowers = cms.InputTag("MyTrackTowerTowers"),
                               
     NJet_Jets         = cms.InputTag("MyNJet_Jets"),
+    NJet_MinNumJets   = cms.int32(1),                             
+    NJet_JetIDs       = cms.InputTag("MyNJet_JetIDs"),
     NJet_MET          = cms.InputTag("MyNJet_MET"),
     NJetRecTracks     = cms.InputTag("MyNJetRecTracks"),
     NJetRecMuons      = cms.InputTag("MyNJetRecMuons"),
