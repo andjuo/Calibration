@@ -5,11 +5,12 @@ process = cms.Process("Calib")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold             = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
+#    '/store/data/BeamCommissioning09/MinimumBias/RECO/Dec19thReReco_341_v1/0002/B418F9B9-07ED-DE11-909A-0026189438A7.root'
     '/store/data/BeamCommissioning09/MinimumBias/RECO/v2/000/123/596/F67BCF17-48E2-DE11-98B1-000423D94534.root'
             )
                             )
@@ -27,8 +28,15 @@ process.options = cms.untracked.PSet(
 process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
 process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
 process.hltLevel1GTSeed.L1TechTriggerSeeding = cms.bool(True)
-process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41)')
-
+process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) AND NOT (36 OR 37 OR 38 OR 39)')
+# Monster Event filter
+process.monster = cms.EDFilter(
+    "FilterOutScraping",
+    applyfilter = cms.untracked.bool(True),
+    debugOn = cms.untracked.bool(False),
+    numtrack = cms.untracked.uint32(10),
+    thresh = cms.untracked.double(0.2)
+    )
 
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('Configuration/StandardSequences/GeometryExtended_cff')
@@ -65,11 +73,9 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 
 # Jet Energy Corrections
-#process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_7TeV_cff")
 process.load("JetMETCorrections.Configuration.L2L3Corrections_900GeV_cff")
 
 # ZSP and JPT corrections
-
 process.load("JetMETCorrections.Configuration.ZSPJetCorrections219_cff")
 process.load("JetMETCorrections.Configuration.JetPlusTrackCorrections_cff")
 
@@ -90,11 +96,13 @@ process.L2L3JetCorrectorIC5JPT = cms.ESSource("JetCorrectionServiceChain",
 process.calibTreeMaker.WriteDiJetTree          = True
 process.calibTreeMaker.WriteStableGenParticles = False
 
-process.calibTreeMaker.OutputFile         = 'BeamCommissioning09_MinBias_000123596.root'
+process.calibTreeMaker.OutputFile         = 'MinBias-BeamCommissioning09-900GeV-Dec19thReReco_341_v1.root'
 
 process.calibTreeMaker.DiJetTreeName      = 'DiJetTree'
 process.calibTreeMaker.GenEventScaleLabel = 'genEventScale'
 process.calibTreeMaker.NJet_Jets         = 'ak5CaloJets'
+process.calibTreeMaker.NJet_MinNumJets   = 1
+process.calibTreeMaker.NJet_JetIDs       = 'ak5JetID'
 process.calibTreeMaker.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMaker.NJet_GenParticles = 'genParticles'
 process.calibTreeMaker.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
@@ -112,7 +120,7 @@ process.calibTreeMaker.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.
 #Unfinished  15-20: 47035.54 ; 30-50: 8650.123 ; 80-120: 293.22
 
 
-process.p1 = cms.Path( process.dump )
+process.pDump = cms.Path( process.dump )
 
 process.pMC = cms.Path( process.ZSPJetCorrectionsAntiKt5
                         * process.ZSPrecoJetAssociationsAntiKt5
@@ -120,11 +128,11 @@ process.pMC = cms.Path( process.ZSPJetCorrectionsAntiKt5
                         * process.CaloJetPartonMatching
                         * process.genJetParticles
                         * process.ak5GenJets
-                        * process.dump
                         * process.calibTreeMaker
                         )
 
 process.pData = cms.Path( process.hltLevel1GTSeed
+                          * process.monster
                           * process.ZSPJetCorrectionsAntiKt5
                           * process.ZSPrecoJetAssociationsAntiKt5
                           * process.calibTreeMaker
