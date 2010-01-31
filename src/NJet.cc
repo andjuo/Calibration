@@ -10,6 +10,8 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GtFdlWord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
 
 
 NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
@@ -19,11 +21,15 @@ NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
   luminosityBlockNumber_ = 0;
   eventNumber_ = 0;
 
+  hltPhysicsDeclared_ = false;
+
   vtxNTracks_ = 0;
   vtxPosX_ = 0.;
   vtxPosY_ = 0.;
   vtxPosZ_ = 0.;
   vtxNormalizedChi2_ = 0.;
+  vtxNDof_ = 0.;
+  vtxIsFake_ = false;
 
 
   // CaloTower branches for all jets
@@ -381,11 +387,15 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch("LumiBlockNumber",&luminosityBlockNumber_,"LumiBlockNumber/i");
   CalibTree->Branch("EventNumber",&eventNumber_,"EventNumber/i");
 
+  CalibTree->Branch("HltPhysicsDelcared",&hltPhysicsDeclared_,"HltPhysicsDelcared/O");
+
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
   CalibTree->Branch("VtxPosX",&vtxPosX_,"VtxPosX/F");
   CalibTree->Branch("VtxPosY",&vtxPosY_,"VtxPosY/F");
   CalibTree->Branch("VtxPosZ",&vtxPosZ_,"VtxPosZ/F");
   CalibTree->Branch("VtxNormalizedChi2",&vtxNormalizedChi2_,"VtxNormalizedChi2/F");
+  CalibTree->Branch("VtxNDof",&vtxNDof_,"VtxNDof/F");
+  CalibTree->Branch("VtxIsFake",&vtxIsFake_,"VtxIsFake/O");
 
   // CaloTower branches for all jets
   CalibTree->Branch( "NobjTow",&NobjTow,"NobjTow/I"             );
@@ -528,6 +538,15 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   luminosityBlockNumber_ = aux.luminosityBlock();
   eventNumber_           = aux.event();
 
+  // HLT trigger: "Physics declared" bit
+  edm::Handle<L1GlobalTriggerReadoutRecord> gtrr_handle;
+  evt.getByLabel("gtDigis", gtrr_handle);
+  L1GlobalTriggerReadoutRecord const* gtrr = gtrr_handle.product();
+ 
+  L1GtFdlWord fdlWord = gtrr->gtFdlWord();
+  if( fdlWord.physicsDeclared() == 1 ) hltPhysicsDeclared_ = true;
+
+  // Vertex info
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
   evt.getByLabel("offlinePrimaryVertices",offlinePrimaryVertices);
   if( offlinePrimaryVertices->size() ) {
@@ -537,12 +556,16 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     vtxPosY_ = vtx->y();
     vtxPosZ_ = vtx->z();
     vtxNormalizedChi2_ = vtx->normalizedChi2();
+    vtxNDof_ = vtx->ndof();
+    vtxIsFake_ = vtx->isFake();
   } else {
     vtxNTracks_ = 0;
     vtxPosX_ = -10000.;
     vtxPosY_ = -10000.;
     vtxPosZ_ = -10000.;
     vtxNormalizedChi2_ = 10000.;
+    vtxNDof_ = 0;
+    vtxIsFake_ = true;
   }
 
   //Event Weighting

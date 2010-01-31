@@ -75,9 +75,11 @@ private:
   unsigned int runNumber_;
   unsigned int luminosityBlockNumber_;
   unsigned int eventNumber_;
+  bool hltPhysicsDeclared_;
   int vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
-  float vtxNormalizedChi2_;
+  float vtxNormalizedChi2_, vtxNDof_;
+  bool vtxIsFake_;
 
   // Calo jets and jet ID
   int    minNumJets_;
