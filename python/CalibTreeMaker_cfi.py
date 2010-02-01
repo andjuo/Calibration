@@ -57,6 +57,8 @@ calibTreeMaker = cms.EDFilter("CalibTreeMaker",
 
     TrackTowerTracks = cms.InputTag("MyTrackTowerTracks"),
     TrackTowerTowers = cms.InputTag("MyTrackTowerTowers"),
+
+    BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
     NJet_Jets         = cms.InputTag("MyNJet_Jets"),
     NJet_MinNumJets   = cms.int32(1),                             

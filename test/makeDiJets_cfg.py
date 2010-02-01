@@ -73,6 +73,7 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 
 # Jet Energy Corrections
+#process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_7TeV_cff")
 process.load("JetMETCorrections.Configuration.L2L3Corrections_900GeV_cff")
 
 # ZSP and JPT corrections
@@ -113,6 +114,7 @@ process.calibTreeMaker.NJet_L2L3JetCorrector    = cms.string('L2L3JetCorrectorAK
 process.calibTreeMaker.NJet_L2L3JetCorrectorJPT = cms.string('L2L3JetCorrectorIC5JPT')
 process.calibTreeMaker.NJet_MET          = 'met'
 process.calibTreeMaker.NJetRecTracks     = 'generalTracks'
+process.calibTreeMaker.BeamSpot          = 'offlineBeamSpot'
 process.calibTreeMaker.NJetRecMuons      = 'muons' #'globalMuons' check for global muon & TMLastStationLoose in code
 process.calibTreeMaker.NJetConeSize      = 0.5
 process.calibTreeMaker.NJet_Weight_Tag   = 'genEventWeight'

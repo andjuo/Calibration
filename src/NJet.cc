@@ -81,6 +81,8 @@ NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
   trackchi2      = new float[ kMAX ];
   muDR           = new float[ kMAX ];
   muDE           = new float[ kMAX ];
+  trackd0      = new float[ kMAX ];
+  trackz0      = new float[ kMAX ];
 
   //All calo jets
   minNumJets_     = 0;
@@ -277,7 +279,9 @@ NJet::~NJet() {
   delete [] trackQualityHP;
   delete [] trackchi2;     
   delete [] muDR;          
-  delete [] muDE;          
+  delete [] muDE;     
+  delete [] trackd0;     
+  delete [] trackz0;          
 
   delete [] jetpt;          
   delete [] jetphi;         
@@ -370,6 +374,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
   genEvtScale_        = cfg.getParameter<edm::InputTag>("GenEventScaleLabel");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
+  beamSpot_           = cfg.getParameter<edm::InputTag>("BeamSpot");
   l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
   l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
   JPTname_ = cfg.getParameter<std::string>("NJet_JPTZSPCorrector");
@@ -445,6 +450,8 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
    CalibTree->Branch( "Track_jetidx",track_jetidx, "Track_jetidx[NobjTrack]/I");
    CalibTree->Branch( "MuDR", muDR,  "MuDR[NobjTrack]/F"  );
    CalibTree->Branch( "MuDE", muDE,  "MuDE[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackD0",  trackd0,  "TrackD0[NobjTrack]/F"  );
+   CalibTree->Branch( "TrackZ0",  trackz0,  "TrackZ0[NobjTrack]/F"  );
 
   //All calo jets
   CalibTree->Branch( "NobjJet",            &NobjJet,         "NobjJet/I"             );
@@ -568,6 +575,13 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     vtxIsFake_ = true;
   }
 
+  //BeamSpot
+  edm::Handle<reco::BeamSpot> beamSpotHandle;
+  evt.getByLabel(beamSpot_,beamSpotHandle);
+  reco::BeamSpot myBeamSpot = *beamSpotHandle;
+  
+  const math::XYZPointD & myPosition=myBeamSpot.position();
+
   //Event Weighting
   if(weight_ < 0)
     {
@@ -662,7 +676,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
  	    jscalel2l3JPT[jtno] = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT[jtno] );  //calculate the correction
  	  }
       }
-
 
       if( genJets.isValid() ) {
 	// Find closest genjet (DeltaR) to the current calo jet
@@ -883,6 +896,8 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	    track_jetidx[iTrack]  = jtno;
 	    trackchi2[iTrack]     = it->normalizedChi2();
 	    tracknhits[iTrack]    = it->numberOfValidHits();
+	    trackd0[iTrack]       = it->dxy(myPosition);
+	    trackz0[iTrack]       = it->dz(myPosition);
 
    
 	    //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;

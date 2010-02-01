@@ -43,6 +43,31 @@
 #include "PhysicsTools/JetMCUtils/interface/CandMCTag.h"
 #include "SimDataFormats/JetMatching/interface/JetMatchedPartons.h"
 
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+
+//Version > CMSSW_3_1_X
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/CommonDetUnit/interface/GeomDetType.h"
+#include "Geometry/CommonDetUnit/interface/GeomDetUnit.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetType.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHitFwd.h"
+#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
+
+#include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+#include "SimTracker/Records/interface/TrackAssociatorRecord.h"
+
+
+
 class NJet {
 public:
   NJet(); 
@@ -53,7 +78,7 @@ public:
 
 private:
   edm::InputTag jets_, jetIDs_, genjets_, genparticles_, met_, weight_tag;                   
-  edm::InputTag ebrechits_;
+  edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   edm::InputTag genEvtScale_;
   std::string l2name_;
@@ -115,7 +140,7 @@ private:
   int   NobjTrack;
   bool *trackQualityL, *trackQualityT, *trackQualityHP;
   float *trackpt, *tracketa, *trackphi, *trackp, *tracketaout, *trackphiout;
-  float *trackdr, *trackdrout, *trackchi2;
+  float *trackdr, *trackdrout, *trackchi2, *trackd0, *trackz0;
   float *trackemc1, *trackemc3, *trackemc5;
   float *trackhac1, *trackhac3, *trackhac5;
   float *muDR, *muDE;
