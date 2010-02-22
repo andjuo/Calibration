@@ -708,11 +708,6 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       }
 
       // Write calo towers
-      double etWeightedPhi = 0.;
-      double etWeightedPhi2 = 0.;
-      double etWeightedEta = 0.;
-      double etWeightedEta2 = 0.;
-      double etSum = 0.;
       std::vector<CaloTowerPtr> j_towers = (*pJets)[jtno].getCaloConstituents();
       NobjTow+=j_towers.size();
       for (std::vector<CaloTowerPtr>::const_iterator tow = j_towers.begin(); 
@@ -736,19 +731,9 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	numProblematicHcalCells_[towno] = (*tow)->numProblematicHcalCells();
 	numRecoveredEcalCells_[towno] = (*tow)->numRecoveredEcalCells();
 	numRecoveredHcalCells_[towno] = (*tow)->numRecoveredHcalCells();
-	
-	etWeightedPhi  += (*tow)->et() * (*tow)->phi();
-	etWeightedPhi2 += (*tow)->et() * (*tow)->phi() * (*tow)->phi();
-	etWeightedEta  += (*tow)->et() * (*tow)->eta();
-	etWeightedEta2 += (*tow)->et() * (*tow)->eta() * (*tow)->eta();
-	etSum          += (*tow)->et();
       } // End loop over towers
-      etWeightedPhi  /= etSum;
-      etWeightedPhi2 /= etSum;
-      etWeightedEta  /= etSum;
-      etWeightedEta2 /= etSum;
-      jetEtWeightedSigmaPhi_[jtno] = sqrt( etWeightedPhi2 - etWeightedPhi*etWeightedPhi );
-      jetEtWeightedSigmaEta_[jtno] = sqrt( etWeightedEta2 - etWeightedEta*etWeightedEta );
+      jetEtWeightedSigmaPhi_[jtno] = (*pJets)[jtno].phiphiMoment() > 0 ? sqrt((*pJets)[jtno].phiphiMoment()) : 0;
+      jetEtWeightedSigmaEta_[jtno] = (*pJets)[jtno].etaetaMoment() > 0 ? sqrt((*pJets)[jtno].etaetaMoment()) : 0;
 
       //// GenParticle Matching ALGO and PHYSICS
       if( matchedParticleMap.isValid() ) {
