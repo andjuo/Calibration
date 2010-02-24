@@ -93,7 +93,7 @@ private:
 
   //tree variables:
   const int kjMAX;               // Max number of jets stored in an event
-  const int kMAX;                // Max number of towers stored in an event
+  const int kMAX;                // Max number of towers/tracks/particles stored in an event
   const int kMaxStableGenPart_;  // Max number of stable gen particles stored in an event
 
   // Event info
@@ -121,7 +121,13 @@ private:
   // Gen jet collection
   int    NobjGenJet;
   float *genjetcolpt, *genjetcolphi, *genjetcoleta, *genjetcolet, *genjetcole;
+  float *genjetcoleme,*genjetcolhade,*genjetcolinve,*genjetcolauxe;
   int   *genjetcol_jet_idx;
+
+  // Get jet particles
+  int NobjGenJetPart;
+  float *genjetparte,*genjetpartpt,*genjetparteta,*genjetpartphi;
+  int *genjetpartpdg,*genjetpart_genjetcolidx;
 
   //duplicated for ALGO and PHYS Def
   float *genpartpt_algo, *genpartphi_algo, *genparteta_algo, *genpartet_algo, *genparte_algo, *genpartm_algo;
@@ -156,6 +162,7 @@ private:
   float *etowet, *etoweta, *etowphi, *etowe;
 
   // Stable gen particles
+  bool    writeGenJetPart_;
   bool    writeStableGenPart_;
   int     NobjStableGenPart_;
   float * stableGenPartM_;

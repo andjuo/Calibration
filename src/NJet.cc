@@ -141,6 +141,10 @@ NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
   genjetcoleta      = new float [ kjMAX ];
   genjetcolet       = new float [ kjMAX ];
   genjetcole        = new float [ kjMAX ];
+  genjetcoleme      = new float [ kjMAX ];
+  genjetcolhade     = new float [ kjMAX ];
+  genjetcolinve     = new float [ kjMAX ];
+  genjetcolauxe     = new float [ kjMAX ];
   genjetcol_jet_idx = new int   [ kjMAX ];
   for(int i = 0; i < kjMAX; i++) {
     genjetcolpt[i]       = 0.;
@@ -148,9 +152,29 @@ NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
     genjetcoleta[i]      = 0.;
     genjetcolet[i]       = 0.;
     genjetcole[i]        = 0.;
+    genjetcoleme[i]      = 0.;
+    genjetcolhade[i]     = 0.;
+    genjetcolinve[i]     = 0.;
+    genjetcolauxe[i]     = 0.;
     genjetcol_jet_idx[i] = -1;
   }
-
+  // Gen jet particles
+  NobjGenJetPart = 0;
+  genjetparte              = new float [ kMAX ];
+  genjetpartpt             = new float [ kMAX ];
+  genjetparteta            = new float [ kMAX ];
+  genjetpartphi            = new float [ kMAX ];
+  genjetpartpdg            = new int [ kMAX ];
+  genjetpart_genjetcolidx  = new int [ kMAX ];
+  for(int i = 0; i < kMAX; ++i) {
+    genjetparte[i]             = 0;
+    genjetpartpt[i]            = 0;
+    genjetparteta[i]           = 0;
+    genjetpartphi[i]           = 0;
+    genjetpartpdg[i]           = 0;
+    genjetpart_genjetcolidx[i] = -1;
+  }
+    
   // Matched gen particles
   // Alogrithmic matching
   genpartpt_algo     = new float [ kjMAX ];
@@ -316,7 +340,18 @@ NJet::~NJet() {
   delete [] genjetcoleta;     
   delete [] genjetcolet;      
   delete [] genjetcole;       
-  delete [] genjetcol_jet_idx;
+  delete [] genjetcoleme;       
+  delete [] genjetcolhade;       
+  delete [] genjetcolinve;       
+  delete [] genjetcolauxe;       
+  delete [] genjetcol_jet_idx;  
+
+  delete [] genjetparte;
+  delete [] genjetpartpt;
+  delete [] genjetparteta;
+  delete [] genjetpartphi;
+  delete [] genjetpartpdg;
+  delete [] genjetpart_genjetcolidx;
 
   delete [] genpartpt_algo;
   delete [] genpartphi_algo;
@@ -373,6 +408,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   conesize_           = cfg.getParameter<double>("NJetConeSize");
   zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
   genEvtScale_        = cfg.getParameter<edm::InputTag>("GenEventScaleLabel");
+  writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
   beamSpot_           = cfg.getParameter<edm::InputTag>("BeamSpot");
   l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
@@ -488,8 +524,21 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "GenJetColEta",    genjetcoleta,      "GenJetColEta[NobjGenJet]/F"   );
   CalibTree->Branch( "GenJetColEt",     genjetcolet,       "GenJetColEt[NobjGenJet]/F"    );
   CalibTree->Branch( "GenJetColE",      genjetcole,        "GenJetColE[NobjGenJet]/F"     );
+  CalibTree->Branch( "GenJetColEmE",    genjetcoleme,      "GenJetColEmE[NobjGenJet]/F"     );
+  CalibTree->Branch( "GenJetColHadE",   genjetcolhade,     "GenJetColHadE[NobjGenJet]/F"     );
+  CalibTree->Branch( "GenJetColInvE",   genjetcolinve,     "GenJetColInvE[NobjGenJet]/F"     );
+  CalibTree->Branch( "GenJetColAuxE",   genjetcolauxe,     "GenJetColAuxE[NobjGenJet]/F"     );
   CalibTree->Branch( "GenJetColJetIdx", genjetcol_jet_idx, "GenJetColJetIdx[NobjGenJet]/I");
-    
+  // Gen Jet constituents(particles)
+  if(writeGenJetPart_) {
+    CalibTree->Branch("NobjGenJetPart",&NobjGenJetPart,"NobjGenJetPart/I");
+    CalibTree->Branch("GenJetPartE",genjetparte,"GenJetPartE[NobjGenJetPart]/F");
+    CalibTree->Branch("GenJetPartPt",genjetpartpt,"GenJetPartPt[NobjGenJetPart]/F");
+    CalibTree->Branch("GenJetPartEta",genjetparteta,"GenJetPartEta[NobjGenJetPart]/F");
+    CalibTree->Branch("GenJetPartPhi",genjetpartphi,"GenJetPartPhi[NobjGenJetPart]/F"); 
+    CalibTree->Branch("GenJetPartPDG",genjetpartpdg,"GenJetPartPDG[NobjGenJetPart]/I"); 
+    CalibTree->Branch("GenJetPartGenJetColIdx",genjetpart_genjetcolidx,"GenJetPartGenJetColIdx[NobjGenJetPart]/I"); 
+  }
   // Matched gen particles
   // Alogrithmic matching
   // GenPart_algo branches        );
@@ -927,24 +976,27 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     if( genJets.isValid() ) {
       // Loop over genjets
       NobjGenJet = genJets->size();
+      int gjpidx = 0;
       if(NobjGenJet > kjMAX) NobjGenJet = kjMAX;
      
       for(int gjidx = 0; gjidx < NobjGenJet; gjidx++) {
-       
+	const reco::GenJet& genJet =  (*genJets)[gjidx];
 	// Write genjet kinematics
-	genjetcolpt[  gjidx ] = genJets->at(gjidx).pt();
-	genjetcolphi[ gjidx ] = genJets->at(gjidx).phi();
-	genjetcoleta[ gjidx ] = genJets->at(gjidx).eta();
-	genjetcolet[  gjidx ] = genJets->at(gjidx).et();
-	genjetcole[   gjidx ] = genJets->at(gjidx).energy();
-       
-       
+	genjetcolpt[  gjidx ] = genJet.pt();
+	genjetcolphi[ gjidx ] = genJet.phi();
+	genjetcoleta[ gjidx ] = genJet.eta();
+	genjetcolet[  gjidx ] = genJet.et();
+	genjetcole[   gjidx ] = genJet.energy();
+       	genjetcoleme[   gjidx ] = genJet.emEnergy();
+       	genjetcolhade[   gjidx ] = genJet.hadEnergy();
+	genjetcolinve[   gjidx ] = genJet.invisibleEnergy();
+	genjetcolauxe[   gjidx ] = genJet.auxiliaryEnergy();
 	// Find closest calojet to this genjet
 	// Note: NobjJet was set above to min( pJets->size(), kjMAX )
 	double closestDeltaR = 1000;
 	int    closestJetIdx = 0;
 	for(int cjidx = 0; cjidx < NobjJet; cjidx++) {
-	  double deltaRtmp = deltaR( genJets->at(gjidx).eta(), genJets->at(gjidx).phi(),
+	  double deltaRtmp = deltaR( genJet.eta(), genJet.phi(),
 				     pJets->at(cjidx).eta(),    pJets->at(cjidx).phi()     );
 	 
 	  if( deltaRtmp < closestDeltaR ) {
@@ -953,15 +1005,29 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	  }
 	}
 	genjetcol_jet_idx[gjidx] = closestJetIdx;
-       
-      } // End of loop over genjets
+
+	if( writeGenJetPart_ ) {
+	  for(unsigned int igp = 0, ngp = genJet.nConstituents() ;
+	      igp < ngp ; ++igp) {
+	    if(gjpidx >= kMAX) break;
+	    const GenParticle* gp = genJet.getGenConstituent(igp);
+	    genjetparte[gjpidx]             = gp->energy();
+	    genjetpartpt[gjpidx]            = gp->pt();
+	    genjetparteta[gjpidx]           = gp->eta();
+	    genjetpartphi[gjpidx]           = gp->phi();
+	    genjetpartpdg[gjpidx]           = gp->pdgId();
+	    genjetpart_genjetcolidx[gjpidx] = gjidx;
+	    ++gjpidx;
+	  }
+	} // End of loop over genjets
+	NobjGenJetPart = gjpidx; 
+      }
     }
-
-
+    
     /////////// Write uncharged stable genparticles ///////////////////
-  
+    
     // Loop over genparticles
-    if( genParticles.isValid() ) {
+    if( writeStableGenPart_  && genParticles.isValid() ) {
       NobjStableGenPart_ = 0;
       genParticle = genParticles->begin();
       for(; genParticle != genParticles->end(); genParticle++) {
