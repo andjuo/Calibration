@@ -96,6 +96,7 @@ NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
 
   // Jet IDs
   n90Hits_ = new int[kjMAX];
+  fHad_ = new float[kjMAX];
   fEMF_ = new float[kjMAX];
   fHPD_ = new float[kjMAX];
   fRBX_ = new float[kjMAX];
@@ -315,6 +316,7 @@ NJet::~NJet() {
   delete [] jetgenjetDeltaR;
 
   delete [] n90Hits_;
+  delete [] fHad_;
   delete [] fEMF_;
   delete [] fHPD_;
   delete [] fRBX_;
@@ -497,6 +499,7 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetEt",               jetet,           "JetEt[NobjJet]/F" );
   CalibTree->Branch( "JetE",                jete,            "JetE[NobjJet]/F"  );
   CalibTree->Branch( "JetN90Hits",n90Hits_,"JetN90Hits[NobjJet]/I");
+  CalibTree->Branch( "JetHad",fHad_,"JetHad[NobjJet]/F");  
   CalibTree->Branch( "JetEMF",fEMF_,"JetEMF[NobjJet]/F");  
   CalibTree->Branch( "JetFHPD",fHPD_,"JetFHPD[NobjJet]/F");
   CalibTree->Branch( "JetFRBX",fRBX_,"JetFRBX[NobjJet]/F");
@@ -594,6 +597,42 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   luminosityBlockNumber_ = aux.luminosityBlock();
   eventNumber_           = aux.event();
 
+
+  // !!! Hack !!!: filter good lumi sections for 2009 MinBias runs
+  bool isGoodLumiSec = true;
+//   if( runNumber_ == 123596 ) {
+//     if( luminosityBlockNumber_ < 2 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 123615 ) {
+//     if( luminosityBlockNumber_ <  70 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 123732 ) {
+//     if( luminosityBlockNumber_ <  62 || luminosityBlockNumber_ > 109 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 123815 ) {
+//     if( luminosityBlockNumber_ <  8 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 123818 ) {
+//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 42 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 123908 ) {
+//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 12 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124008 ) {
+//     if( luminosityBlockNumber_ <  1 || luminosityBlockNumber_ > 1 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124009 ) {
+//     if( luminosityBlockNumber_ <  1 || luminosityBlockNumber_ > 68 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124020 ) {
+//     if( luminosityBlockNumber_ <  12 || luminosityBlockNumber_ > 94 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124022 ) {
+//     if( luminosityBlockNumber_ <  66 || luminosityBlockNumber_ > 179 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124023 ) {
+//     if( luminosityBlockNumber_ <  38 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124024 ) {
+//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 83 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124025 ) {
+//     if( luminosityBlockNumber_ <  5 || luminosityBlockNumber_ > 13 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124027 ) {
+//     if( luminosityBlockNumber_ <  24 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
+//   } else if( runNumber_ == 124030 ) {
+//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
+//   }
+
+
   // HLT trigger: "Physics declared" bit
   edm::Handle<L1GlobalTriggerReadoutRecord> gtrr_handle;
   evt.getByLabel("gtDigis", gtrr_handle);
@@ -689,7 +728,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
   NobjTow=0;
   NobjETowCal = 0;
   NobjJet = pJets->size();
-  if( NobjJet >= minNumJets_ ) {
+  if( isGoodLumiSec && NobjJet >= minNumJets_ ) {
     if(NobjJet > kjMAX) NobjJet = kjMAX;
     unsigned int towno = 0;   // Calo tower counting index
     unsigned int icell = 0;   // Ecal cell counting index
@@ -703,6 +742,7 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       jetet[  jtno ] = (*pJets)[jtno].et();
       jete[   jtno ] = (*pJets)[jtno].energy();
       fEMF_[ jtno ] = (*pJets)[jtno].emEnergyFraction();
+      fHad_[ jtno ] = (*pJets)[jtno].energyFractionHadronic();
 
       // JetID
       reco::JetID pJetID = (*pJetIDMap)[pJets->refAt(jtno)];

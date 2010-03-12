@@ -111,7 +111,7 @@ private:
   int    NobjJet;
   float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;
   int *n90Hits_;
-  float *fEMF_, *fHPD_, *fRBX_;
+  float *fHad_, *fEMF_, *fHPD_, *fRBX_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_;
   float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
 
