@@ -82,7 +82,7 @@ void CalibTreeMaker::analyze(const edm::Event& evt, const edm::EventSetup& setup
   }
 }
 
-void CalibTreeMaker::beginJob(const edm::EventSetup&)
+void CalibTreeMaker::beginJob()
 {
 }
 
