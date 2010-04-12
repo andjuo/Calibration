@@ -720,9 +720,9 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name_,setup);   //Define the jet corrector
-  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname_, setup); //Define the jet corrector
+  //  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname_, setup); //Define the jet corrector
   const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name_, setup); //Define the jet corrector
-  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname_, setup); //Define the jet corrector
+  //  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname_, setup); //Define the jet corrector
   //const JetCorrector* correctorL2L3PFlow  = JetCorrector::getJetCorrector (l2l3PFlowname, setup); //Define the jet corrector
 
   NobjTow=0;
@@ -757,14 +757,14 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 
 
       // JPT correction (uses ZSP corrected jets)
-      for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
-	if( deltaR(zspJet->eta(),zspJet->phi(),(*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
- 	  {
- 	    jscaleZSP[jtno]     = zspJet->et()/ (*pJets)[jtno].et();
- 	    jscaleJPT[jtno]     = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
- 	    jscalel2l3JPT[jtno] = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT[jtno] );  //calculate the correction
- 	  }
-      }
+//       for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
+// 	if( deltaR(zspJet->eta(),zspJet->phi(),(*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
+//  	  {
+//  	    jscaleZSP[jtno]     = zspJet->et()/ (*pJets)[jtno].et();
+//  	    jscaleJPT[jtno]     = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
+//  	    jscalel2l3JPT[jtno] = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT[jtno] );  //calculate the correction
+//  	  }
+//       }
 
       if( genJets.isValid() ) {
 	// Find closest genjet (DeltaR) to the current calo jet
