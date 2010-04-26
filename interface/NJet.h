@@ -114,6 +114,7 @@ private:
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_;
   float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
+  int *jetieta_, *jetiphi_;
 
   // Gen jets matched to calo jets
   float *genjetpt, *genjetphi, *genjeteta, *genjetet, *genjete;

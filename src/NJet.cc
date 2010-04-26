@@ -12,6 +12,8 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GtFdlWord.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 
 
 NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
@@ -120,6 +122,8 @@ NJet::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
     jscalel2l3[i]     = 1.;
     jscalel2l3JPT[i]  = 1.;
   }
+  jetieta_       = new int [ kjMAX ];
+  jetiphi_       = new int [ kjMAX ];
 
   // Gen jets (matched to calo jets)
   genjetpt       = new float [ kjMAX ];
@@ -331,6 +335,9 @@ NJet::~NJet() {
   delete [] jscalel2l3;   
   delete [] jscalel2l3JPT;
 
+  delete [] jetieta_;   
+  delete [] jetiphi_;
+
   delete [] genjetpt; 
   delete [] genjetphi;
   delete [] genjeteta;
@@ -511,6 +518,8 @@ void NJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "JetCorrJPT",          jscaleJPT,       "JetCorrJPT[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2L3",         jscalel2l3,      "JetCorrL2L3[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2L3JPT",      jscalel2l3JPT,   "JetCorrL2L3JPT[NobjJet]/F" );
+  CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
+  CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
 
   // Gen jets (matched to calo jets)
   CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
@@ -716,6 +725,11 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
     genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]);
   }
 
+  //get tower geometry
+  edm::ESHandle<CaloGeometry> geometry;
+  setup.get<CaloGeometryRecord>().get(geometry);
+  const CaloSubdetectorGeometry* towerGeometry = geometry->getSubdetectorGeometry(DetId::Calo, CaloTowerDetId::SubdetId);
+  
   //std::string l2l3PFlowname = "L2L3JetCorrectorSC5PF";
 
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name_,setup);   //Define the jet corrector
@@ -765,6 +779,15 @@ void NJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 //  	    jscalel2l3JPT[jtno] = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT[jtno] );  //calculate the correction
 //  	  }
 //       }
+
+      //jet position 
+      // only eta and phi coordinate of poI is used so it's fine to 
+      // initialize poI with the jet momentum
+      const GlobalPoint poI((*pJets)[jtno].px(),(*pJets)[jtno].py(),(*pJets)[jtno].pz());
+      CaloTowerDetId towerId = towerGeometry->getClosestCell(poI);    
+      jetieta_[jtno] = towerId.ieta();
+      jetiphi_[jtno] = towerId.iphi();
+
 
       if( genJets.isValid() ) {
 	// Find closest genjet (DeltaR) to the current calo jet
