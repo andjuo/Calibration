@@ -311,7 +311,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	if( deltaR(zspJet->eta(),zspJet->phi(), calojet.eta() , calojet.phi()) < 0.01)//no change in R
 	  {
 	    jscaleZSP = zspJet->et()/calojet.et();
-	    jscaleJPT = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
+	    jscaleJPT = correctorJPT ->correction((*zspJet));  //calculate the correction
 	    jscalel2l3JPT   = correctorL2L3JPT  ->correction(zspJet->p4() * jscaleJPT );  //calculate the correction
 	  }
       }

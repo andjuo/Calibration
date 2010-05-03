@@ -31,7 +31,7 @@ process.primaryVertexFilter = cms.EDFilter("VertexSelector",
 
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('Configuration/StandardSequences/GeometryExtended_cff')
-process.load('Configuration/StandardSequences/MagneticField_38T_cff')
+process.load('Configuration/StandardSequences/MagneticField_AutoFromDBCurrent_cff')
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
@@ -42,7 +42,7 @@ process.load("TrackingTools.TrackAssociator.default_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'START3X_V26A::All'
 
-process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
+process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")
 
 process.load("RecoJets.Configuration.RecoJets_cff")
 
@@ -63,11 +63,11 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 
 # Jet Energy Corrections
-process.load("JetMETCorrections.Configuration.L2L3Corrections_Summer09_7TeV_ReReco332_cff")
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 
 # ZSP and JPT corrections
-process.load("JetMETCorrections.Configuration.ZSPJetCorrections219_cff")
-process.load("JetMETCorrections.Configuration.JetPlusTrackCorrections_cff")
+process.load("RecoJets.Configuration.RecoJPTJets_cff")
+
 
 #process.L2JetCorrectorIC5JPT= cms.ESSource("L2RelativeCorrectionService", 
 #                                           tagName = cms.string('Winter09_L2Relative_IC5JPT'),
@@ -90,11 +90,11 @@ process.calibTreeMakerCalo.NJet_Jets         = 'ak5CaloJets'
 process.calibTreeMakerCalo.NJet_JetIDs       = 'ak5JetID'
 process.calibTreeMakerCalo.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerCalo.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
-process.calibTreeMakerCalo.NJet_L2JetCorrector      = cms.string('L2RelativeJetCorrectorAK5Calo')
-process.calibTreeMakerCalo.NJet_L3JetCorrector      = cms.string('L3AbsoluteJetCorrectorAK5Calo')
+process.calibTreeMakerCalo.NJet_L2JetCorrector      = cms.string('ak5CaloL2Relative')
+process.calibTreeMakerCalo.NJet_L3JetCorrector      = cms.string('ak5CaloL3Absolute')
 process.calibTreeMakerCalo.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerCalo.NJet_L2L3JetCorrector    = cms.string('L2L3JetCorrectorAK5Calo')
-process.calibTreeMakerCalo.NJet_L2L3JetCorrectorJPT = cms.string('L2L3JetCorrectorIC5JPT')
+process.calibTreeMakerCalo.NJet_L2L3JetCorrector    = cms.string('ak5CaloL2L3')
+process.calibTreeMakerCalo.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerCalo.NJetConeSize      = 0.5
 #process.calibTreeMakerCalo.NJet_Weight_Tag   = 'genEventWeight'
 #process.calibTreeMakerCalo.NJet_Weight       =  1 #Summer09: 0-15: 1802353.8 (fuer 1mio ca 600000);   20-30: 21194.22 ;   50-80: 10193.66  ;    120-170: 469.1156 ;170-230: 89.325 ; 230-300:19.6624 ; 300-380: 5.1781 ; 380-470: 1.32352 ; 470-600: 0.43106 ; 600-800: 0.29169 ;  800-1k: 0.044800 ; 1k-1.4k: 0.010758 ; 1.4k-1.8k: 0.0007192 ; 1.8-2.2k: 0.000063557 ; 2.2k - 2.6k : 0.000005888; 2.6k-3k: 0.000000517 ; 3k-3.5k: 0.00000004 ; 3.5k-Inf: 0.000000001
@@ -107,11 +107,11 @@ process.calibTreeMakerPF.NJet_Jets         = 'ak5PFJets'
 process.calibTreeMakerPF.NJet_JetIDs       = ''
 process.calibTreeMakerPF.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerPF.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
-process.calibTreeMakerPF.NJet_L2JetCorrector      = cms.string('L2RelativeJetCorrectorAK5PF')
-process.calibTreeMakerPF.NJet_L3JetCorrector      = cms.string('L3AbsoluteJetCorrectorAK5PF')
+process.calibTreeMakerPF.NJet_L2JetCorrector      = cms.string('ak5PFL2Relative')
+process.calibTreeMakerPF.NJet_L3JetCorrector      = cms.string('ak5PFL3Absolute')
 process.calibTreeMakerPF.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerPF.NJet_L2L3JetCorrector    = cms.string('L2L3JetCorrectorAK5PF')
-process.calibTreeMakerPF.NJet_L2L3JetCorrectorJPT = cms.string('L2L3JetCorrectorIC5JPT')
+process.calibTreeMakerPF.NJet_L2L3JetCorrector    = cms.string('ak5PFL2L3')
+process.calibTreeMakerPF.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPT')
 process.calibTreeMakerPF.NJetConeSize      = 0.5
 #process.calibTreeMakerPF.NJet_Weight_Tag   = 'genEventWeight'
 #process.calibTreeMakerPF.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.8 (fuer 1mio ca 600000);   20-30: 21194.22 ;   50-80: 10193.66  ;    120-170: 469.1156 ;170-230: 89.325 ; 230-300:19.6624 ; 300-380: 5.1781 ; 380-470: 1.32352 ; 470-600: 0.43106 ; 600-800: 0.29169 ;  800-1k: 0.044800 ; 1k-1.4k: 0.010758 ; 1.4k-1.8k: 0.0007192 ; 1.8-2.2k: 0.000063557 ; 2.2k - 2.6k : 0.000005888; 2.6k-3k: 0.000000517 ; 3k-3.5k: 0.00000004 ; 3.5k-Inf: 0.000000001
@@ -125,40 +125,46 @@ process.calibTreeMakerTrack.NJet_JetIDs       = ''
 process.calibTreeMakerTrack.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerTrack.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
 #ATTENTION: use CALO correction for the time being....
-process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('L2RelativeJetCorrectorAK5Calo')
-process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('L3AbsoluteJetCorrectorAK5Calo')
+process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TrackL2Relative')
+process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TrackL3Absolute')
 process.calibTreeMakerTrack.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerTrack.NJet_L2L3JetCorrector    = cms.string('L2L3JetCorrectorAK5Calo')
-process.calibTreeMakerTrack.NJet_L2L3JetCorrectorJPT = cms.string('L2L3JetCorrectorIC5JPT')
+process.calibTreeMakerTrack.NJet_L2L3JetCorrector    = cms.string('ak5TrackL2L3')
+process.calibTreeMakerTrack.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerTrack.NJetConeSize      = 0.5
 #process.calibTreeMakerTrack.NJet_Weight_Tag   = 'genEventWeight'
 #process.calibTreeMakerTrack.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.8 (fuer 1mio ca 600000);   20-30: 21194.22 ;   50-80: 10193.66  ;    120-170: 469.1156 ;170-230: 89.325 ; 230-300:19.6624 ; 300-380: 5.1781 ; 380-470: 1.32352 ; 470-600: 0.43106 ; 600-800: 0.29169 ;  800-1k: 0.044800 ; 1k-1.4k: 0.010758 ; 1.4k-1.8k: 0.0007192 ; 1.8-2.2k: 0.000063557 ; 2.2k - 2.6k : 0.000005888; 2.6k-3k: 0.000000517 ; 3k-3.5k: 0.00000004 ; 3.5k-Inf: 0.000000001
 #Unfinished  15-20: 47035.54 ; 30-50: 8650.123 ; 80-120: 293.22
 
 #ATTENTION: use CALOcorrections for the time being
-process.calibTreeMakerJPT = process.calibTreeMakerCalo.clone()
+process.calibTreeMakerJPT.WriteDiJetTree          = True
+process.calibTreeMakerJPT.WriteStableGenParticles = False
 process.calibTreeMakerJPT.OutputFile        = 'QCDFlat_Pt15to3000Spring10-START3X_V26_S09-v1-ak5JPT.root'
-process.calibTreeMakerJPT.NJet_Jets         = 'ZSPJetCorJetAntiKt5'
+process.calibTreeMakerJPT.NJet_Jets         = 'JetPlusTrackZSPCorJetAntiKt5'
 process.calibTreeMakerJPT.NJet_JetIDs       = ''
-process.calibTreeMakerJPT.NJet_L2JetCorrector      = cms.string('L2RelativeJetCorrectorAK5Calo')
-process.calibTreeMakerJPT.NJet_L3JetCorrector      = cms.string('L3AbsoluteJetCorrectorAK5Calo')
-process.calibTreeMakerJPT.NJet_L2L3JetCorrector    = cms.string('L2L3JetCorrectorAK5Calo')
-process.calibTreeMakerJPT.NJet_L2L3JetCorrectorJPT = cms.string('L2L3JetCorrectorIC5JPT')
+process.calibTreeMakerJPT.NJet_L2JetCorrector      = cms.string('ak5JPTL2Relative')
+process.calibTreeMakerJPT.NJet_L3JetCorrector      = cms.string('ak5JPTL3Absolute')
+process.calibTreeMakerJPT.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
+process.calibTreeMakerJPT.NJet_L2L3JetCorrector    = cms.string('ak5JPTL2L3')
+process.calibTreeMakerJPT.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
+process.calibTreeMakerJPT.NJetConeSize      = 0.5
+#process.calibTreeMakerJPT.NJet_Weight_Tag   = 'genEventWeight'
+#process.calibTreeMakerJPT.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.8 (fuer 1mio ca 600000);   20-30: 21194.22 ;   50-80: 10193.66  ;    120-170: 469.1156 ;170-230: 89.325 ; 230-300:19.6624 ; 300-380: 5.1781 ; 380-470: 1.32352 ; 470-600: 0.43106 ; 600-800: 0.29169 ;  800-1k: 0.044800 ; 1k-1.4k: 0.010758 ; 1.4k-1.8k: 0.0007192 ; 1.8-2.2k: 0.000063557 ; 2.2k - 2.6k : 0.000005888; 2.6k-3k: 0.000000517 ; 3k-3.5k: 0.00000004 ; 3.5k-Inf: 0.000000001
+#Unfinished  15-20: 47035.54 ; 30-50: 8650.123 ; 80-120: 293.22
+
+
 
 process.pDump = cms.Path( process.dump )
 
 process.pMC = cms.Path( #process.dump
-                        #* process.ZSPJetCorrectionsAntiKt5
-                        #* process.ZSPrecoJetAssociationsAntiKt5
-                         process.myPartons
+                        process.recoJPTJets
+                        * process.myPartons
                         * process.CaloJetPartonMatching
                         * process.genJetParticles
                         * process.ak5GenJets
+#                        * process.dump
                         * process.calibTreeMakerCalo
                         * process.calibTreeMakerPF
                         * process.calibTreeMakerTrack
-                        * process.ZSPJetCorrectionsAntiKt5
-                        * process.JetPlusTrackCorrectionsAntiKt5 
                         * process.calibTreeMakerJPT
                         )
 

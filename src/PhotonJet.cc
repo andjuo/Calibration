@@ -243,7 +243,7 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTr
 	if( deltaR(zspJet->eta(),zspJet->phi(), calojet.eta() , calojet.phi()) < 0.01)//no change in R
 	  {
 	    jscaleZSP = zspJet->et()/calojet.et();
-	    jscaleJPT = correctorJPT ->correction((*zspJet),evt,setup);  //calculate the correction
+	    jscaleJPT = correctorJPT ->correction((*zspJet));  //calculate the correction
 	  }
       }
   /*
