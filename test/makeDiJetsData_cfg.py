@@ -5,19 +5,20 @@ process = cms.Process("Calib")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold             = 'INFO'
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
     #'/store/data/Run2010A/JetMETTau/RECO/v1/000/136/082/147EC62F-DF66-DF11-9678-003048D2BE08.root'
-    '/store/data/Commissioning10/MinimumBias/RECO/May6thPDSkim2_SD_JetMETTau-v1/0137/FE3CCCB6-D05D-DF11-BB30-00261894383F.root'
-
+    #'/store/data/Commissioning10/MinimumBias/RECO/May6thPDSkim2_SD_JetMETTau-v1/0137/FE3CCCB6-D05D-DF11-BB30-00261894383F.root'
+    # '/store/data/Commissioning10/MinimumBias/RECO/GOODCOLL-Jun9thSkim_v1/0039/20C793BD-3678-DF11-AF29-0018F3D09706.root'
+    '/store/data/Run2010A/JetMET/RECO/v4/000/141/960/48753CF6-D39B-DF11-AB95-0030487A18F2.root'
             )
                             )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(5000) )
+    input = cms.untracked.int32(200) )
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),
@@ -33,14 +34,15 @@ process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) 
 
 # HLT
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
-process.hltHighLevel.HLTPaths = ('HLT_Jet15U','HLT_Jet30U','HLT_Jet50U','HLT_DiJetAve15U_8E29','HLT_DiJetAve30U_8E29')
+#process.hltHighLevel.HLTPaths = ('HLT_DiJetAve15U','HLT_DiJetAve30U','HLT_DiJetAve50U')
+process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve15U')
 process.hltHighLevel.andOr = cms.bool(True)
 process.hltHighLevel.throw = cms.bool(True)
 
 # Vertex filter
 process.primaryVertexFilter = cms.EDFilter("VertexSelector",
    src = cms.InputTag("offlinePrimaryVertices"),
-   cut = cms.string("!isFake && ndof > 4 && abs(z) <= 15 && position.Rho <= 2"), # tracksSize() > 3 for the older cut
+   cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"), # tracksSize() > 3 for the older cut
    filter = cms.bool(True),   # otherwise it won't filter the events, just produce an empty vertex collection.
 )
 
@@ -54,8 +56,9 @@ thresh = cms.untracked.double(0.25)
 
 
 process.load('Configuration/StandardSequences/Services_cff')
-process.load('Configuration/StandardSequences/GeometryExtended_cff')
-process.load('Configuration/StandardSequences/MagneticField_38T_cff')
+process.load('Configuration/StandardSequences/GeometryDB_cff')
+process.load('Configuration/StandardSequences/MagneticField_AutoFromDBCurrent_cff')
+process.load("Configuration/StandardSequences/Reconstruction_cff")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
@@ -64,8 +67,7 @@ process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.GlobalTag.globaltag = 'GR_R_36X_V11A::All'
-process.GlobalTag.globaltag = 'GR_R_35X_V8B::All'
+process.GlobalTag.globaltag = 'GR_R_38X_V13::All'
 
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")

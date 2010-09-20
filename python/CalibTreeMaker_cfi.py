@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from TrackingTools.TrackAssociator.default_cfi import *
 
-calibTreeMakerCalo = cms.EDFilter("CalibTreeMakerCalo",
+calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     TrackAssociatorParameters,
     TrackAssociatorParameterBlock,
                               
@@ -94,7 +94,7 @@ calibTreeMakerCalo = cms.EDFilter("CalibTreeMakerCalo",
 
 calibTreeMaker = calibTreeMakerCalo.clone()
 
-calibTreeMakerPF = cms.EDFilter("CalibTreeMakerPF",
+calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     TrackAssociatorParameters,
     TrackAssociatorParameterBlock,
                               
@@ -184,7 +184,7 @@ calibTreeMakerPF = cms.EDFilter("CalibTreeMakerPF",
     WriteZJetTree       = cms.bool(False),
 )
 
-calibTreeMakerTrack = cms.EDFilter("CalibTreeMakerTrack",
+calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     TrackAssociatorParameters,
     TrackAssociatorParameterBlock,
                               
@@ -274,7 +274,7 @@ calibTreeMakerTrack = cms.EDFilter("CalibTreeMakerTrack",
     WriteZJetTree       = cms.bool(False),
 )
 
-calibTreeMakerJPT = cms.EDFilter("CalibTreeMakerJPT",
+calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     TrackAssociatorParameters,
     TrackAssociatorParameterBlock,
                               
