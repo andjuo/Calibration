@@ -10,11 +10,15 @@
 #include "TChain.h"
 
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/ParameterSet/interface/InputTag.h"
+#include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
+
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
@@ -31,6 +35,7 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
 #include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
@@ -79,10 +84,11 @@ public:
 
 private:
   void fillExtra(const edm::View<T>& pJets, int jtno);
+  bool looseJetID(T const &jet, reco::JetID const &jetID);
+  bool tightJetID(T const &jet, reco::JetID const &jetID);
   edm::InputTag jets_, jetIDs_, genjets_, genparticles_, met_, weight_tag;                   
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
-  edm::InputTag genEvtScale_;
   std::string l2name_;
   std::string l3name_;
   std::string JPTname_;
@@ -109,8 +115,11 @@ private:
   bool vtxIsFake_;
 
   // Calo jets and jet ID
+  JetIDSelectionFunctor jetIDFunctorLoose_;
+  JetIDSelectionFunctor jetIDFunctorTight_;
   int    minNumJets_;
   int    NobjJet;
+  bool *jetIDLoose_, *jetIDTight_;
   float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
@@ -141,7 +150,7 @@ private:
   int   NobjTow;
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
   int   *towid_phi, *towid_eta, *towid, *tow_jetidx;
-  float mmet, mphi, msum, weight;
+  float mmet, mphi, msum, weight, xsec;
   unsigned int *numBadEcalCells_, *numBadHcalCells_;
   unsigned int *numProblematicEcalCells_, *numProblematicHcalCells_;
   unsigned int *numRecoveredEcalCells_, *numRecoveredHcalCells_;
@@ -197,7 +206,10 @@ private:
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 
 
-template <typename T> NJet<T>::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000) {
+template <typename T> NJet<T>::NJet()
+  : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000),
+    jetIDFunctorLoose_(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09,JetIDSelectionFunctor::LOOSE)),
+    jetIDFunctorTight_(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09,JetIDSelectionFunctor::TIGHT)) {
 
   // Event info
   runNumber_ = 0;
@@ -283,6 +295,12 @@ template <typename T> NJet<T>::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPar
   fEMF_ = new float[kjMAX];
   fHPD_ = new float[kjMAX];
   fRBX_ = new float[kjMAX];
+  jetIDLoose_ = new bool[kjMAX];
+  jetIDTight_ = new bool[kjMAX];
+  for(int i = 0; i < kjMAX; i++) {
+    jetIDLoose_[i] = false;
+    jetIDTight_[i] = false;
+  }
 
   // Jet shape
   jetEtWeightedSigmaPhi_ = new float[kjMAX];
@@ -407,6 +425,7 @@ template <typename T> NJet<T>::NJet() : kjMAX(50), kMAX(10000), kMaxStableGenPar
 
   //EventWeight
   weight = 1.;
+  xsec = 0;
 
   //ecal cells data
   NobjETowCal = 0;
@@ -505,6 +524,8 @@ template <typename T> NJet<T>::~NJet() {
   delete [] fEMF_;
   delete [] fHPD_;
   delete [] fRBX_;
+  delete [] jetIDLoose_;
+  delete [] jetIDTight_;
   
   delete [] jetEtWeightedSigmaPhi_;
   delete [] jetEtWeightedSigmaEta_;
@@ -597,7 +618,6 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   recMuons_           = cfg.getParameter<edm::InputTag>("NJetRecMuons");
   conesize_           = cfg.getParameter<double>("NJetConeSize");
   zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
-  genEvtScale_        = cfg.getParameter<edm::InputTag>("GenEventScaleLabel");
   writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
   beamSpot_           = cfg.getParameter<edm::InputTag>("BeamSpot");
@@ -691,6 +711,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetEMF",fEMF_,"JetEMF[NobjJet]/F");  
   CalibTree->Branch( "JetFHPD",fHPD_,"JetFHPD[NobjJet]/F");
   CalibTree->Branch( "JetFRBX",fRBX_,"JetFRBX[NobjJet]/F");
+  CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
+  CalibTree->Branch( "JetIDTight",jetIDTight_,"JetIDTight[NobjJet]/O");
   CalibTree->Branch( "JetEtWeightedSigmaPhi",jetEtWeightedSigmaPhi_,"JetEtWeightedSigmaPhi[NobjJet]/F" );
   CalibTree->Branch( "JetEtWeightedSigmaEta",jetEtWeightedSigmaEta_,"JetEtWeightedSigmaEta[NobjJet]/F" );
   CalibTree->Branch( "JetCorrZSP",          jscaleZSP,       "JetCorrZSP[NobjJet]/F" );
@@ -762,6 +784,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 
   //EventWeight
   CalibTree->Branch( "Weight",&weight,"Weight/F"   );
+  //CrossSection
+  CalibTree->Branch( "CrossSection",&xsec,"CrossSection/F"   );
 
   // stable gen particles data
   if( writeStableGenPart_ ) {
@@ -785,42 +809,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   runNumber_             = aux.run();
   luminosityBlockNumber_ = aux.luminosityBlock();
   eventNumber_           = aux.event();
-
-
-  // !!! Hack !!!: filter good lumi sections for 2009 MinBias runs
-  bool isGoodLumiSec = true;
-//   if( runNumber_ == 123596 ) {
-//     if( luminosityBlockNumber_ < 2 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 123615 ) {
-//     if( luminosityBlockNumber_ <  70 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 123732 ) {
-//     if( luminosityBlockNumber_ <  62 || luminosityBlockNumber_ > 109 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 123815 ) {
-//     if( luminosityBlockNumber_ <  8 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 123818 ) {
-//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 42 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 123908 ) {
-//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 12 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124008 ) {
-//     if( luminosityBlockNumber_ <  1 || luminosityBlockNumber_ > 1 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124009 ) {
-//     if( luminosityBlockNumber_ <  1 || luminosityBlockNumber_ > 68 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124020 ) {
-//     if( luminosityBlockNumber_ <  12 || luminosityBlockNumber_ > 94 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124022 ) {
-//     if( luminosityBlockNumber_ <  66 || luminosityBlockNumber_ > 179 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124023 ) {
-//     if( luminosityBlockNumber_ <  38 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124024 ) {
-//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 83 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124025 ) {
-//     if( luminosityBlockNumber_ <  5 || luminosityBlockNumber_ > 13 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124027 ) {
-//     if( luminosityBlockNumber_ <  24 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
-//   } else if( runNumber_ == 124030 ) {
-//     if( luminosityBlockNumber_ <  2 || luminosityBlockNumber_ > 9999 ) isGoodLumiSec = false;
-//   }
-
 
   // HLT trigger: "Physics declared" bit
   edm::Handle<L1GlobalTriggerReadoutRecord> gtrr_handle;
@@ -859,15 +847,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   
   const math::XYZPointD & myPosition=myBeamSpot.position();
 
-  //Event Weighting
-  if(weight_ < 0)
-    {
-      edm::Handle<double> weightHandle;
-      evt.getByLabel (weight_tag, weightHandle);
-      weight = (float)( *weightHandle );
-    }
-  else weight = weight_;
-
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
 
@@ -888,10 +867,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   edm::Handle<JetMatchedPartonsCollection> matchedParticleMap;
   evt.getByLabel("CaloJetPartonMatching", matchedParticleMap); 
 
-  //3_1_X
-  //edm::ESHandle<TrackerGeometry> theG;
-  //setup.get<TrackerDigiGeometryRecord>().get(theG);
-
 
   // get calo jet after zsp collection
   edm::Handle<CaloJetCollection> zspJets;
@@ -900,11 +875,24 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
   // Get pthat
   edm::Handle<GenEventInfoProduct> genInfoHandle;
-  evt.getByLabel("generator", genInfoHandle);
+  evt.getByLabel("generator", genInfoHandle); 
+  weight = weight_;
   if( genInfoHandle.isValid() ) {
-    genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]);
+    genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]); 
+    if(weight_ <= 0)
+      { 
+	weight = static_cast<float>(genInfoHandle->weight());
+      }
   }
-
+  
+  edm::Handle<GenRunInfoProduct> genInfoProduct;
+  evt.getRun().getByLabel("generator", genInfoProduct );
+  if( genInfoHandle.isValid() ) {
+    xsec = genInfoProduct->crossSection();
+  } else {
+    xsec = 0;
+  }
+  
   //get tower geometry
   edm::ESHandle<CaloGeometry> geometry;
   setup.get<CaloGeometryRecord>().get(geometry);
@@ -922,7 +910,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   NobjTow=0;
   NobjETowCal = 0;
   NobjJet = pJets->size();
-  if( isGoodLumiSec && NobjJet >= minNumJets_ ) {
+  if( NobjJet >= minNumJets_ ) {
     if(NobjJet > kjMAX) NobjJet = kjMAX;
     //unsigned int towno = 0;   // Calo tower counting index
     unsigned int icell = 0;   // Ecal cell counting index
@@ -939,6 +927,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       // JetID
       if(pJetIDMap.isValid()) {
 	reco::JetID pJetID = (*pJetIDMap)[pJets->refAt(jtno)];
+	jetIDLoose_[jtno] = looseJetID((*pJets)[jtno],pJetID);
+	jetIDTight_[jtno] = tightJetID((*pJets)[jtno],pJetID);
 	n90Hits_[jtno] = static_cast<int>(pJetID.n90Hits);
 	fHPD_[jtno] = pJetID.fHPD;
 	fRBX_[jtno] = pJetID.fRBX;
@@ -1306,6 +1296,21 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
 
 template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtno)
 {
+}
+
+
+template <> bool NJet<reco::CaloJet>::looseJetID(reco::CaloJet const &jet, reco::JetID const &jetID) {
+  return jetIDFunctorLoose_(jet,jetID);
+}
+template <typename T> bool NJet<T>::looseJetID(T const &jet, reco::JetID const &jetID) {
+  return false;
+}
+
+template <> bool NJet<reco::CaloJet>::tightJetID(reco::CaloJet const &jet, reco::JetID const &jetID) {
+  return jetIDFunctorTight_(jet,jetID);
+}
+template <typename T> bool NJet<T>::tightJetID(T const &jet, reco::JetID const &jetID) {
+  return false;
 }
 
 #endif
