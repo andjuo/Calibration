@@ -111,6 +111,7 @@ process.calibTreeMaker.NJet_L2JetCorrector      = cms.string('L2RelativeJetCorre
 process.calibTreeMaker.NJet_L3JetCorrector      = cms.string('L3AbsoluteJetCorrectorAK5Calo')
 process.calibTreeMaker.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
 process.calibTreeMaker.NJet_L2L3JetCorrector    = cms.string('L2L3JetCorrectorAK5Calo')
+process.calibTreeMaker.NJet_L2L3L4JWJetCorrector    = cms.string('L2L3JetCorrectorAK5Calo')
 process.calibTreeMaker.NJet_L2L3JetCorrectorJPT = cms.string('L2L3JetCorrectorIC5JPT')
 process.calibTreeMaker.NJet_MET          = 'met'
 process.calibTreeMaker.NJetRecTracks     = 'generalTracks'

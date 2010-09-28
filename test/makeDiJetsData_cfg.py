@@ -83,7 +83,24 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 # Jet Energy Corrections
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-
+# L4JW Correction Services
+# you need special versions of CondFormats and JetMETCorrections:
+# copy the following dirs to your release (this works with 3_8_4):
+# /afs/cern.ch/user/s/stadie/public/CondFormats
+# /afs/cern.ch/user/s/stadie/public/JetMETCorrections
+#
+process.ak5CaloL4JW = cms.ESSource(
+    'LXXXCorrectionService',
+    era = cms.string('Spring10'),
+    section   = cms.string(''),
+    level     = cms.string('L4JW'),
+    algorithm = cms.string('AK5Calo'),
+    useCondDB = cms.untracked.bool(False)
+    )
+process.ak5CaloL2L3L4JW = cms.ESSource(
+    'JetCorrectionServiceChain',
+    correctors = cms.vstring('ak5CaloL2Relative','ak5CaloL3Absolute','ak5CaloL4JW')
+)
 # ZSP and JPT corrections
 process.load("RecoJets.Configuration.RecoJPTJets_cff")
 
@@ -102,6 +119,7 @@ process.calibTreeMakerCalo.NJet_L2JetCorrector      = cms.string('ak5CaloL2Relat
 process.calibTreeMakerCalo.NJet_L3JetCorrector      = cms.string('ak5CaloL3Absolute')
 process.calibTreeMakerCalo.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
 process.calibTreeMakerCalo.NJet_L2L3JetCorrector    = cms.string('ak5CaloL2L3')
+process.calibTreeMakerCalo.NJet_L2L3L4JWJetCorrector    = cms.string('ak5CaloL2L3L4JW')
 process.calibTreeMakerCalo.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerCalo.NJetConeSize      = 0.5
 
@@ -116,6 +134,7 @@ process.calibTreeMakerPF.NJet_L2JetCorrector      = cms.string('ak5PFL2Relative'
 process.calibTreeMakerPF.NJet_L3JetCorrector      = cms.string('ak5PFL3Absolute')
 process.calibTreeMakerPF.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
 process.calibTreeMakerPF.NJet_L2L3JetCorrector    = cms.string('ak5PFL2L3')
+process.calibTreeMakerPF.NJet_L2L3L4JWJetCorrector    = cms.string('ak5PFL2L3')
 process.calibTreeMakerPF.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPT')
 process.calibTreeMakerPF.NJetConeSize      = 0.5
 
@@ -133,6 +152,7 @@ process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TrackL2Rel
 process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TrackL3Absolute')
 process.calibTreeMakerTrack.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
 process.calibTreeMakerTrack.NJet_L2L3JetCorrector    = cms.string('ak5TrackL2L3')
+process.calibTreeMakerTrack.NJet_L2L3L4JWJetCorrector    = cms.string('ak5TrackL2L3')
 process.calibTreeMakerTrack.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerTrack.NJetConeSize      = 0.5
 
@@ -142,12 +162,13 @@ process.calibTreeMakerJPT.WriteStableGenParticles = False
 process.calibTreeMakerJPT.OutputFile        = 'Dijet-ak5JPT.root'
 process.calibTreeMakerJPT.NJet_Jets         = 'JetPlusTrackZSPCorJetAntiKt5'
 process.calibTreeMakerJPT.NJet_JetIDs       = ''
-process.calibTreeMakerTrack.NJet_GenJets    = 'ak5GenJets'
-process.calibTreeMakerTrack.NJetZSPJets     = 'ZSPJetCorJetAntiKt5'
+process.calibTreeMakerJPT.NJet_GenJets    = 'ak5GenJets'
+process.calibTreeMakerJPT.NJetZSPJets     = 'ZSPJetCorJetAntiKt5'
 process.calibTreeMakerJPT.NJet_L2JetCorrector      = cms.string('ak5JPTL2Relative')
 process.calibTreeMakerJPT.NJet_L3JetCorrector      = cms.string('ak5JPTL3Absolute')
 process.calibTreeMakerJPT.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
 process.calibTreeMakerJPT.NJet_L2L3JetCorrector    = cms.string('ak5JPTL2L3')
+process.calibTreeMakerJPT.NJet_L2L3L4JWJetCorrector    = cms.string('ak5JPTL2L3')
 process.calibTreeMakerJPT.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerJPT.NJetConeSize      = 0.5
 

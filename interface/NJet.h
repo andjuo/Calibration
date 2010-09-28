@@ -93,7 +93,9 @@ private:
   std::string l3name_;
   std::string JPTname_;
   std::string l2l3name_;
+  std::string l2l3l4JWname_;
   std::string l2l3JPTname_;
+
   double conesize_;
   float weight_;
   TrackDetectorAssociator trackAssociator_;
@@ -124,7 +126,7 @@ private:
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_;
-  float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT;
+  float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW;
   int *jetieta_, *jetiphi_;
 
   // Gen jets matched to calo jets
@@ -313,6 +315,7 @@ template <typename T> NJet<T>::NJet()
   jscaleJPT       = new float [ kjMAX ];
   jscalel2l3      = new float [ kjMAX ];
   jscalel2l3JPT   = new float [ kjMAX ];
+  jscalel4JW      = new float [ kjMAX ];
   for(int i = 0; i < kjMAX; i++) {
     jscaleZSP[i]      = 1.;
     jscalel2[i]       = 1.;
@@ -320,6 +323,7 @@ template <typename T> NJet<T>::NJet()
     jscaleJPT[i]      = 1.;
     jscalel2l3[i]     = 1.;
     jscalel2l3JPT[i]  = 1.;
+    jscalel4JW[i]     = 1.;
   }
   jetieta_       = new int [ kjMAX ];
   jetiphi_       = new int [ kjMAX ];
@@ -536,6 +540,7 @@ template <typename T> NJet<T>::~NJet() {
   delete [] jscaleJPT;    
   delete [] jscalel2l3;   
   delete [] jscalel2l3JPT;
+  delete [] jscalel4JW;
 
   delete [] jetieta_;   
   delete [] jetiphi_;
@@ -625,6 +630,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
   JPTname_ = cfg.getParameter<std::string>("NJet_JPTZSPCorrector");
   l2l3name_ = cfg.getParameter<std::string>("NJet_L2L3JetCorrector");
+  l2l3l4JWname_ = cfg.getParameter<std::string>("NJet_L2L3L4JWJetCorrector");
   l2l3JPTname_ = cfg.getParameter<std::string>("NJet_L2L3JetCorrectorJPT");
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
   parameters_.loadParameters( parameters );
@@ -721,6 +727,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetCorrJPT",          jscaleJPT,       "JetCorrJPT[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2L3",         jscalel2l3,      "JetCorrL2L3[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2L3JPT",      jscalel2l3JPT,   "JetCorrL2L3JPT[NobjJet]/F" );
+  CalibTree->Branch( "JetCorrL4JW",         jscalel4JW,      "JetCorrL4JW[NobjJet]/F" );
   CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
   CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
 
@@ -904,6 +911,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name_,setup);   //Define the jet corrector
   //  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname_, setup); //Define the jet corrector
   const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name_, setup); //Define the jet corrector
+  const JetCorrector* correctorL2L3L4JW  = JetCorrector::getJetCorrector (l2l3l4JWname_, setup); //Define the jet corrector
+  
   //  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname_, setup); //Define the jet corrector
   //const JetCorrector* correctorL2L3PFlow  = JetCorrector::getJetCorrector (l2l3PFlowname, setup); //Define the jet corrector
 
@@ -937,7 +946,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
       jscalel3[jtno]   = correctorL3  ->correction( jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno].p4());  //calculate the correction
-
+      jscalel4JW[jtno] = correctorL2L3L4JW->correction((*pJets)[jtno]) / jscalel2l3[jtno];  //calculate the correction
 
       // JPT correction (uses ZSP corrected jets)
 //       for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
