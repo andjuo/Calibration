@@ -10,7 +10,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/mc/Spring10/QCDFlat_Pt15to3000/GEN-SIM-RECO/START3X_V26_S09-v1/0057/E6265471-0C4A-DF11-916C-002264984988.root'
+    '/store/mc/Summer10/QCDDiJet_Pt0to15/GEN-SIM-RECO/START36_V9_S09-v1/0005/8C35F91C-0D7B-DF11-990E-001A4BA98052.root'
             )
 )
 
@@ -130,11 +130,11 @@ process.calibTreeMakerTrack.NJet_JetIDs       = ''
 process.calibTreeMakerTrack.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerTrack.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
 #ATTENTION: use CALO correction for the time being....
-process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TRKL2Relative')
-process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TRKL3Absolute')
+process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TrackL2Relative')
+process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TrackL3Absolute')
 process.calibTreeMakerTrack.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerTrack.NJet_L2L3JetCorrector    = cms.string('ak5TRKL2L3')
-process.calibTreeMakerTrack.NJet_L2L3L4JWJetCorrector    = cms.string('ak5TRKL2L3')
+process.calibTreeMakerTrack.NJet_L2L3JetCorrector    = cms.string('ak5TrackL2L3')
+process.calibTreeMakerTrack.NJet_L2L3L4JWJetCorrector    = cms.string('ak5TrackL2L3')
 process.calibTreeMakerTrack.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerTrack.NJetConeSize      = 0.5
 #process.calibTreeMakerTrack.NJet_Weight_Tag   = 'genEventWeight'
