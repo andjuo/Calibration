@@ -7,6 +7,12 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold             = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
+process.AdaptorConfig = cms.Service("AdaptorConfig",
+                                    #tempDir=cms.untracked.string(""),
+                                    cacheHint=cms.untracked.string("lazy-download"),
+                                    #cacheHint=cms.untracked.string("storage-only"),             
+                                    readHint=cms.untracked.string("auto-detect") )
+
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
@@ -57,6 +63,21 @@ process.CaloJetPartonMatching = cms.EDProducer("JetPartonMatcher",
    coneSizeToAssociate = cms.double(0.2),
    partons = cms.InputTag("myPartons")
 )
+process.PFJetPartonMatching = cms.EDProducer("JetPartonMatcher",
+   jets = cms.InputTag("ak5PFJets"),
+   coneSizeToAssociate = cms.double(0.2),
+   partons = cms.InputTag("myPartons")
+)
+process.JPTJetPartonMatching = cms.EDProducer("JetPartonMatcher",
+   jets = cms.InputTag("JetPlusTrackZSPCorJetAntiKt5"),
+   coneSizeToAssociate = cms.double(0.2),
+   partons = cms.InputTag("myPartons")
+)
+process.TrackJetPartonMatching = cms.EDProducer("JetPartonMatcher",
+   jets = cms.InputTag("ak5TrackJets"),
+   coneSizeToAssociate = cms.double(0.2),
+   partons = cms.InputTag("myPartons")
+)
 
 process.load("RecoJets.Configuration.GenJetParticles_cff")
 process.load("RecoJets.Configuration.RecoGenJets_cff")
@@ -91,6 +112,7 @@ process.calibTreeMakerCalo.WriteStableGenParticles = False
 process.calibTreeMakerCalo.OutputFile         = 'ak5Calo.root'
 process.calibTreeMakerCalo.NJet_Jets         = 'ak5CaloJets'
 process.calibTreeMakerCalo.NJet_JetIDs       = 'ak5JetID'
+process.calibTreeMakerCalo.NJet_PartonMatch  = 'CaloJetPartonMatching'
 process.calibTreeMakerCalo.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerCalo.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
 process.calibTreeMakerCalo.NJet_L2JetCorrector      = cms.string('ak5CaloL2Relative')
@@ -109,6 +131,7 @@ process.calibTreeMakerPF.WriteStableGenParticles = False
 process.calibTreeMakerPF.OutputFile         = 'ak5PF.root'
 process.calibTreeMakerPF.NJet_Jets         = 'ak5PFJets'
 process.calibTreeMakerPF.NJet_JetIDs       = ''
+process.calibTreeMakerPF.NJet_PartonMatch  = 'PFJetPartonMatching'
 process.calibTreeMakerPF.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerPF.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
 process.calibTreeMakerPF.NJet_L2JetCorrector      = cms.string('ak5PFL2Relative')
@@ -127,6 +150,7 @@ process.calibTreeMakerTrack.WriteStableGenParticles = False
 process.calibTreeMakerTrack.OutputFile        = 'ak5Track.root'
 process.calibTreeMakerTrack.NJet_Jets         = 'ak5TrackJets'
 process.calibTreeMakerTrack.NJet_JetIDs       = ''
+process.calibTreeMakerTrack.NJet_PartonMatch  = 'TrackJetPartonMatching'
 process.calibTreeMakerTrack.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerTrack.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
 #ATTENTION: use CALO correction for the time being....
@@ -141,12 +165,12 @@ process.calibTreeMakerTrack.NJetConeSize      = 0.5
 #process.calibTreeMakerTrack.NJet_Weight       =  600000  #1 #Summer09: 0-15: 1802353.8 (fuer 1mio ca 600000);   20-30: 21194.22 ;   50-80: 10193.66  ;    120-170: 469.1156 ;170-230: 89.325 ; 230-300:19.6624 ; 300-380: 5.1781 ; 380-470: 1.32352 ; 470-600: 0.43106 ; 600-800: 0.29169 ;  800-1k: 0.044800 ; 1k-1.4k: 0.010758 ; 1.4k-1.8k: 0.0007192 ; 1.8-2.2k: 0.000063557 ; 2.2k - 2.6k : 0.000005888; 2.6k-3k: 0.000000517 ; 3k-3.5k: 0.00000004 ; 3.5k-Inf: 0.000000001
 #Unfinished  15-20: 47035.54 ; 30-50: 8650.123 ; 80-120: 293.22
 
-#ATTENTION: use CALOcorrections for the time being
 process.calibTreeMakerJPT.WriteDiJetTree          = True
 process.calibTreeMakerJPT.WriteStableGenParticles = False
 process.calibTreeMakerJPT.OutputFile        = 'ak5JPT.root'
 process.calibTreeMakerJPT.NJet_Jets         = 'JetPlusTrackZSPCorJetAntiKt5'
 process.calibTreeMakerJPT.NJet_JetIDs       = ''
+process.calibTreeMakerJPT.NJet_PartonMatch  = 'JPTJetPartonMatching'
 process.calibTreeMakerJPT.NJet_GenJets    = 'ak5GenJets'
 process.calibTreeMakerJPT.NJetZSPJets     = 'ZSPJetCorJetAntiKt5'
 process.calibTreeMakerJPT.NJet_L2JetCorrector      = cms.string('ak5JPTL2Relative')
@@ -168,6 +192,9 @@ process.pMC = cms.Path( #process.dump *
                         process.recoJPTJets *
                         process.myPartons *
                         process.CaloJetPartonMatching
+                        * process.PFJetPartonMatching
+                        * process.JPTJetPartonMatching
+                        * process.TrackJetPartonMatching
                         * process.genJetParticles
                         * process.ak5GenJets
 #                        * process.dump

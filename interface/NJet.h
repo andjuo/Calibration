@@ -15,6 +15,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "DataFormats/Common/interface/RefToBase.h"
 
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -86,7 +87,7 @@ private:
   void fillExtra(const edm::View<T>& pJets, int jtno);
   bool looseJetID(T const &jet, reco::JetID const &jetID);
   bool tightJetID(T const &jet, reco::JetID const &jetID);
-  edm::InputTag jets_, jetIDs_, genjets_, genparticles_, met_, weight_tag;                   
+  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, weight_tag;                   
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   std::string l2name_;
@@ -614,6 +615,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   minNumJets_         = cfg.getParameter<int>("NJet_MinNumJets");
   jets_               = cfg.getParameter<edm::InputTag>("NJet_Jets");
   jetIDs_             = cfg.getParameter<edm::InputTag>("NJet_JetIDs");
+  partMatch_          = cfg.getParameter<edm::InputTag>("NJet_PartonMatch");
   genjets_            = cfg.getParameter<edm::InputTag>("NJet_GenJets");
   genparticles_       = cfg.getParameter<edm::InputTag>("NJet_GenParticles");
   met_                = cfg.getParameter<edm::InputTag>("NJet_MET");
@@ -872,7 +874,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   reco::GenParticleCollection::const_iterator genParticle;
   
   edm::Handle<JetMatchedPartonsCollection> matchedParticleMap;
-  evt.getByLabel("CaloJetPartonMatching", matchedParticleMap); 
+  evt.getByLabel(partMatch_, matchedParticleMap); 
 
 
   // get calo jet after zsp collection
@@ -1019,53 +1021,33 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	double gpm_phys = 0;
 	int gpid_phys = 0;
       
-	JetMatchedPartonsCollection::const_iterator j_sel;
-	bool matchedPartonFound=false;
-	//       //cout<<"calo Jet (pt,eta,phi): "<< (*pJets)[jtno].et() << " " << (*pJets)[jtno].eta() << " " << (*pJets)[jtno].phi() <<endl;
-	for (JetMatchedPartonsCollection::const_iterator j = matchedParticleMap->begin(); j != matchedParticleMap->end(); j ++) {
-	  const Jet *aJet = (*j).first.get();
-	  //cout<<"maped Jet (pt,eta,phi): "<< ((aJet))->et() << " " << ((aJet))->eta() << " " << ((aJet))->phi() <<endl;
-	  if (((*pJets)[jtno].eta()==((aJet))->eta()) && ((*pJets)[jtno].phi()==((aJet))->phi())) {
-	    j_sel=j;
-	    matchedPartonFound=true;
-	    break;
-	  }
+	const MatchedPartons aMatch = (*matchedParticleMap)[edm::RefToBase<reco::Jet>(pJets->refAt(jtno))];
+	
+	GenParticleRef theAlgoDef = aMatch.algoDefinitionParton();
+	if (theAlgoDef.isNonnull()) {
+	  
+	  gppt_algo = theAlgoDef->pt();
+	  gpphi_algo = theAlgoDef->phi();
+	  gpeta_algo = theAlgoDef->eta();
+	  gpet_algo = theAlgoDef->et();
+	  gpe_algo = theAlgoDef->energy();
+	  gpm_algo = theAlgoDef->mass();
+	  gpid_algo = theAlgoDef->pdgId();
 	}
-      
-	if (matchedPartonFound) {
-	  const MatchedPartons aMatch = (*j_sel).second;
 	
-
-	
-	  //           cout<<"matched Jet (pt,eta,phi):         "<< aJet->et() <<" "<< aJet->eta()<<" "<< aJet->phi()<<endl;
-	
-	  GenParticleRef theAlgoDef = aMatch.algoDefinitionParton();
-	  if (theAlgoDef.isNonnull()) {
+	GenParticleRef thePhyDef = aMatch.physicsDefinitionParton();
+	if (thePhyDef.isNonnull()) {
+	  //          cout<<"matched parton PhysDef:        "<< thePhyDef->et() <<" "<< thePhyDef->eta()<<" "<< thePhyDef->phi()<<endl;
+	  gppt_phys = thePhyDef->pt();
+	  gpphi_phys = thePhyDef->phi();
+	  gpeta_phys = thePhyDef->eta();
+	  gpet_phys = thePhyDef->et();
+	  gpe_phys = thePhyDef->energy();
+	  gpm_phys = thePhyDef->mass();
+	  gpid_phys = thePhyDef->pdgId();
 	  
-	    gppt_algo = theAlgoDef->pt();
-	    gpphi_algo = theAlgoDef->phi();
-	    gpeta_algo = theAlgoDef->eta();
-	    gpet_algo = theAlgoDef->et();
-	    gpe_algo = theAlgoDef->energy();
-	    gpm_algo = theAlgoDef->mass();
-	    gpid_algo = theAlgoDef->pdgId();
-	  }
+	}
 	
-	  GenParticleRef thePhyDef = aMatch.physicsDefinitionParton();
-	  if (thePhyDef.isNonnull()) {
-	    //          cout<<"matched parton PhysDef:        "<< thePhyDef->et() <<" "<< thePhyDef->eta()<<" "<< thePhyDef->phi()<<endl;
-	    gppt_phys = thePhyDef->pt();
-	    gpphi_phys = thePhyDef->phi();
-	    gpeta_phys = thePhyDef->eta();
-	    gpet_phys = thePhyDef->et();
-	    gpe_phys = thePhyDef->energy();
-	    gpm_phys = thePhyDef->mass();
-	    gpid_phys = thePhyDef->pdgId();
-	  
-	  }
-	
-	
-	} 
 	genpartpt_algo[  jtno ] = gppt_algo;
 	genpartphi_algo[ jtno ] = gpphi_algo ;
 	genparteta_algo[ jtno ] = gpeta_algo ;
@@ -1074,7 +1056,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	genpartm_algo[   jtno ] = gpm_algo ;
 	genpartid_algo[  jtno ] = gpid_algo ;
       
-
+	
 	genpartpt_phys[  jtno ] = gppt_phys;
 	genpartphi_phys[ jtno ] = gpphi_phys ;
 	genparteta_phys[ jtno ] = gpeta_phys ;
@@ -1082,7 +1064,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	genparte_phys[   jtno ] = gpe_phys ;
 	genpartm_phys[   jtno ] = gpm_phys ;
 	genpartid_phys[  jtno ] = gpid_phys ;
-      
+	
       } // End of loop over calo jets
     }
     NobjETowCal = icell;
