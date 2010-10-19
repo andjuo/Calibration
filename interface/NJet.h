@@ -18,8 +18,10 @@
 #include "DataFormats/Common/interface/RefToBase.h"
 
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/strbitset.h"
+#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"
+#include "PhysicsTools/JetMCUtils/interface/CandMCTag.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
@@ -46,8 +48,6 @@
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 
-#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"
-#include "PhysicsTools/JetMCUtils/interface/CandMCTag.h"
 #include "SimDataFormats/JetMatching/interface/JetMatchedPartons.h"
 
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
@@ -87,6 +87,8 @@ private:
   void fillExtra(const edm::View<T>& pJets, int jtno);
   bool looseJetID(T const &jet, reco::JetID const &jetID);
   bool tightJetID(T const &jet, reco::JetID const &jetID);
+  bool looseJetID(T const &jet);
+  bool tightJetID(T const &jet);
   edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, weight_tag;                   
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
@@ -118,8 +120,11 @@ private:
   bool vtxIsFake_;
 
   // Calo jets and jet ID
-  JetIDSelectionFunctor jetIDFunctorLoose_;
-  JetIDSelectionFunctor jetIDFunctorTight_;
+  JetIDSelectionFunctor jetIDCaloFunctorLoose_;
+  JetIDSelectionFunctor jetIDCaloFunctorTight_;
+  PFJetIDSelectionFunctor jetIDPFFunctorLoose_;
+  PFJetIDSelectionFunctor jetIDPFFunctorTight_;
+
   int    minNumJets_;
   int    NobjJet;
   bool *jetIDLoose_, *jetIDTight_;
@@ -211,8 +216,12 @@ private:
 
 template <typename T> NJet<T>::NJet()
   : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000),
-    jetIDFunctorLoose_(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09,JetIDSelectionFunctor::LOOSE)),
-    jetIDFunctorTight_(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09,JetIDSelectionFunctor::TIGHT)) {
+    jetIDCaloFunctorLoose_(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09,JetIDSelectionFunctor::LOOSE)),
+    jetIDCaloFunctorTight_(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09,JetIDSelectionFunctor::TIGHT)),
+    jetIDPFFunctorLoose_(PFJetIDSelectionFunctor(PFJetIDSelectionFunctor::FIRSTDATA,PFJetIDSelectionFunctor::LOOSE)),
+    jetIDPFFunctorTight_(PFJetIDSelectionFunctor(PFJetIDSelectionFunctor::FIRSTDATA,PFJetIDSelectionFunctor::TIGHT)) {
+
+
 
   // Event info
   runNumber_ = 0;
@@ -936,13 +945,16 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       jete[   jtno ] = (*pJets)[jtno].energy();
 
       // JetID
-      if(pJetIDMap.isValid()) {
+      if( pJetIDMap.isValid() ) { // For calo and JPT jets
 	reco::JetID pJetID = (*pJetIDMap)[pJets->refAt(jtno)];
 	jetIDLoose_[jtno] = looseJetID((*pJets)[jtno],pJetID);
 	jetIDTight_[jtno] = tightJetID((*pJets)[jtno],pJetID);
 	n90Hits_[jtno] = static_cast<int>(pJetID.n90Hits);
 	fHPD_[jtno] = pJetID.fHPD;
 	fRBX_[jtno] = pJetID.fRBX;
+      } else { // For PF jets
+ 	jetIDTight_[jtno] = tightJetID((*pJets)[jtno]);
+	jetIDLoose_[jtno] = looseJetID((*pJets)[jtno]);
       }
       // L2L3 correction
       jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
@@ -1290,17 +1302,35 @@ template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtn
 }
 
 
+// JetID for calo jets
 template <> bool NJet<reco::CaloJet>::looseJetID(reco::CaloJet const &jet, reco::JetID const &jetID) {
-  return jetIDFunctorLoose_(jet,jetID);
+  return jetIDCaloFunctorLoose_(jet,jetID);
 }
 template <typename T> bool NJet<T>::looseJetID(T const &jet, reco::JetID const &jetID) {
   return false;
 }
 
 template <> bool NJet<reco::CaloJet>::tightJetID(reco::CaloJet const &jet, reco::JetID const &jetID) {
-  return jetIDFunctorTight_(jet,jetID);
+  return jetIDCaloFunctorTight_(jet,jetID);
 }
 template <typename T> bool NJet<T>::tightJetID(T const &jet, reco::JetID const &jetID) {
+  return false;
+}
+
+// JetID for pf jets
+template <> bool NJet<reco::PFJet>::looseJetID(reco::PFJet const &jet) {
+  pat::strbitset ret = jetIDPFFunctorLoose_.getBitTemplate();
+  return jetIDPFFunctorLoose_(jet,ret);
+}
+template <typename T> bool NJet<T>::looseJetID(T const &jet) {
+  return false;
+}
+
+template <> bool NJet<reco::PFJet>::tightJetID(reco::PFJet const &jet) {
+  pat::strbitset ret = jetIDPFFunctorTight_.getBitTemplate();
+  return jetIDPFFunctorTight_(jet,ret);
+}
+template <typename T> bool NJet<T>::tightJetID(T const &jet) {
   return false;
 }
 
