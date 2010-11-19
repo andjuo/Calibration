@@ -73,7 +73,7 @@
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 
-
+#include <boost/regex.hpp> 
 
 template <typename T> class NJet {
 public:
@@ -84,6 +84,7 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
 
 private:
+  static unsigned int findTrigger(const std::vector<std::string>& list, const std::string& name);
   void fillExtra(const edm::View<T>& pJets, int jtno);
   bool looseJetID(T const &jet, reco::JetID const &jetID);
   bool tightJetID(T const &jet, reco::JetID const &jetID);
@@ -121,7 +122,7 @@ private:
   bool hltDiJetAve70U_;
   bool hltDiJetAve100U_;
   bool hltDiJetAve140U_;
-  int vtxNTracks_;
+  int vtxN_,vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
   bool vtxIsFake_;
@@ -247,6 +248,7 @@ template <typename T> NJet<T>::NJet()
   hltDiJetAve100U_ = false;
   hltDiJetAve140U_ = false;
 
+  vtxN_ = 0;
   vtxNTracks_ = 0;
   vtxPosX_ = 0.;
   vtxPosY_ = 0.;
@@ -681,6 +683,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("HltDiJetAve100U",&hltDiJetAve100U_,"HltDiJetAve100U/O");
   CalibTree->Branch("HltDiJetAve140U",&hltDiJetAve140U_,"HltDiJetAve140U/O");
 
+  CalibTree->Branch("VtxN",&vtxN_,"VtxN/I");
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
   CalibTree->Branch("VtxPosX",&vtxPosX_,"VtxPosX/F");
   CalibTree->Branch("VtxPosY",&vtxPosY_,"VtxPosY/F");
@@ -844,6 +847,16 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 }
 
 
+template <typename T> unsigned int NJet<T>::findTrigger(const std::vector<std::string>& list, const std::string& name)
+{
+  boost::regex re(std::string("(")+name+"|"+name+"_v\\d*)");
+  for (unsigned int i = 0,n = list.size() ; i < n ; ++i) {
+    if(boost::regex_match(list[i],re)) return i;
+  }
+  return list.size();
+}
+
+
 template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
   // Event
@@ -863,43 +876,43 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
   // HLT Trigger
   edm::Handle<edm::TriggerResults> triggerResults;
-
+  
   if( evt.getByLabel(edm::InputTag("TriggerResults::HLT"),triggerResults) ) {
     const edm::TriggerNames & trigNames = evt.triggerNames(*triggerResults);
     size_t id = 0;
-
+    boost::cmatch matches;
     hltL1Jet6U_ = false;
 /*     id = trigNames.triggerIndex("HLT_L1Jet6U"); */
 /*     if( id != trigNames.size() ) */
 /*       if( triggerResults->accept(id) ) hltL1Jet6U_ = true; */
-    
+   
     hltDiJetAve15U_ = false;
-    id = trigNames.triggerIndex("HLT_DiJetAve15U_v3");
-    if( id != trigNames.size() )
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve15U");
+    if( id != trigNames.size() ) {
       if( triggerResults->accept(id) ) hltDiJetAve15U_ = true;
-    
+    }
     hltDiJetAve30U_ = false;
-    id = trigNames.triggerIndex("HLT_DiJetAve30U_v3");
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve30U_ = true;
 
     hltDiJetAve50U_ = false;
-    id = trigNames.triggerIndex("HLT_DiJetAve50U_v3");
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve50U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve50U_ = true;
 
     hltDiJetAve70U_ = false;
-    id = trigNames.triggerIndex("HLT_DiJetAve70U_v3");
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve70U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve70U_ = true;
     
     hltDiJetAve100U_ = false;
-    id = trigNames.triggerIndex("HLT_DiJetAve100U_v3");
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve100U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve100U_ = true;
 
     hltDiJetAve140U_ = false;
-    id = trigNames.triggerIndex("HLT_DiJetAve140U_v3");
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve140U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve140U_ = true;
   }
@@ -908,6 +921,10 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   // Vertex info
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
   evt.getByLabel("offlinePrimaryVertices",offlinePrimaryVertices);
+  vtxN_ = 0;
+  for(int i = 0, n = offlinePrimaryVertices->size() ; i < n ; ++i) {
+    if(! (*offlinePrimaryVertices)[i].isFake()) ++vtxN_;
+  }
   if( offlinePrimaryVertices->size() ) {
     const reco::Vertex *vtx = &(offlinePrimaryVertices->front());
     vtxNTracks_ = vtx->tracksSize();
