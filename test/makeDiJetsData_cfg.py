@@ -36,7 +36,7 @@ process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) 
 # HLT
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 #process.hltHighLevel.HLTPaths = ('HLT_DiJetAve15U','HLT_DiJetAve30U','HLT_DiJetAve50U')
-process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve50U')
+process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve30U')
 process.hltHighLevel.andOr = cms.bool(True)
 process.hltHighLevel.throw = cms.bool(True)
 
@@ -84,6 +84,17 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 # Jet Energy Corrections
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+process.ak5CaloL2Relative.useCondDB = False
+process.ak5CaloL3Absolute.useCondDB = False
+process.ak5CaloResidual.useCondDB = False
+process.ak5PFL2Relative.useCondDB = False
+process.ak5PFL3Absolute.useCondDB = False
+process.ak5PFResidual.useCondDB = False
+process.ak5JPTL2Relative.useCondDB = False
+process.ak5JPTL3Absolute.useCondDB = False
+process.ak5JPTResidual.useCondDB = False
+process.ak5TrackL2Relative.useCondDB = False
+process.ak5TrackL3Absolute.useCondDB = False
 # L4JW and L2L3Residual Correction Services
 # you need special versions of CondFormats and JetMETCorrections:
 # copy the following dirs to your release (this works with 3_8_4):
@@ -177,8 +188,8 @@ process.calibTreeMakerJPT.NJetConeSize      = 0.5
 
 process.pDump = cms.Path( process.dump )
 
-process.pData = cms.Path( process.hltLevel1GTSeed
-                          * process.hltHighLevel
+process.pData = cms.Path( #process.hltLevel1GTSeed*
+                          process.hltHighLevel
                           * process.primaryVertexFilter
                           * process.noscraping
                           #* process.ZSPJetCorrectionsAntiKt5
