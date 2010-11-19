@@ -114,6 +114,13 @@ private:
   unsigned int luminosityBlockNumber_;
   unsigned int eventNumber_;
   bool hltPhysicsDeclared_;
+  bool hltL1Jet6U_;
+  bool hltDiJetAve15U_;
+  bool hltDiJetAve30U_;
+  bool hltDiJetAve50U_;
+  bool hltDiJetAve70U_;
+  bool hltDiJetAve100U_;
+  bool hltDiJetAve140U_;
   int vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
@@ -213,6 +220,8 @@ private:
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 
 template <typename T> NJet<T>::NJet()
   : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000),
@@ -229,6 +238,14 @@ template <typename T> NJet<T>::NJet()
   eventNumber_ = 0;
 
   hltPhysicsDeclared_ = false;
+
+  hltL1Jet6U_ = false;
+  hltDiJetAve15U_ = false;
+  hltDiJetAve30U_ = false;
+  hltDiJetAve50U_ = false;
+  hltDiJetAve70U_ = false;
+  hltDiJetAve100U_ = false;
+  hltDiJetAve140U_ = false;
 
   vtxNTracks_ = 0;
   vtxPosX_ = 0.;
@@ -656,6 +673,13 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("EventNumber",&eventNumber_,"EventNumber/i");
 
   CalibTree->Branch("HltPhysicsDelcared",&hltPhysicsDeclared_,"HltPhysicsDelcared/O");
+  CalibTree->Branch("HltL1Jet6U",&hltL1Jet6U_,"HltL1Jet6U/O");
+  CalibTree->Branch("HltDiJetAve15U",&hltDiJetAve15U_,"HltDiJetAve15U/O");
+  CalibTree->Branch("HltDiJetAve30U",&hltDiJetAve30U_,"HltDiJetAve30U/O");
+  CalibTree->Branch("HltDiJetAve50U",&hltDiJetAve50U_,"HltDiJetAve50U/O");
+  CalibTree->Branch("HltDiJetAve70U",&hltDiJetAve70U_,"HltDiJetAve70U/O");
+  CalibTree->Branch("HltDiJetAve100U",&hltDiJetAve100U_,"HltDiJetAve100U/O");
+  CalibTree->Branch("HltDiJetAve140U",&hltDiJetAve140U_,"HltDiJetAve140U/O");
 
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
   CalibTree->Branch("VtxPosX",&vtxPosX_,"VtxPosX/F");
@@ -836,6 +860,51 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   L1GtFdlWord fdlWord = gtrr->gtFdlWord();
   if( fdlWord.physicsDeclared() == 1 ) hltPhysicsDeclared_ = true;
 
+
+  // HLT Trigger
+  edm::Handle<edm::TriggerResults> triggerResults;
+
+  if( evt.getByLabel(edm::InputTag("TriggerResults::HLT"),triggerResults) ) {
+    const edm::TriggerNames & trigNames = evt.triggerNames(*triggerResults);
+    size_t id = 0;
+
+    hltL1Jet6U_ = false;
+/*     id = trigNames.triggerIndex("HLT_L1Jet6U"); */
+/*     if( id != trigNames.size() ) */
+/*       if( triggerResults->accept(id) ) hltL1Jet6U_ = true; */
+    
+    hltDiJetAve15U_ = false;
+    id = trigNames.triggerIndex("HLT_DiJetAve15U_v3");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve15U_ = true;
+    
+    hltDiJetAve30U_ = false;
+    id = trigNames.triggerIndex("HLT_DiJetAve30U_v3");
+    if( id != trigNames.size()  )
+      if( triggerResults->accept(id) ) hltDiJetAve30U_ = true;
+
+    hltDiJetAve50U_ = false;
+    id = trigNames.triggerIndex("HLT_DiJetAve50U_v3");
+    if( id != trigNames.size()  )
+      if( triggerResults->accept(id) ) hltDiJetAve50U_ = true;
+
+    hltDiJetAve70U_ = false;
+    id = trigNames.triggerIndex("HLT_DiJetAve70U_v3");
+    if( id != trigNames.size()  )
+      if( triggerResults->accept(id) ) hltDiJetAve70U_ = true;
+    
+    hltDiJetAve100U_ = false;
+    id = trigNames.triggerIndex("HLT_DiJetAve100U_v3");
+    if( id != trigNames.size()  )
+      if( triggerResults->accept(id) ) hltDiJetAve100U_ = true;
+
+    hltDiJetAve140U_ = false;
+    id = trigNames.triggerIndex("HLT_DiJetAve140U_v3");
+    if( id != trigNames.size()  )
+      if( triggerResults->accept(id) ) hltDiJetAve140U_ = true;
+  }
+
+
   // Vertex info
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
   evt.getByLabel("offlinePrimaryVertices",offlinePrimaryVertices);
@@ -898,7 +967,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   if( genInfoHandle.isValid() ) {
     genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]); 
     if(weight_ <= 0)
-      { 
+      {
 	weight = static_cast<float>(genInfoHandle->weight());
       }
   }
@@ -910,6 +979,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   } else {
     xsec = 0;
   }
+
   
   //get tower geometry
   edm::ESHandle<CaloGeometry> geometry;
@@ -920,12 +990,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name_,setup);   //Define the jet corrector
-  //  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname_, setup); //Define the jet corrector
   const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name_, setup); //Define the jet corrector
   const JetCorrector* correctorL2L3L4JW  = JetCorrector::getJetCorrector (l2l3l4JWname_, setup); //Define the jet corrector
-  
-  //  const JetCorrector* correctorL2L3JPT  = JetCorrector::getJetCorrector (l2l3JPTname_, setup); //Define the jet corrector
-  //const JetCorrector* correctorL2L3PFlow  = JetCorrector::getJetCorrector (l2l3PFlowname, setup); //Define the jet corrector
 
   NobjTow=0;
   NobjETowCal = 0;
@@ -1150,7 +1216,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	    else  trackQualityL[iTrack] = false;
 	    if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
 	    else  trackQualityT[iTrack] = false;
-	    if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
+	    if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true;
 	    else  trackQualityHP[iTrack] = false;
 	    //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
 	    //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
