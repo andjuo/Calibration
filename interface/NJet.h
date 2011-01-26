@@ -104,7 +104,8 @@ private:
   float weight_;
   TrackDetectorAssociator trackAssociator_;
   TrackAssociatorParameters parameters_;
-
+  bool writeTracks_, writeTowers_;
+  
   //tree variables:
   const int kjMAX;               // Max number of jets stored in an event
   const int kMAX;                // Max number of towers/tracks/particles stored in an event
@@ -655,6 +656,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
   writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
+  writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
+  writeTowers_        = cfg.getParameter<bool>("NJet_writeTowers");
   beamSpot_           = cfg.getParameter<edm::InputTag>("BeamSpot");
   l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
   l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
@@ -849,7 +852,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 
 template <typename T> unsigned int NJet<T>::findTrigger(const std::vector<std::string>& list, const std::string& name)
 {
-  boost::regex re(std::string("(")+name+"|"+name+"_v\\d*)");
+  boost::regex re(std::string("^(")+name+"|"+name+"_v\\d*)$");
   for (unsigned int i = 0,n = list.size() ; i < n ; ++i) {
     if(boost::regex_match(list[i],re)) return i;
   }
@@ -1173,96 +1176,99 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       break;
     }
 
-    //Tracks
-    edm::Handle<reco::TrackCollection> tracks;
-    evt.getByLabel(recTracks_,tracks);
-
-    //Muons
-    edm::Handle<reco::MuonCollection> muons;
-    //edm::Handle<reco::TrackCollection> muons;
-    evt.getByLabel(recMuons_,muons);
-
-    // see here for detailed track cluster matching and jet track association
-    //   -> CMSSW/TrackingTools/TrackAssociator/test/CaloMatchingExample.cc
-
-    int iTrack = 0;
-    for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
-      // skip low Pt tracks
-      if (it->pt() < 1) continue;
-      TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
-
-      for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
-	{
-	  bool saveTrack = false;
-	  double dRin   = deltaR(*it,(*pJets)[jtno]);
-	  double outeta = info.trkGlobPosAtEcal.eta();
-	  double outphi = info.trkGlobPosAtEcal.phi();
-	  double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
-	  if (dRin < conesize_  || dRout < conesize_){
-	    saveTrack=true;
-	  }
-	  if (saveTrack){
-	    trackpt[iTrack]     = it->pt();
-	    tracketa[iTrack]    = it->eta();
-	    trackphi[iTrack]    = it->phi();
-	    trackp[iTrack]      = it->p();
-	    trackdr[iTrack]     = dRin;
-	    trackdrout[iTrack]  = dRout;
-	    tracketaout[iTrack] = outeta;
-	    trackphiout[iTrack] = outphi;
-	    trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
-	    trackemc3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1);
-	    trackemc5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2);
-	    trackhac1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0);
-	    trackhac3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1);
-	    trackhac5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2);
-	    DetId centerId = info.findMaxDeposition(TrackDetMatchInfo::HcalRecHits);
-	    HcalDetId HcalCenterId(centerId);
-	    tracktowidphi[iTrack] = HcalCenterId.iphi();
-	    tracktowideta[iTrack] = HcalCenterId.ieta();
-	    tracktowid[iTrack]    = centerId.rawId();
-	    track_jetidx[iTrack]  = jtno;
-	    trackchi2[iTrack]     = it->normalizedChi2();
-	    tracknhits[iTrack]    = it->numberOfValidHits();
-	    trackd0[iTrack]       = it->dxy(myPosition);
-	    trackz0[iTrack]       = it->dz(myPosition);
-
-   
-	    //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
-	    if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
-	    else  trackQualityL[iTrack] = false;
-	    if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
-	    else  trackQualityT[iTrack] = false;
-	    if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true;
-	    else  trackQualityHP[iTrack] = false;
-	    //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
-	    //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
-	    //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
- 
-	    //Match track with muons
-	    muDR[iTrack] = -1;
-	    muDE[iTrack] = -1;
-	    bool muonMatch = false;
-	    for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-	      //for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-	      if(muon::isGoodMuon(*im, muon::AllGlobalMuons) && muon::isGoodMuon(*im, muon::TMLastStationLoose)) continue;
-	      double dRm = deltaR(*im,*it);
-	      double dE = fabs( (im->pt()-it->pt())/it->pt() );
-	      muDR[iTrack] = dRm;
-	      muDE[iTrack] = dE;
-	      if (dRm<0.1 && dE < 0.2) muonMatch = true;
+    if(writeTracks_) {
+      //Tracks
+      edm::Handle<reco::TrackCollection> tracks;
+      evt.getByLabel(recTracks_,tracks);
+      
+      //Muons
+      edm::Handle<reco::MuonCollection> muons;
+      //edm::Handle<reco::TrackCollection> muons;
+      evt.getByLabel(recMuons_,muons);
+      
+      // see here for detailed track cluster matching and jet track association
+      //   -> CMSSW/TrackingTools/TrackAssociator/test/CaloMatchingExample.cc
+      
+      int iTrack = 0;
+      for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
+	// skip low Pt tracks
+	if (it->pt() < 1) continue;
+	TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
+	
+	for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno)
+	  {
+	    bool saveTrack = false;
+	    double dRin   = deltaR(*it,(*pJets)[jtno]);
+	    double outeta = info.trkGlobPosAtEcal.eta();
+	    double outphi = info.trkGlobPosAtEcal.phi();
+	    double dRout  = deltaR((*pJets)[jtno].eta(),(*pJets)[jtno].phi(),outeta,outphi);
+	    if (dRin < conesize_  || dRout < conesize_){
+	      saveTrack=true;
 	    }
-	    if (muonMatch) {
-	      trackid[iTrack] = 13;
-	    } else {
-	      trackid[iTrack] = 0;
+	    if (saveTrack){
+	      trackpt[iTrack]     = it->pt();
+	      tracketa[iTrack]    = it->eta();
+	      trackphi[iTrack]    = it->phi();
+	      trackp[iTrack]      = it->p();
+	      trackdr[iTrack]     = dRin;
+	      trackdrout[iTrack]  = dRout;
+	      tracketaout[iTrack] = outeta;
+	      trackphiout[iTrack] = outphi;
+	      trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
+	      trackemc3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1);
+	      trackemc5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2);
+	      trackhac1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0);
+	      trackhac3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1);
+	      trackhac5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2);
+	      DetId centerId = info.findMaxDeposition(TrackDetMatchInfo::HcalRecHits);
+	      HcalDetId HcalCenterId(centerId);
+	      tracktowidphi[iTrack] = HcalCenterId.iphi();
+	      tracktowideta[iTrack] = HcalCenterId.ieta();
+	      tracktowid[iTrack]    = centerId.rawId();
+	      track_jetidx[iTrack]  = jtno;
+	      trackchi2[iTrack]     = it->normalizedChi2();
+	      tracknhits[iTrack]    = it->numberOfValidHits();
+	      trackd0[iTrack]       = it->dxy(myPosition);
+	      trackz0[iTrack]       = it->dz(myPosition);
+	      
+	      
+	      //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
+	      if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
+	      else  trackQualityL[iTrack] = false;
+	      if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
+	      else  trackQualityT[iTrack] = false;
+	      if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true;
+	      else  trackQualityHP[iTrack] = false;
+	      //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
+	      //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
+	      //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
+	      
+	      //Match track with muons
+	      muDR[iTrack] = -1;
+	      muDE[iTrack] = -1;
+	      bool muonMatch = false;
+	      for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+		//for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
+		if(muon::isGoodMuon(*im, muon::AllGlobalMuons) && muon::isGoodMuon(*im, muon::TMLastStationLoose)) continue;
+		double dRm = deltaR(*im,*it);
+		double dE = fabs( (im->pt()-it->pt())/it->pt() );
+		muDR[iTrack] = dRm;
+		muDE[iTrack] = dE;
+		if (dRm<0.1 && dE < 0.2) muonMatch = true;
+	      }
+	      if (muonMatch) {
+		trackid[iTrack] = 13;
+	      } else {
+		trackid[iTrack] = 0;
+	      }
+	      ++iTrack;
 	    }
-	    ++iTrack;
 	  }
-	}
+      }
+      NobjTrack=iTrack;
+    } else {
+      NobjTrack= 0;
     }
-    NobjTrack=iTrack;
-
 
 
     /////////// Write genjet collection ///////////////////
@@ -1352,7 +1358,8 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
 {
   fEMF_[ jtno ] = pJets[jtno].emEnergyFraction();
   fHad_[ jtno ] = pJets[jtno].energyFractionHadronic();
-
+  
+  if(! writeTowers_) return;
   std::vector<CaloTowerPtr> j_towers = pJets[jtno].getCaloConstituents();
   int towno = NobjTow;
   NobjTow+=j_towers.size();
