@@ -223,6 +223,7 @@ void Top::fillTowers(const std::vector<CaloTowerPtr> &towers, unsigned int& town
 
 void Top::fillCorrFactors(const pat::Jet &jet, const unsigned int jtno, const std::string &flavor) {
 
+  /*
   if( jet.hasCorrFactors() ) {
     jscaleL1[jtno] = jet.corrFactor("off");
     jscaleL2[jtno] = jet.corrFactor("rel")/jet.corrFactor("off");
@@ -230,6 +231,7 @@ void Top::fillCorrFactors(const pat::Jet &jet, const unsigned int jtno, const st
     jscaleL4[jtno] = jet.corrFactor("emf")/jet.corrFactor("abs");
     jscaleL5[jtno] = jet.corrFactor("had", flavor)/jet.corrFactor("emf");
   }
+  */
 
 }
 
