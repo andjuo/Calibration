@@ -925,8 +925,11 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
   evt.getByLabel("offlinePrimaryVertices",offlinePrimaryVertices);
   vtxN_ = 0;
+  //vertex cuts: ndof > 4 && abs(z) <= 24 && position.Rho <= 2
   for(int i = 0, n = offlinePrimaryVertices->size() ; i < n ; ++i) {
-    if(! (*offlinePrimaryVertices)[i].isFake()) ++vtxN_;
+    const reco::Vertex& vtx = (*offlinePrimaryVertices)[i];
+    if((! vtx.isFake()) && (vtx.ndof() > 4) && (std::abs(vtx.z()) <= 24) && (vtx.position().rho()  <= 2))
+      ++vtxN_;
   }
   if( offlinePrimaryVertices->size() ) {
     const reco::Vertex *vtx = &(offlinePrimaryVertices->front());

@@ -71,7 +71,7 @@ process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'FT_R_38X_V14A::All'
+process.GlobalTag.globaltag = 'GR_R_38X_V15::All'
 
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")
@@ -87,37 +87,6 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 # Jet Energy Corrections
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-process.ak5CaloL2Relative.useCondDB = False
-process.ak5CaloL3Absolute.useCondDB = False
-process.ak5CaloResidual.useCondDB = False
-process.ak5PFL2Relative.useCondDB = False
-process.ak5PFL3Absolute.useCondDB = False
-process.ak5PFResidual.useCondDB = False
-process.ak5JPTL2Relative.useCondDB = False
-process.ak5JPTL3Absolute.useCondDB = False
-process.ak5JPTResidual.useCondDB = False
-process.ak5TrackL2Relative.useCondDB = False
-process.ak5TrackL3Absolute.useCondDB = False
-process.ak7CaloL2Relative.useCondDB = False
-process.ak7CaloL3Absolute.useCondDB = False
-process.ic5CaloL2Relative.useCondDB = False
-process.ic5CaloL3Absolute.useCondDB = False
-process.kt4CaloL2Relative.useCondDB = False
-process.kt4CaloL3Absolute.useCondDB = False
-process.kt6CaloL2Relative.useCondDB = False
-process.kt6CaloL3Absolute.useCondDB = False
-process.ak5CaloL3Absolute.useCondDB = False
-process.ak7PFL2Relative.useCondDB = False
-process.ak7PFL3Absolute.useCondDB = False
-process.ic5PFL2Relative.useCondDB = False
-process.ic5PFL3Absolute.useCondDB = False
-process.kt4PFL2Relative.useCondDB = False
-process.kt4PFL3Absolute.useCondDB = False
-process.kt6PFL2Relative.useCondDB = False
-process.kt6PFL3Absolute.useCondDB = False
-process.ak5PFL3Absolute.useCondDB = False
-#process.ak7JPTL2Relative.useCondDB = False
-#process.ak7JPTL3Absolute.useCondDB = False
 
 # L4JW and L2L3Residual Correction Services
 # you need special versions of CondFormats and JetMETCorrections:

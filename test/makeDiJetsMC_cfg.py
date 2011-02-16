@@ -16,7 +16,7 @@ process.AdaptorConfig = cms.Service("AdaptorConfig",
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/mc/Summer10/QCDDiJet_Pt0to15/GEN-SIM-RECO/START36_V9_S09-v1/0005/8C35F91C-0D7B-DF11-990E-001A4BA98052.root'
+    '/store/mc/Fall10/QCD_Pt_15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/0002/0A2BAA33-F4E4-DF11-ADAF-00215E21DB88.root'
             )
 )
 
@@ -46,7 +46,7 @@ process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START38_V12::All'
+process.GlobalTag.globaltag = 'START38_V14::All'
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")
 
@@ -85,68 +85,6 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 # Jet Energy Corrections
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-process.ak5CaloL2Relative.useCondDB = False
-process.ak5CaloL3Absolute.useCondDB = False
-process.ak5CaloResidual.useCondDB = False
-process.ak5PFL2Relative.useCondDB = False
-process.ak5PFL3Absolute.useCondDB = False
-process.ak5PFResidual.useCondDB = False
-process.ak5JPTL2Relative.useCondDB = False
-process.ak5JPTL3Absolute.useCondDB = False
-process.ak5JPTResidual.useCondDB = False
-process.ak5TrackL2Relative.useCondDB = False
-process.ak5TrackL3Absolute.useCondDB = False
-process.ak7CaloL2Relative.useCondDB = False
-process.ak7CaloL3Absolute.useCondDB = False
-process.ic5CaloL2Relative.useCondDB = False
-process.ic5CaloL3Absolute.useCondDB = False
-process.kt4CaloL2Relative.useCondDB = False
-process.kt4CaloL3Absolute.useCondDB = False
-process.kt6CaloL2Relative.useCondDB = False
-process.kt6CaloL3Absolute.useCondDB = False
-process.ak5CaloL3Absolute.useCondDB = False
-process.ak7PFL2Relative.useCondDB = False
-process.ak7PFL3Absolute.useCondDB = False
-process.ic5PFL2Relative.useCondDB = False
-process.ic5PFL3Absolute.useCondDB = False
-process.kt4PFL2Relative.useCondDB = False
-process.kt4PFL3Absolute.useCondDB = False
-process.kt6PFL2Relative.useCondDB = False
-process.kt6PFL3Absolute.useCondDB = False
-process.ak5PFL3Absolute.useCondDB = False
-#process.ak7JPTL2Relative.useCondDB = False
-#process.ak7JPTL3Absolute.useCondDB = False
-process.ak5CaloL2Relative.era = "Fall10"
-process.ak5CaloL3Absolute.era = "Fall10"
-process.ak5CaloResidual.era = "Fall10"
-process.ak5PFL2Relative.era = "Fall10"
-process.ak5PFL3Absolute.era = "Fall10"
-process.ak5PFResidual.era = "Fall10"
-process.ak5JPTL2Relative.era = "Fall10"
-process.ak5JPTL3Absolute.era = "Fall10"
-process.ak5JPTResidual.era = "Fall10"
-process.ak5TrackL2Relative.era = "Fall10"
-process.ak5TrackL3Absolute.era = "Fall10"
-process.ak7CaloL2Relative.era = "Fall10"
-process.ak7CaloL3Absolute.era = "Fall10"
-process.ic5CaloL2Relative.era = "Fall10"
-process.ic5CaloL3Absolute.era = "Fall10"
-process.kt4CaloL2Relative.era = "Fall10"
-process.kt4CaloL3Absolute.era = "Fall10"
-process.kt6CaloL2Relative.era = "Fall10"
-process.kt6CaloL3Absolute.era = "Fall10"
-process.ak5CaloL3Absolute.era = "Fall10"
-process.ak7PFL2Relative.era = "Fall10"
-process.ak7PFL3Absolute.era = "Fall10"
-process.ic5PFL2Relative.era = "Fall10"
-process.ic5PFL3Absolute.era = "Fall10"
-process.kt4PFL2Relative.era = "Fall10"
-process.kt4PFL3Absolute.era = "Fall10"
-process.kt6PFL2Relative.era = "Fall10"
-process.kt6PFL3Absolute.era = "Fall10"
-process.ak5PFL3Absolute.era = "Fall10"
-#process.ak7JPTL2Relative.era = "Fall10"
-#process.ak7JPTL3Absolute.era = "Fall10"
 
 process.ak7JPTL3Absolute  = process.ak5CaloL3Absolute.clone( algorithm = 'AK7JPT' )
 process.ak7JPTL2Relative  = process.ak5CaloL2Relative.clone( algorithm = 'AK7JPT' )
@@ -382,16 +320,16 @@ process.pMC = cms.Path( #process.dump *
                         * process.calibTreeMakerJPT
                         * process.AK7CaloJetPartonMatching
                         * process.calibTreeMakerAK7Calo
-                        * process.IC5CaloJetPartonMatching
-                        * process.calibTreeMakerIC5Calo
+ #                       * process.IC5CaloJetPartonMatching
+ #                       * process.calibTreeMakerIC5Calo
                         * process.KT4CaloJetPartonMatching
                         * process.calibTreeMakerKT4Calo
                         * process.KT6CaloJetPartonMatching
                         * process.calibTreeMakerKT6Calo
                         * process.AK7PFJetPartonMatching
                         * process.calibTreeMakerAK7PF
-                        * process.IC5PFJetPartonMatching
-                        * process.calibTreeMakerIC5PF
+#                        * process.IC5PFJetPartonMatching
+#                        * process.calibTreeMakerIC5PF
                         * process.KT4PFJetPartonMatching
                         * process.calibTreeMakerKT4PF
                         * process.KT6PFJetPartonMatching
