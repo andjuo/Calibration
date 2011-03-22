@@ -24,6 +24,7 @@
 #include "PhysicsTools/JetMCUtils/interface/CandMCTag.h"
 
 #include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/Candidate/interface/CandidateFwd.h"
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
 #include "DataFormats/HcalDetId/interface/HcalDetId.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
@@ -950,13 +951,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     vtxIsFake_ = true;
   }
 
-  //BeamSpot
-  edm::Handle<reco::BeamSpot> beamSpotHandle;
-  evt.getByLabel(beamSpot_,beamSpotHandle);
-  reco::BeamSpot myBeamSpot = *beamSpotHandle;
-  
-  const math::XYZPointD & myPosition=myBeamSpot.position();
-
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
 
@@ -1099,10 +1093,12 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	  genjete[   jtno ] = 0.;
 	}
       }
-
-      jetEtWeightedSigmaPhi_[jtno] = (*pJets)[jtno].phiphiMoment() > 0 ? sqrt((*pJets)[jtno].phiphiMoment()) : 0;
-      jetEtWeightedSigmaEta_[jtno] = (*pJets)[jtno].etaetaMoment() > 0 ? sqrt((*pJets)[jtno].etaetaMoment()) : 0;
-
+      //check if daughters are present 
+      if((*pJets)[jtno].numberOfDaughters() &&
+	 (*pJets)[jtno].daughterPtr(0).isAvailable()) { 
+	jetEtWeightedSigmaPhi_[jtno] = (*pJets)[jtno].phiphiMoment() > 0 ? sqrt((*pJets)[jtno].phiphiMoment()) : 0;
+	jetEtWeightedSigmaEta_[jtno] = (*pJets)[jtno].etaetaMoment() > 0 ? sqrt((*pJets)[jtno].etaetaMoment()) : 0;
+      }
       fillExtra(*pJets, jtno);
       //// GenParticle Matching ALGO and PHYSICS
       if( matchedParticleMap.isValid() ) {
@@ -1179,7 +1175,14 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       break;
     }
 
-    if(writeTracks_) {
+    if(writeTracks_) { 
+      //BeamSpot
+      edm::Handle<reco::BeamSpot> beamSpotHandle;
+      evt.getByLabel(beamSpot_,beamSpotHandle);
+      reco::BeamSpot myBeamSpot = *beamSpotHandle;
+      
+      const math::XYZPointD & myPosition=myBeamSpot.position();
+      
       //Tracks
       edm::Handle<reco::TrackCollection> tracks;
       evt.getByLabel(recTracks_,tracks);
