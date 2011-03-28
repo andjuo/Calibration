@@ -171,6 +171,7 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 
 void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
 {
+  using namespace reco;
   if(weight_<0)
     {
       edm::Handle<double> weightHandle;
