@@ -95,6 +95,7 @@ private:
   edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, weight_tag;                   
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
+  std::string l1name_;
   std::string l2name_;
   std::string l3name_;
   std::string JPTname_;
@@ -125,6 +126,8 @@ private:
   bool hltDiJetAve70U_;
   bool hltDiJetAve100U_;
   bool hltDiJetAve140U_;
+  bool hltDiJetAve180U_;
+  bool hltDiJetAve300U_;
   int vtxN_,vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
@@ -143,7 +146,7 @@ private:
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_;
-  float *jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW;
+  float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW;
   int *jetieta_, *jetiphi_;
 
   // Gen jets matched to calo jets
@@ -250,6 +253,8 @@ template <typename T> NJet<T>::NJet()
   hltDiJetAve70U_ = false;
   hltDiJetAve100U_ = false;
   hltDiJetAve140U_ = false;
+  hltDiJetAve180U_ = false;
+  hltDiJetAve300U_ = false;
 
   vtxN_ = 0;
   vtxNTracks_ = 0;
@@ -342,6 +347,7 @@ template <typename T> NJet<T>::NJet()
 
   // Correction factors
   jscaleZSP       = new float [ kjMAX ];
+  jscalel1        = new float [ kjMAX ];
   jscalel2        = new float [ kjMAX ];
   jscalel3        = new float [ kjMAX ];
   jscaleJPT       = new float [ kjMAX ];
@@ -350,6 +356,7 @@ template <typename T> NJet<T>::NJet()
   jscalel4JW      = new float [ kjMAX ];
   for(int i = 0; i < kjMAX; i++) {
     jscaleZSP[i]      = 1.;
+    jscalel1[i]       = 1.;
     jscalel2[i]       = 1.;
     jscalel3[i]       = 1.;
     jscaleJPT[i]      = 1.;
@@ -567,6 +574,7 @@ template <typename T> NJet<T>::~NJet() {
   delete [] jetEtWeightedSigmaEta_;
 
   delete [] jscaleZSP;    
+  delete [] jscalel1;     
   delete [] jscalel2;     
   delete [] jscalel3;     
   delete [] jscaleJPT;    
@@ -661,6 +669,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
   writeTowers_        = cfg.getParameter<bool>("NJet_writeTowers");
   beamSpot_           = cfg.getParameter<edm::InputTag>("BeamSpot");
+  l1name_ = cfg.getParameter<std::string>("NJet_L1JetCorrector");
   l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
   l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
   JPTname_ = cfg.getParameter<std::string>("NJet_JPTZSPCorrector");
@@ -687,6 +696,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("HltDiJetAve70U",&hltDiJetAve70U_,"HltDiJetAve70U/O");
   CalibTree->Branch("HltDiJetAve100U",&hltDiJetAve100U_,"HltDiJetAve100U/O");
   CalibTree->Branch("HltDiJetAve140U",&hltDiJetAve140U_,"HltDiJetAve140U/O");
+  CalibTree->Branch("HltDiJetAve180U",&hltDiJetAve180U_,"HltDiJetAve180U/O");
+  CalibTree->Branch("HltDiJetAve300U",&hltDiJetAve300U_,"HltDiJetAve300U/O");
 
   CalibTree->Branch("VtxN",&vtxN_,"VtxN/I");
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
@@ -765,6 +776,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetEtWeightedSigmaPhi",jetEtWeightedSigmaPhi_,"JetEtWeightedSigmaPhi[NobjJet]/F" );
   CalibTree->Branch( "JetEtWeightedSigmaEta",jetEtWeightedSigmaEta_,"JetEtWeightedSigmaEta[NobjJet]/F" );
   CalibTree->Branch( "JetCorrZSP",          jscaleZSP,       "JetCorrZSP[NobjJet]/F" );
+  CalibTree->Branch( "JetCorrL1",           jscalel1,        "JetCorrL1[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2",           jscalel2,        "JetCorrL2[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL3",           jscalel3,        "JetCorrL3[NobjJet]/F" );
   CalibTree->Branch( "JetCorrJPT",          jscaleJPT,       "JetCorrJPT[NobjJet]/F" );
@@ -920,6 +932,16 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve140U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve140U_ = true;
+
+    hltDiJetAve180U_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve180U");
+    if( id != trigNames.size()  )
+      if( triggerResults->accept(id) ) hltDiJetAve180U_ = true;
+
+    hltDiJetAve300U_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300U");
+    if( id != trigNames.size()  )
+      if( triggerResults->accept(id) ) hltDiJetAve300U_ = true;
   }
 
 
@@ -930,7 +952,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   //vertex cuts: ndof > 4 && abs(z) <= 24 && position.Rho <= 2
   for(int i = 0, n = offlinePrimaryVertices->size() ; i < n ; ++i) {
     const reco::Vertex& vtx = (*offlinePrimaryVertices)[i];
-    if((! vtx.isFake()) && (vtx.ndof() > 4) && (std::abs(vtx.z()) <= 24) && (vtx.position().rho()  <= 2))
+    if((! vtx.isFake()) && (vtx.ndof() > 4))
       ++vtxN_;
   }
   if( offlinePrimaryVertices->size() ) {
@@ -1006,6 +1028,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   
   //std::string l2l3PFlowname = "L2L3JetCorrectorSC5PF";
 
+  const JetCorrector* correctorL1   = JetCorrector::getJetCorrector (l1name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name_, setup); //Define the jet corrector
@@ -1041,8 +1064,10 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	jetIDLoose_[jtno] = looseJetID((*pJets)[jtno]);
       }
       // L2L3 correction
-      jscalel2[jtno]   = correctorL2  ->correction( (*pJets)[jtno].p4());  //calculate the correction
-      jscalel3[jtno]   = correctorL3  ->correction( jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
+      edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
+      jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],jetRef,evt,setup);  //calculate the correction
+      jscalel2[jtno]   = correctorL2->correction( jscalel1[jtno] * (*pJets)[jtno].p4());  //calculate the correction
+      jscalel3[jtno]   = correctorL3->correction( jscalel1[jtno] * jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno].p4());  //calculate the correction
       jscalel4JW[jtno] = correctorL2L3L4JW->correction((*pJets)[jtno]) / jscalel2l3[jtno];  //calculate the correction
 
