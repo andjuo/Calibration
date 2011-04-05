@@ -16,12 +16,12 @@ process.AdaptorConfig = cms.Service("AdaptorConfig",
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/mc/Fall10/QCD_Pt_15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/E7TeV_ProbDist_2010Data_BX156_START38_V12-v1/0002/0A2BAA33-F4E4-DF11-ADAF-00215E21DB88.root'
+    '/store/mc/Spring11/QCD_Pt_15to3000_Flat_7TeV/AODSIM/START311_V1A-v1/0000/D6F6452C-3847-E011-A36C-003048D4770C.root'
             )
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(5) )
+    input = cms.untracked.int32(100) )
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),
@@ -46,7 +46,7 @@ process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START38_V14::All'
+process.GlobalTag.globaltag = 'START311_V1::All'
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")
 
@@ -86,29 +86,30 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 # Jet Energy Corrections
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 
+##-------------------- Disable the CondDB -------
+process.ak5CaloL1Offset.useCondDB   = False
+process.ak5CaloL2Relative.useCondDB = False
+process.ak5CaloL3Absolute.useCondDB = False
+process.ak5PFL1Offset.useCondDB     = False
+process.ak5PFL2Relative.useCondDB   = False
+process.ak5PFL3Absolute.useCondDB   = False
+process.ak5JPTL1Offset.useCondDB    = False
+process.ak5JPTL2Relative.useCondDB  = False
+process.ak5JPTL3Absolute.useCondDB  = False
+
+process.ak7CaloL1Offset.useCondDB   = False
+process.ak7CaloL2Relative.useCondDB = False
+process.ak7CaloL3Absolute.useCondDB = False
+process.ak7PFL1Offset.useCondDB     = False
+process.ak7PFL2Relative.useCondDB   = False
+process.ak7PFL3Absolute.useCondDB   = False
+
 process.ak7JPTL3Absolute  = process.ak5CaloL3Absolute.clone( algorithm = 'AK7JPT' )
 process.ak7JPTL2Relative  = process.ak5CaloL2Relative.clone( algorithm = 'AK7JPT' )
 process.ak7JPTL2L3 = cms.ESSource(
     'JetCorrectionServiceChain',
     correctors = cms.vstring('ak7JPTL2Relative','ak7JPTL3Absolute')
     )
-# L4JW Correction Services
-# you need special versions of CondFormats and JetMETCorrections:
-# copy the following dirs to your release (this works with 3_8_4):
-# /afs/cern.ch/user/s/stadie/public/CondFormats
-# /afs/cern.ch/user/s/stadie/public/JetMETCorrections
-#
-
-#process.ak5CaloL4JW = cms.ESSource(
-#    'LXXXCorrectionService',
-#    era = cms.string('Spring10'),
-#    section   = cms.string(''),
-#    level     = cms.string('L4JW'),
-#    algorithm = cms.string('AK5Calo'),
-#    useCondDB = cms.untracked.bool(False)
-#    )
-#process.ak5CaloL2L3L4JW = process.ak5CaloL2L3.clone()
-#process.ak5CaloL2L3L4JW.correctors.append('ak5CaloL4JW')
 
 # ZSP and JPT corrections
 process.load("RecoJets.Configuration.RecoJPTJets_cff")
@@ -123,6 +124,7 @@ process.calibTreeMakerCalo.NJet_JetIDs       = 'ak5JetID'
 process.calibTreeMakerCalo.NJet_PartonMatch  = 'CaloJetPartonMatching'
 process.calibTreeMakerCalo.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerCalo.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
+process.calibTreeMakerCalo.NJet_L1JetCorrector      = cms.string('ak5CaloL1Offset')
 process.calibTreeMakerCalo.NJet_L2JetCorrector      = cms.string('ak5CaloL2Relative')
 process.calibTreeMakerCalo.NJet_L3JetCorrector      = cms.string('ak5CaloL3Absolute')
 process.calibTreeMakerCalo.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
@@ -142,6 +144,7 @@ process.calibTreeMakerPF.NJet_JetIDs       = ''
 process.calibTreeMakerPF.NJet_PartonMatch  = 'PFJetPartonMatching'
 process.calibTreeMakerPF.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerPF.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
+process.calibTreeMakerPF.NJet_L1JetCorrector      = cms.string('ak5PFL1Offset')
 process.calibTreeMakerPF.NJet_L2JetCorrector      = cms.string('ak5PFL2Relative')
 process.calibTreeMakerPF.NJet_L3JetCorrector      = cms.string('ak5PFL3Absolute')
 process.calibTreeMakerPF.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
@@ -158,6 +161,7 @@ process.calibTreeMakerTrack.NJet_JetIDs       = ''
 process.calibTreeMakerTrack.NJet_PartonMatch  = 'TrackJetPartonMatching'
 process.calibTreeMakerTrack.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerTrack.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
+process.calibTreeMakerTrack.NJet_L1JetCorrector      = cms.string('ak5TrackL1Offset')
 process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TrackL2Relative')
 process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TrackL3Absolute')
 process.calibTreeMakerTrack.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
@@ -175,6 +179,7 @@ process.calibTreeMakerJPT.NJet_JetIDs       = ''
 process.calibTreeMakerJPT.NJet_PartonMatch  = 'JPTJetPartonMatching'
 process.calibTreeMakerJPT.NJet_GenJets    = 'ak5GenJets'
 process.calibTreeMakerJPT.NJetZSPJets     = 'ZSPJetCorJetAntiKt5'
+process.calibTreeMakerJPT.NJet_L1JetCorrector      = cms.string('ak5JPTL1Offset')
 process.calibTreeMakerJPT.NJet_L2JetCorrector      = cms.string('ak5JPTL2Relative')
 process.calibTreeMakerJPT.NJet_L3JetCorrector      = cms.string('ak5JPTL3Absolute')
 process.calibTreeMakerJPT.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
@@ -193,6 +198,7 @@ process.calibTreeMakerAK7Calo = process.calibTreeMakerCalo.clone(
     NJet_JetIDs = 'ak7JetID',
     NJet_PartonMatch = 'AK7CaloJetPartonMatching',
     NJet_GenJets = 'ak7GenJets',
+    NJet_L1JetCorrector = 'ak7CaloL1Offset',
     NJet_L2JetCorrector = 'ak7CaloL2Relative',
     NJet_L3JetCorrector = 'ak7CaloL3Absolute',
     NJet_L2L3JetCorrector = 'ak7CaloL2L3',
@@ -208,6 +214,7 @@ process.calibTreeMakerIC5Calo = process.calibTreeMakerCalo.clone(
     NJet_JetIDs = 'ic5JetID',
     NJet_PartonMatch = 'IC5CaloJetPartonMatching',
     NJet_GenJets = 'iterativeCone5GenJets',
+    NJet_L1JetCorrector = 'ic5CaloL1Offset',
     NJet_L2JetCorrector = 'ic5CaloL2Relative',
     NJet_L3JetCorrector = 'ic5CaloL3Absolute',
     NJet_L2L3JetCorrector = 'ic5CaloL2L3',
@@ -223,6 +230,7 @@ process.calibTreeMakerKT4Calo = process.calibTreeMakerCalo.clone(
     NJet_JetIDs = 'kt4JetID',
     NJet_PartonMatch = 'KT4CaloJetPartonMatching',
     NJet_GenJets = 'kt4GenJets',
+    NJet_L1JetCorrector = 'kt4CaloL1Offset',
     NJet_L2JetCorrector = 'kt4CaloL2Relative',
     NJet_L3JetCorrector = 'kt4CaloL3Absolute',
     NJet_L2L3JetCorrector = 'kt4CaloL2L3',
@@ -239,6 +247,7 @@ process.calibTreeMakerKT6Calo = process.calibTreeMakerCalo.clone(
     NJet_JetIDs = 'kt6JetID',
     NJet_PartonMatch = 'KT6CaloJetPartonMatching',
     NJet_GenJets = 'kt6GenJets',
+    NJet_L1JetCorrector = 'kt6CaloL1Offset',
     NJet_L2JetCorrector = 'kt6CaloL2Relative',
     NJet_L3JetCorrector = 'kt6CaloL3Absolute',
     NJet_L2L3JetCorrector = 'kt6CaloL2L3',
@@ -253,6 +262,7 @@ process.calibTreeMakerAK7PF = process.calibTreeMakerPF.clone(
     NJet_Jets  = 'ak7PFJets',
     NJet_PartonMatch = 'AK7PFJetPartonMatching',
     NJet_GenJets = 'ak7GenJets',
+    NJet_L1JetCorrector = 'ak7PFL1Offset',
     NJet_L2JetCorrector = 'ak7PFL2Relative',
     NJet_L3JetCorrector = 'ak7PFL3Absolute',
     NJet_L2L3JetCorrector = 'ak7PFL2L3',
@@ -267,6 +277,7 @@ process.calibTreeMakerIC5PF = process.calibTreeMakerPF.clone(
     NJet_Jets  = 'iterativeCone5PFJets',
     NJet_PartonMatch = 'IC5PFJetPartonMatching',
     NJet_GenJets = 'iterativeCone5GenJets',
+    NJet_L1JetCorrector = 'ic5PFL1Offset',
     NJet_L2JetCorrector = 'ic5PFL2Relative',
     NJet_L3JetCorrector = 'ic5PFL3Absolute',
     NJet_L2L3JetCorrector = 'ic5PFL2L3',
@@ -281,6 +292,7 @@ process.calibTreeMakerKT4PF = process.calibTreeMakerPF.clone(
     NJet_Jets  = 'kt4PFJets',
     NJet_PartonMatch = 'KT4PFJetPartonMatching',
     NJet_GenJets = 'kt4GenJets',
+    NJet_L1JetCorrector = 'kt4PFL1Offset',
     NJet_L2JetCorrector = 'kt4PFL2Relative',
     NJet_L3JetCorrector = 'kt4PFL3Absolute',
     NJet_L2L3JetCorrector = 'kt4PFL2L3',
@@ -296,6 +308,7 @@ process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
     NJet_Jets  = 'kt6PFJets',
     NJet_PartonMatch = 'KT6PFJetPartonMatching',
     NJet_GenJets = 'kt6GenJets',
+    NJet_L1JetCorrector = 'kt6PFL1Offset',
     NJet_L2JetCorrector = 'kt6PFL2Relative',
     NJet_L3JetCorrector = 'kt6PFL3Absolute',
     NJet_L2L3JetCorrector = 'kt6PFL2L3',
@@ -310,7 +323,7 @@ process.pMC = cms.Path( #process.dump *
                         process.CaloJetPartonMatching
                         * process.PFJetPartonMatching
                         * process.JPTJetPartonMatching
-                        * process.TrackJetPartonMatching
+#                        * process.TrackJetPartonMatching
 #                        * process.genJetParticles
 #                        * process.recoGenJets
 #                        * process.dump
@@ -322,18 +335,18 @@ process.pMC = cms.Path( #process.dump *
                         * process.calibTreeMakerAK7Calo
  #                       * process.IC5CaloJetPartonMatching
  #                       * process.calibTreeMakerIC5Calo
-                        * process.KT4CaloJetPartonMatching
-                        * process.calibTreeMakerKT4Calo
-                        * process.KT6CaloJetPartonMatching
-                        * process.calibTreeMakerKT6Calo
+#                        * process.KT4CaloJetPartonMatching
+#                        * process.calibTreeMakerKT4Calo
+#                        * process.KT6CaloJetPartonMatching
+#                        * process.calibTreeMakerKT6Calo
                         * process.AK7PFJetPartonMatching
                         * process.calibTreeMakerAK7PF
 #                        * process.IC5PFJetPartonMatching
 #                        * process.calibTreeMakerIC5PF
-                        * process.KT4PFJetPartonMatching
-                        * process.calibTreeMakerKT4PF
-                        * process.KT6PFJetPartonMatching
-                        * process.calibTreeMakerKT6PF
+#                        * process.KT4PFJetPartonMatching
+#                        * process.calibTreeMakerKT4PF
+#                        * process.KT6PFJetPartonMatching
+#                        * process.calibTreeMakerKT6PF
                         )
 
 process.schedule = cms.Schedule(process.pMC)
