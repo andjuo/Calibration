@@ -132,6 +132,7 @@ private:
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
   bool vtxIsFake_;
+  int puMCNumVtx_;
 
   // Calo jets and jet ID
   JetIDSelectionFunctor jetIDCaloFunctorLoose_;
@@ -222,6 +223,7 @@ private:
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
 #include "DataFormats/L1GlobalTrigger/interface/L1GtFdlWord.h"
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
@@ -229,6 +231,7 @@ private:
 
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+
 
 template <typename T> NJet<T>::NJet()
   : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000),
@@ -264,6 +267,7 @@ template <typename T> NJet<T>::NJet()
   vtxNormalizedChi2_ = 0.;
   vtxNDof_ = 0.;
   vtxIsFake_ = false;
+  puMCNumVtx_ = 0;
 
 
   // CaloTower branches for all jets
@@ -708,6 +712,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("VtxNDof",&vtxNDof_,"VtxNDof/F");
   CalibTree->Branch("VtxIsFake",&vtxIsFake_,"VtxIsFake/O");
 
+  CalibTree->Branch("PUMCNumVtx",&puMCNumVtx_,"PUMCNumVtx/I");
+
   // CaloTower branches for all jets
   CalibTree->Branch( "NobjTow",&NobjTow,"NobjTow/I"             );
   CalibTree->Branch( "TowId",     towid,      "TowId[NobjTow]/I"    );
@@ -1011,6 +1017,23 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	weight = static_cast<float>(genInfoHandle->weight());
       }
   }
+
+  // Number of generated PU events
+  edm::Handle< std::vector<PileupSummaryInfo> > puInfo;
+  evt.getByLabel("addPileupInfo",puInfo);
+  if( puInfo.isValid() ) {
+    std::vector<PileupSummaryInfo>::const_iterator puIt;
+    int n = 0;
+    for(puIt = puInfo->begin(); puIt != puInfo->end(); ++puIt,++n) {
+      //std::cout << " Pileup Information: bunchXing, nvtx: " << puIt->getBunchCrossing() << " " << puIt->getPU_NumInteractions() << std::endl;
+      if( puIt->getBunchCrossing() == 0 ) { // Select in-time bunch crossing
+	puMCNumVtx_ = puIt->getPU_NumInteractions();
+	break;
+      }
+    }
+  } else {
+    puMCNumVtx_ = 0;
+  }
   
   edm::Handle<GenRunInfoProduct> genInfoProduct;
   evt.getRun().getByLabel("generator", genInfoProduct );
@@ -1019,7 +1042,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   } else {
     xsec = 0;
   }
-
   
   //get tower geometry
   edm::ESHandle<CaloGeometry> geometry;
