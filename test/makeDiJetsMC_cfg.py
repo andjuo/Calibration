@@ -16,12 +16,13 @@ process.AdaptorConfig = cms.Service("AdaptorConfig",
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-    '/store/mc/Spring11/QCD_Pt_15to3000_Flat_7TeV/AODSIM/START311_V1A-v1/0000/D6F6452C-3847-E011-A36C-003048D4770C.root'
+#    '/store/mc/Spring11/QCD_Pt_15to3000_Flat_7TeV/AODSIM/START311_V1A-v1/0000/D6F6452C-3847-E011-A36C-003048D4770C.root'
+    '/store/mc/Spring11/QCD_Pt_15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/PU_S1_START311_V1G1-v1/0030/CEAF3187-C652-E011-BA2D-00215E222382.root'
             )
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100) )
+    input = cms.untracked.int32(5) )
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),
@@ -36,8 +37,8 @@ process.primaryVertexFilter = cms.EDFilter("VertexSelector",
 )
 
 process.load('Configuration/StandardSequences/Services_cff')
-process.load('Configuration/StandardSequences/GeometryExtended_cff')
-process.load('Configuration/StandardSequences/MagneticField_AutoFromDBCurrent_cff')
+process.load('Configuration.StandardSequences.GeometryDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
 process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
@@ -46,7 +47,7 @@ process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
 process.load("TrackingTools.TrackAssociator.default_cfi")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START311_V1::All'
+process.GlobalTag.globaltag = 'START311_V2::All'
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")
 
