@@ -363,9 +363,9 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
 
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
-    NJet_Jets         = cms.InputTag("ak5JPTJets"),
+    NJet_Jets         = cms.InputTag("JetPlusTrackZSPCorJetAntiKt5"),
     NJet_MinNumJets   = cms.int32(1),                             
-    NJet_JetIDs       = cms.InputTag(""),
+    NJet_JetIDs       = cms.InputTag("ak5JetID"),
     NJet_PartonMatch  = cms.InputTag(""),
     NJet_MET          = cms.InputTag("met"),
     NJetRecTracks     = cms.InputTag("generalTracks"),

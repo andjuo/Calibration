@@ -88,10 +88,8 @@ public:
 private:
   static unsigned int findTrigger(const std::vector<std::string>& list, const std::string& name);
   void fillExtra(const edm::View<T>& pJets, int jtno);
-  bool looseJetID(T const &jet, reco::JetID const &jetID);
-  bool tightJetID(T const &jet, reco::JetID const &jetID);
-  bool looseJetID(T const &jet);
-  bool tightJetID(T const &jet);
+  void fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap);
+
   edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, weight_tag;                   
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
@@ -983,9 +981,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
 
-  edm::Handle<reco::JetIDValueMap> pJetIDMap;
-  evt.getByLabel(jetIDs_,pJetIDMap);
-
   edm::Handle<reco::CaloMETCollection> recmets;
   evt.getByLabel(met_, recmets);
 
@@ -1055,6 +1050,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name_, setup); //Define the jet corrector
   const JetCorrector* correctorL2L3L4JW  = JetCorrector::getJetCorrector (l2l3l4JWname_, setup); //Define the jet corrector
+  //const JetCorrector* correctorJPT   = JetCorrector::getJetCorrector (JPTname_,setup);   //Define the jet corrector
+  //const JetCorrector* correctorL2L3JPT   = JetCorrector::getJetCorrector (l2l3JPTname_,setup);   //Define the jet corrector
 
   NobjTow=0;
   NobjETowCal = 0;
@@ -1073,26 +1070,19 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       jetet[  jtno ] = (*pJets)[jtno].et();
       jete[   jtno ] = (*pJets)[jtno].energy();
 
-      // JetID
-      if( pJetIDMap.isValid() ) { // For calo and JPT jets
-	reco::JetID pJetID = (*pJetIDMap)[pJets->refAt(jtno)];
-	jetIDLoose_[jtno] = looseJetID((*pJets)[jtno],pJetID);
-	jetIDTight_[jtno] = tightJetID((*pJets)[jtno],pJetID);
-	n90Hits_[jtno] = static_cast<int>(pJetID.n90Hits);
-	fHPD_[jtno] = pJetID.fHPD;
-	fRBX_[jtno] = pJetID.fRBX;
-      } else { // For PF jets
- 	jetIDTight_[jtno] = tightJetID((*pJets)[jtno]);
-	jetIDLoose_[jtno] = looseJetID((*pJets)[jtno]);
-      }
+      edm::Handle<reco::JetIDValueMap> pJetIDMap;
+      evt.getByLabel(jetIDs_,pJetIDMap);
+      fillJetID(pJets->refAt(jtno),jtno,pJetIDMap);
+      
       // L2L3 correction
       edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
       jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],jetRef,evt,setup);  //calculate the correction
       jscalel2[jtno]   = correctorL2->correction( jscalel1[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel3[jtno]   = correctorL3->correction( jscalel1[jtno] * jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
-      jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno].p4());  //calculate the correction
+      jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno]);  //calculate the correction
       jscalel4JW[jtno] = correctorL2L3L4JW->correction((*pJets)[jtno]) / jscalel2l3[jtno];  //calculate the correction
-
+      //jscaleJPT[jtno]     = correctorJPT->correction((*zspJet),jetRef,evt,setup);
+      //jscalel2l3JPT[jtno] = correctorL2L3JPT ->correction((*pJets)[jtno].p4() * jscaleJPT[jtno] );  //calculate the correction
       // JPT correction (uses ZSP corrected jets)
 //       for(zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet) {
 // 	if( deltaR(zspJet->eta(),zspJet->phi(),(*pJets)[jtno].eta() , (*pJets)[jtno].phi()) < 0.01)//no change in R by ZSP or JPT
@@ -1446,36 +1436,41 @@ template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtn
 }
 
 
-// JetID for calo jets
-template <> bool NJet<reco::CaloJet>::looseJetID(reco::CaloJet const &jet, reco::JetID const &jetID) {
-  return jetIDCaloFunctorLoose_(jet,jetID);
-}
-template <typename T> bool NJet<T>::looseJetID(T const &jet, reco::JetID const &jetID) {
-  return false;
-}
-
-template <> bool NJet<reco::CaloJet>::tightJetID(reco::CaloJet const &jet, reco::JetID const &jetID) {
-  return jetIDCaloFunctorTight_(jet,jetID);
-}
-template <typename T> bool NJet<T>::tightJetID(T const &jet, reco::JetID const &jetID) {
-  return false;
+// JetID
+template <> void NJet<reco::CaloJet>::fillJetID(const edm::RefToBase<reco::CaloJet>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap)
+{
+  const reco::JetID& jetID = (*idmap)[jetref];
+  const reco::CaloJet& jet = *(jetref.get());
+  jetIDLoose_[jtno] = jetIDCaloFunctorLoose_(jet,jetID);
+  jetIDTight_[jtno] = jetIDCaloFunctorTight_(jet,jetID);
+  n90Hits_[jtno] = static_cast<int>(jetID.n90Hits);
+  fHPD_[jtno] = jetID.fHPD;
+  fRBX_[jtno] = jetID.fRBX;
 }
 
-// JetID for pf jets
-template <> bool NJet<reco::PFJet>::looseJetID(reco::PFJet const &jet) {
+template <> void NJet<reco::JPTJet>::fillJetID(const edm::RefToBase<reco::JPTJet>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap)
+{
+  const reco::JetID& jetID = (*idmap)[jetref->getCaloJetRef()];
+  const reco::CaloJet* jet = dynamic_cast<const reco::CaloJet*>(jetref->getCaloJetRef().get());
+  
+  jetIDLoose_[jtno] = jetIDCaloFunctorLoose_(*jet,jetID);
+  jetIDTight_[jtno] = jetIDCaloFunctorTight_(*jet,jetID);
+  n90Hits_[jtno] = static_cast<int>(jetID.n90Hits);
+  fHPD_[jtno] = jetID.fHPD;
+  fRBX_[jtno] = jetID.fRBX;
+}
+
+template <> void NJet<reco::PFJet>::fillJetID(const edm::RefToBase<reco::PFJet>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap)
+{
+  const reco::PFJet& jet = *(jetref.get());
   pat::strbitset ret = jetIDPFFunctorLoose_.getBitTemplate();
-  return jetIDPFFunctorLoose_(jet,ret);
-}
-template <typename T> bool NJet<T>::looseJetID(T const &jet) {
-  return false;
+  jetIDLoose_[jtno] = jetIDPFFunctorLoose_(jet,ret);
+  ret = jetIDPFFunctorTight_.getBitTemplate();
+  jetIDTight_[jtno] = jetIDPFFunctorTight_(jet,ret);
 }
 
-template <> bool NJet<reco::PFJet>::tightJetID(reco::PFJet const &jet) {
-  pat::strbitset ret = jetIDPFFunctorTight_.getBitTemplate();
-  return jetIDPFFunctorTight_(jet,ret);
-}
-template <typename T> bool NJet<T>::tightJetID(T const &jet) {
-  return false;
+template <typename T> void NJet<T>::fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap)
+{
 }
 
 #endif
