@@ -126,6 +126,15 @@ private:
   bool hltDiJetAve140U_;
   bool hltDiJetAve180U_;
   bool hltDiJetAve300U_;
+  bool hltDiJetAve30_;
+  bool hltDiJetAve60_;
+  bool hltDiJetAve80_;
+  bool hltDiJetAve110_;
+  bool hltDiJetAve150_;
+  bool hltDiJetAve190_;
+  bool hltDiJetAve240_;
+  bool hltDiJetAve300_;
+  bool hltDiJetAve370_;
   int vtxN_,vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
@@ -258,6 +267,16 @@ template <typename T> NJet<T>::NJet()
   hltDiJetAve140U_ = false;
   hltDiJetAve180U_ = false;
   hltDiJetAve300U_ = false;
+
+  hltDiJetAve30_ = false;
+  hltDiJetAve60_ = false;
+  hltDiJetAve80_ = false;
+  hltDiJetAve110_ = false;
+  hltDiJetAve150_ = false;
+  hltDiJetAve190_ = false;
+  hltDiJetAve240_ = false;
+  hltDiJetAve300_ = false;
+  hltDiJetAve370_ = false;
 
   vtxN_ = 0;
   vtxNTracks_ = 0;
@@ -716,6 +735,16 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("HltDiJetAve180U",&hltDiJetAve180U_,"HltDiJetAve180U/O");
   CalibTree->Branch("HltDiJetAve300U",&hltDiJetAve300U_,"HltDiJetAve300U/O");
 
+  CalibTree->Branch("HltDiJetAve30", &hltDiJetAve30_, "HltDiJetAve30/O");
+  CalibTree->Branch("HltDiJetAve60", &hltDiJetAve60_, "HltDiJetAve60/O");
+  CalibTree->Branch("HltDiJetAve80", &hltDiJetAve80_, "HltDiJetAve80/O");
+  CalibTree->Branch("HltDiJetAve110",&hltDiJetAve110_,"HltDiJetAve110/O");
+  CalibTree->Branch("HltDiJetAve150",&hltDiJetAve150_,"HltDiJetAve150/O");
+  CalibTree->Branch("HltDiJetAve190",&hltDiJetAve190_,"HltDiJetAve190/O");
+  CalibTree->Branch("HltDiJetAve240",&hltDiJetAve240_,"HltDiJetAve240/O");
+  CalibTree->Branch("HltDiJetAve300",&hltDiJetAve300_,"HltDiJetAve300/O");
+  CalibTree->Branch("HltDiJetAve370",&hltDiJetAve370_,"HltDiJetAve370/O");
+
   CalibTree->Branch("VtxN",&vtxN_,"VtxN/I");
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
   CalibTree->Branch("VtxPosX",&vtxPosX_,"VtxPosX/F");
@@ -968,6 +997,53 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve300U_ = true;
+
+
+    // The DiJetAve trigger decisions for corrected jet pt
+    hltDiJetAve30_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve30_ = true;
+
+    hltDiJetAve60_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve60");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve60_ = true;
+
+    hltDiJetAve80_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve80");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve80_ = true;
+
+    hltDiJetAve110_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve110");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve110_ = true;
+
+    hltDiJetAve150_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve150");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve150_ = true;
+
+    hltDiJetAve190_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve190");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve190_ = true;
+
+    hltDiJetAve240_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve240");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve240_ = true;
+
+    hltDiJetAve300_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve300_ = true;
+
+    hltDiJetAve370_ = false;
+    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve370");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiJetAve370_ = true;
   }
 
 
