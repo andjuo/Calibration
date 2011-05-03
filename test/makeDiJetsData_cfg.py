@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import os
 
 process = cms.Process("Calib")
 
@@ -39,8 +40,9 @@ process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) 
 
 # HLT
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
-process.hltHighLevel.HLTPaths = ('HLT_DiJetAve15U','HLT_DiJetAve30U','HLT_DiJetAve50U','HLT_DiJetAve70U','HLT_DiJetAve100U','HLT_DiJetAve140U','HLT_DiJetAve15U_v*','HLT_DiJetAve30U_v*','HLT_DiJetAve50U_v*','HLT_DiJetAve70U_v*','HLT_DiJetAve100U_v*','HLT_DiJetAve140U_v*','HLT_DiJetAve180U_v*','HLT_DiJetAve300U_v*')
+#process.hltHighLevel.HLTPaths = ('HLT_DiJetAve15U','HLT_DiJetAve30U','HLT_DiJetAve50U','HLT_DiJetAve70U','HLT_DiJetAve100U','HLT_DiJetAve140U','HLT_DiJetAve15U_v*','HLT_DiJetAve30U_v*','HLT_DiJetAve50U_v*','HLT_DiJetAve70U_v*','HLT_DiJetAve100U_v*','HLT_DiJetAve140U_v*','HLT_DiJetAve180U_v*','HLT_DiJetAve300U_v*')
 #process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve30U')
+process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve*')
 process.hltHighLevel.andOr = cms.bool(True)
 process.hltHighLevel.throw = cms.bool(False)
 
@@ -107,6 +109,64 @@ process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 #    'JetCorrectionServiceChain',
 #    correctors = cms.vstring('ak5CaloL2L3Residual','ak5CaloL4JW')
 #)
+process.load("CondCore.DBCommon.CondDBCommon_cfi")
+process.jec = cms.ESSource("PoolDBESSource",
+      DBParameters = cms.PSet(
+        messageLevel = cms.untracked.int32(0)
+        ),
+      timetype = cms.string('runnumber'),
+      toGet = cms.VPSet(
+      cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5PF'),
+            label  = cms.untracked.string('AK5PF')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5Calo'),
+            label  = cms.untracked.string('AK5Calo')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5JPT'),
+            label  = cms.untracked.string('AK5JPT')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK7PF'),
+            label  = cms.untracked.string('AK7PF')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK7Calo'),
+            label  = cms.untracked.string('AK7Calo')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT4PF'),
+            label  = cms.untracked.string('KT4PF')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT6PF'),
+            label  = cms.untracked.string('KT6PF')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT4Calo'),
+            label  = cms.untracked.string('KT4Calo')
+            ),
+     cms.PSet(
+            record = cms.string('JetCorrectionsRecord'),
+            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT6Calo'),
+            label  = cms.untracked.string('KT6Calo')
+            )
+      ),
+      ## here you add as many jet types as you need (AK5Calo, AK5JPT, AK7PF, AK7Calo, KT4PF, KT4Calo, KT6PF, KT6Calo)
+      connect = cms.string('sqlite_file:'+os.environ['CMSSW_BASE']+'/src/Jec10V3.db/Jec10V3.db')
+)
+
+process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
 
 # ZSP and JPT corrections
 process.load("RecoJets.Configuration.RecoJPTJets_cff")
@@ -171,7 +231,7 @@ process.calibTreeMakerJPT.WriteDiJetTree          = True
 process.calibTreeMakerJPT.WriteStableGenParticles = False
 process.calibTreeMakerJPT.OutputFile        = 'ak5JPT.root'
 process.calibTreeMakerJPT.NJet_Jets         = 'JetPlusTrackZSPCorJetAntiKt5'
-process.calibTreeMakerJPT.NJet_JetIDs       = ''
+process.calibTreeMakerJPT.NJet_JetIDs       = 'ak5JetID'
 process.calibTreeMakerJPT.NJet_GenJets    = 'ak5GenJets'
 process.calibTreeMakerJPT.NJetZSPJets     = 'ZSPJetCorJetAntiKt5'
 process.calibTreeMakerJPT.NJet_L1JetCorrector      = cms.string('ak5JPTL1Offset')
@@ -286,7 +346,7 @@ process.pDump = cms.Path( process.dump )
 
 process.pData = cms.Path( #process.hltLevel1GTSeed*
                           process.hltHighLevel
-                          #* process.primaryVertexFilter
+                          * process.primaryVertexFilter
                           #* process.noscraping
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5
