@@ -90,7 +90,7 @@ private:
   void fillExtra(const edm::View<T>& pJets, int jtno);
   void fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap);
 
-  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, weight_tag;                   
+  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, rho_tag_, weight_tag;
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   std::string l1name_;
@@ -131,6 +131,7 @@ private:
   float vtxNormalizedChi2_, vtxNDof_;
   bool vtxIsFake_;
   int puMCNumVtx_;
+  float rho_;
 
   // Calo jets and jet ID
   JetIDSelectionFunctor jetIDCaloFunctorLoose_;
@@ -144,9 +145,10 @@ private:
   float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
-  float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_;
+  float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_;
+  float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_,*jetarea_;
   float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW;
-  int *jetieta_, *jetiphi_;
+  int *nChargedHadrons_,*jetieta_, *jetiphi_;
 
   // Gen jets matched to calo jets
   float *genjetpt, *genjetphi, *genjeteta, *genjetet, *genjete;
@@ -266,7 +268,7 @@ template <typename T> NJet<T>::NJet()
   vtxNDof_ = 0.;
   vtxIsFake_ = false;
   puMCNumVtx_ = 0;
-
+  rho_ = 0;
 
   // CaloTower branches for all jets
   NobjTow    = 0;
@@ -336,6 +338,11 @@ template <typename T> NJet<T>::NJet()
   fEMF_ = new float[kjMAX];
   fHPD_ = new float[kjMAX];
   fRBX_ = new float[kjMAX];
+  fChargedHadrons_ = new float[kjMAX];
+  fNeutralHadrons_ = new float[kjMAX];
+  fPhotons_ = new float[kjMAX];
+  fElectrons_ = new float[kjMAX];
+  nChargedHadrons_ = new int[kjMAX];
   jetIDLoose_ = new bool[kjMAX];
   jetIDTight_ = new bool[kjMAX];
   for(int i = 0; i < kjMAX; i++) {
@@ -346,6 +353,7 @@ template <typename T> NJet<T>::NJet()
   // Jet shape
   jetEtWeightedSigmaPhi_ = new float[kjMAX];
   jetEtWeightedSigmaEta_ = new float[kjMAX];
+  jetarea_               = new float[kjMAX];
 
   // Correction factors
   jscaleZSP       = new float [ kjMAX ];
@@ -569,11 +577,17 @@ template <typename T> NJet<T>::~NJet() {
   delete [] fEMF_;
   delete [] fHPD_;
   delete [] fRBX_;
+  delete [] fChargedHadrons_;
+  delete [] fNeutralHadrons_;
+  delete [] fPhotons_;
+  delete [] fElectrons_;
+  delete [] nChargedHadrons_;
   delete [] jetIDLoose_;
   delete [] jetIDTight_;
   
   delete [] jetEtWeightedSigmaPhi_;
   delete [] jetEtWeightedSigmaEta_;
+  delete [] jetarea_;
 
   delete [] jscaleZSP;    
   delete [] jscalel1;     
@@ -660,6 +674,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   genjets_            = cfg.getParameter<edm::InputTag>("NJet_GenJets");
   genparticles_       = cfg.getParameter<edm::InputTag>("NJet_GenParticles");
   met_                = cfg.getParameter<edm::InputTag>("NJet_MET");
+  rho_tag_            = cfg.getParameter<edm::InputTag>("NJet_Rho");
   weight_             = (float)(cfg.getParameter<double> ("NJet_Weight"));
   weight_tag          = cfg.getParameter<edm::InputTag> ("NJet_Weight_Tag");
   recTracks_          = cfg.getParameter<edm::InputTag>("NJetRecTracks");
@@ -711,6 +726,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("VtxIsFake",&vtxIsFake_,"VtxIsFake/O");
 
   CalibTree->Branch("PUMCNumVtx",&puMCNumVtx_,"PUMCNumVtx/I");
+  CalibTree->Branch("Rho",&rho_,"Rho/F");
 
   // CaloTower branches for all jets
   CalibTree->Branch( "NobjTow",&NobjTow,"NobjTow/I"             );
@@ -775,10 +791,15 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetEMF",fEMF_,"JetEMF[NobjJet]/F");  
   CalibTree->Branch( "JetFHPD",fHPD_,"JetFHPD[NobjJet]/F");
   CalibTree->Branch( "JetFRBX",fRBX_,"JetFRBX[NobjJet]/F");
+  CalibTree->Branch( "JetFChargedHadron",fChargedHadrons_,"JetFChargedHadrons[NobjJet]/F");  
+  CalibTree->Branch( "JetNeutralHadrons",fNeutralHadrons_,"JetFNeutralHadrons[NobjJet]/F");  
+  CalibTree->Branch( "JetFPhotons",fPhotons_,"JetFPhotons[NobjJet]/F");  
+  CalibTree->Branch( "JetFElectrons",fElectrons_,"JetFElectrons[NobjJet]/F");  
   CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
   CalibTree->Branch( "JetIDTight",jetIDTight_,"JetIDTight[NobjJet]/O");
   CalibTree->Branch( "JetEtWeightedSigmaPhi",jetEtWeightedSigmaPhi_,"JetEtWeightedSigmaPhi[NobjJet]/F" );
   CalibTree->Branch( "JetEtWeightedSigmaEta",jetEtWeightedSigmaEta_,"JetEtWeightedSigmaEta[NobjJet]/F" );
+  CalibTree->Branch( "JetArea",jetarea_,"JetArea[NobjJet]/F" );
   CalibTree->Branch( "JetCorrZSP",          jscaleZSP,       "JetCorrZSP[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL1",           jscalel1,        "JetCorrL1[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2",           jscalel2,        "JetCorrL2[NobjJet]/F" );
@@ -789,6 +810,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetCorrL4JW",         jscalel4JW,      "JetCorrL4JW[NobjJet]/F" );
   CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
   CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
+  CalibTree->Branch( "JetNChargedHadrons",nChargedHadrons_,"JetNChargedHadrons[NobjJet]/I");  
 
   // Gen jets (matched to calo jets)
   CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
@@ -978,6 +1000,14 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     vtxIsFake_ = true;
   }
 
+  edm::Handle<double> pRho;
+  evt.getByLabel(rho_tag_,pRho);
+  if( pRho.isValid() ) {
+    rho_ = *pRho;
+  } else {
+    rho_ = 0;
+  }
+
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
 
@@ -1137,6 +1167,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	jetEtWeightedSigmaPhi_[jtno] = (*pJets)[jtno].phiphiMoment() > 0 ? sqrt((*pJets)[jtno].phiphiMoment()) : 0;
 	jetEtWeightedSigmaEta_[jtno] = (*pJets)[jtno].etaetaMoment() > 0 ? sqrt((*pJets)[jtno].etaetaMoment()) : 0;
       }
+      jetarea_[jtno] = (*pJets)[jtno].jetArea();
       fillExtra(*pJets, jtno);
       //// GenParticle Matching ALGO and PHYSICS
       if( matchedParticleMap.isValid() ) {
@@ -1402,7 +1433,11 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
 {
   fEMF_[ jtno ] = pJets[jtno].emEnergyFraction();
   fHad_[ jtno ] = pJets[jtno].energyFractionHadronic();
-  
+  fChargedHadrons_[ jtno ] = -1;
+  fNeutralHadrons_[ jtno ] = -1;
+  fPhotons_[ jtno ]        = -1;
+  fElectrons_[ jtno ]      = -1;
+  nChargedHadrons_[ jtno ]  = -1;
   if(! writeTowers_) return;
   std::vector<CaloTowerPtr> j_towers = pJets[jtno].getCaloConstituents();
   int towno = NobjTow;
@@ -1431,8 +1466,26 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
   } // End loop over towers
 }
 
+template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJets, int jtno)
+{
+  fEMF_[ jtno ] = pJets[jtno].chargedEmEnergyFraction() + pJets[jtno].neutralEmEnergyFraction() +  pJets[jtno].HFEMEnergyFraction ();
+  fHad_[ jtno ] = 1 - fEMF_[ jtno ];
+  fChargedHadrons_[ jtno ] = pJets[jtno].chargedHadronEnergyFraction();
+  fNeutralHadrons_[ jtno ] = pJets[jtno].neutralHadronEnergyFraction();
+  fPhotons_[ jtno ]      = pJets[jtno].photonEnergyFraction();
+  fElectrons_[ jtno ]      = pJets[jtno].electronEnergyFraction();
+  nChargedHadrons_[ jtno ]  = pJets[jtno].chargedHadronMultiplicity();
+}  
+
 template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtno)
 {
+  fEMF_[ jtno ] = -1;
+  fHad_[ jtno ] = -1;
+  fChargedHadrons_[ jtno ] = -1;
+  fNeutralHadrons_[ jtno ] = -1;
+  fPhotons_[ jtno ]        = -1;
+  fElectrons_[ jtno ]      = -1;
+  nChargedHadrons_[ jtno ]  = -1;
 }
 
 
@@ -1467,10 +1520,18 @@ template <> void NJet<reco::PFJet>::fillJetID(const edm::RefToBase<reco::PFJet>&
   jetIDLoose_[jtno] = jetIDPFFunctorLoose_(jet,ret);
   ret = jetIDPFFunctorTight_.getBitTemplate();
   jetIDTight_[jtno] = jetIDPFFunctorTight_(jet,ret);
+  n90Hits_[jtno] = -1;
+  fHPD_[jtno] = -1;
+  fRBX_[jtno] = -1;
 }
 
 template <typename T> void NJet<T>::fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap)
 {
+   jetIDLoose_[jtno] = false;
+   jetIDTight_[jtno] = false;
+   n90Hits_[jtno] = -1;
+   fHPD_[jtno] = -1;
+   fRBX_[jtno] = -1;
 }
 
 #endif
