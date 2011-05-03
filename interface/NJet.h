@@ -34,6 +34,8 @@
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
+#include "DataFormats/METReco/interface/PFMET.h"
+#include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -89,6 +91,7 @@ private:
   static unsigned int findTrigger(const std::vector<std::string>& list, const std::string& name);
   void fillExtra(const edm::View<T>& pJets, int jtno);
   void fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap);
+  void fillMET(const edm::Event& evt);
 
   edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, rho_tag_, weight_tag;
   edm::InputTag ebrechits_, beamSpot_;
@@ -1087,9 +1090,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
 
-  edm::Handle<reco::CaloMETCollection> recmets;
-  evt.getByLabel(met_, recmets);
-
   edm::Handle<reco::GenJetCollection> genJets;
   evt.getByLabel(genjets_,genJets);
   reco::GenJetCollection::const_iterator genJet;
@@ -1311,14 +1311,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     }
     NobjETowCal = icell;
 
-
-    typedef reco::CaloMETCollection::const_iterator cmiter;
-    for( cmiter i=recmets->begin(); i!=recmets->end(); i++) {
-      mmet = i->pt();
-      mphi = i->phi();
-      msum = i->sumEt();
-      break;
-    }
+    fillMET(evt);
 
     if(writeTracks_) { 
       //BeamSpot
@@ -1608,6 +1601,33 @@ template <typename T> void NJet<T>::fillJetID(const edm::RefToBase<T>& jetref, i
    n90Hits_[jtno] = -1;
    fHPD_[jtno] = -1;
    fRBX_[jtno] = -1;
+}
+
+template <> void NJet<reco::CaloJet>::fillMET(const edm::Event& evt) 
+{
+  edm::Handle<reco::CaloMETCollection> recmets;
+  evt.getByLabel(met_, recmets);
+  mmet = recmets->front().pt();
+  mphi = recmets->front().phi();
+  msum = recmets->front().sumEt();
+}
+
+template <> void NJet<reco::JPTJet>::fillMET(const edm::Event& evt) 
+{
+  edm::Handle<edm::View<reco::MET> > recmets;
+  evt.getByLabel(met_, recmets);
+  mmet = recmets->front().pt();
+  mphi = recmets->front().phi();
+  msum = recmets->front().sumEt();
+}
+
+template <typename T> void NJet<T>::fillMET(const edm::Event& evt) 
+{
+  edm::Handle<edm::View<reco::PFMET> > recmets;
+  evt.getByLabel(met_, recmets);
+  mmet = recmets->front().pt();
+  mphi = recmets->front().phi();
+  msum = recmets->front().sumEt();
 }
 
 #endif
