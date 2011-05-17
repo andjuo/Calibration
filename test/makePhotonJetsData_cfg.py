@@ -196,8 +196,8 @@ process.calibTreeMakerCalo.NJet_L1JetCorrector      = cms.string('ak5CaloL1Offse
 process.calibTreeMakerCalo.NJet_L2JetCorrector      = cms.string('ak5CaloL2Relative')
 process.calibTreeMakerCalo.NJet_L3JetCorrector      = cms.string('ak5CaloL3Absolute')
 process.calibTreeMakerCalo.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerCalo.NJet_L2L3JetCorrector    = cms.string('ak5CaloL2L3Residual')
-process.calibTreeMakerCalo.NJet_L2L3L4JWJetCorrector    = cms.string('ak5CaloL2L3Residual')
+process.calibTreeMakerCalo.NJet_L1L2L3JetCorrector    = cms.string('ak5CaloL1L2L3Residual')
+process.calibTreeMakerCalo.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5CaloL1L2L3Residual')
 process.calibTreeMakerCalo.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerCalo.NJetConeSize      = 0.5
 process.calibTreeMakerCalo.WritePhotons = True
@@ -213,8 +213,8 @@ process.calibTreeMakerPF.NJet_L1JetCorrector      = cms.string('ak5PFL1Offset')
 process.calibTreeMakerPF.NJet_L2JetCorrector      = cms.string('ak5PFL2Relative')
 process.calibTreeMakerPF.NJet_L3JetCorrector      = cms.string('ak5PFL3Absolute')
 process.calibTreeMakerPF.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerPF.NJet_L2L3JetCorrector    = cms.string('ak5PFL2L3Residual')
-process.calibTreeMakerPF.NJet_L2L3L4JWJetCorrector    = cms.string('ak5PFL2L3Residual')
+process.calibTreeMakerPF.NJet_L1L2L3JetCorrector    = cms.string('ak5PFL1L2L3Residual')
+process.calibTreeMakerPF.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5PFL1L2L3Residual')
 process.calibTreeMakerPF.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3Residual')
 process.calibTreeMakerPF.NJetConeSize      = 0.5
 process.calibTreeMakerPF.WritePhotons = True
@@ -233,8 +233,8 @@ process.calibTreeMakerTrack.NJet_L1JetCorrector      = cms.string('ak5PFL1Offset
 process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TrackL2Relative')
 process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TrackL3Absolute')
 process.calibTreeMakerTrack.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerTrack.NJet_L2L3JetCorrector    = cms.string('ak5TrackL2L3')
-process.calibTreeMakerTrack.NJet_L2L3L4JWJetCorrector    = cms.string('ak5TrackL2L3')
+process.calibTreeMakerTrack.NJet_L1L2L3JetCorrector    = cms.string('ak5TrackL1L2L3')
+process.calibTreeMakerTrack.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5TrackL1L2L3')
 process.calibTreeMakerTrack.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3Residual')
 process.calibTreeMakerTrack.NJetConeSize      = 0.5
 
@@ -249,8 +249,8 @@ process.calibTreeMakerJPT.NJet_L1JetCorrector      = cms.string('ak5JPTL1Offset'
 process.calibTreeMakerJPT.NJet_L2JetCorrector      = cms.string('ak5JPTL2Relative')
 process.calibTreeMakerJPT.NJet_L3JetCorrector      = cms.string('ak5JPTL3Absolute')
 process.calibTreeMakerJPT.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerJPT.NJet_L2L3JetCorrector    = cms.string('ak5JPTL2L3Residual')
-process.calibTreeMakerJPT.NJet_L2L3L4JWJetCorrector    = cms.string('ak5JPTL2L3Residual')
+process.calibTreeMakerJPT.NJet_L1L2L3JetCorrector    = cms.string('ak5JPTL1L2L3Residual')
+process.calibTreeMakerJPT.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5JPTL1L2L3Residual')
 process.calibTreeMakerJPT.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3Residual')
 process.calibTreeMakerJPT.NJetConeSize      = 0.5
 process.calibTreeMakerJPT.WritePhotons = True
@@ -265,8 +265,8 @@ process.calibTreeMakerAK7Calo = process.calibTreeMakerCalo.clone(
     NJet_L1JetCorrector = 'ak7CaloL1Offset',
     NJet_L2JetCorrector = 'ak7CaloL2Relative',
     NJet_L3JetCorrector = 'ak7CaloL3Absolute',
-    NJet_L2L3JetCorrector = 'ak7CaloL2L3',
-    NJet_L2L3L4JWJetCorrector = 'ak7CaloL2L3'
+    NJet_L1L2L3JetCorrector = 'ak7CaloL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7CaloL1L2L3'
 )
 process.calibTreeMakerIC5Calo = process.calibTreeMakerCalo.clone(
     OutputFile = 'ic5Calo.root',
@@ -277,8 +277,8 @@ process.calibTreeMakerIC5Calo = process.calibTreeMakerCalo.clone(
     NJet_L1JetCorrector = 'ic5CaloL1Offset',
     NJet_L2JetCorrector = 'ic5CaloL2Relative',
     NJet_L3JetCorrector = 'ic5CaloL3Absolute',
-    NJet_L2L3JetCorrector = 'ic5CaloL2L3',
-    NJet_L2L3L4JWJetCorrector = 'ic5CaloL2L3'
+    NJet_L1L2L3JetCorrector = 'ic5CaloL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ic5CaloL1L2L3'
 )
 
 process.calibTreeMakerKT4Calo = process.calibTreeMakerCalo.clone(
@@ -290,8 +290,8 @@ process.calibTreeMakerKT4Calo = process.calibTreeMakerCalo.clone(
     NJet_L1JetCorrector = 'kt4CaloL1Offset',
     NJet_L2JetCorrector = 'kt4CaloL2Relative',
     NJet_L3JetCorrector = 'kt4CaloL3Absolute',
-    NJet_L2L3JetCorrector = 'kt4CaloL2L3',
-    NJet_L2L3L4JWJetCorrector = 'kt4CaloL2L3'
+    NJet_L1L2L3JetCorrector = 'kt4CaloL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'kt4CaloL1L2L3'
 )
 
 process.calibTreeMakerKT6Calo = process.calibTreeMakerCalo.clone(
@@ -302,8 +302,8 @@ process.calibTreeMakerKT6Calo = process.calibTreeMakerCalo.clone(
     NJet_GenJets = 'kt6GenJets',
     NJet_L2JetCorrector = 'kt6CaloL2Relative',
     NJet_L3JetCorrector = 'kt6CaloL3Absolute',
-    NJet_L2L3JetCorrector = 'kt6CaloL2L3',
-    NJet_L2L3L4JWJetCorrector = 'kt6CaloL2L3'
+    NJet_L1L2L3JetCorrector = 'kt6CaloL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'kt6CaloL1L2L3'
 )
 
 process.calibTreeMakerAK7PF = process.calibTreeMakerPF.clone(
@@ -314,8 +314,8 @@ process.calibTreeMakerAK7PF = process.calibTreeMakerPF.clone(
     NJet_L1JetCorrector = 'ak7PFL1Offset',
     NJet_L2JetCorrector = 'ak7PFL2Relative',
     NJet_L3JetCorrector = 'ak7PFL3Absolute',
-    NJet_L2L3JetCorrector = 'ak7PFL2L3',
-    NJet_L2L3L4JWJetCorrector = 'ak7PFL2L3'
+    NJet_L1L2L3JetCorrector = 'ak7PFL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFL1L2L3'
 )
 
 process.calibTreeMakerIC5PF = process.calibTreeMakerPF.clone(
@@ -325,8 +325,8 @@ process.calibTreeMakerIC5PF = process.calibTreeMakerPF.clone(
     NJet_GenJets = 'iterativeCone5GenJets',
     NJet_L2JetCorrector = 'ic5PFL2Relative',
     NJet_L3JetCorrector = 'ic5PFL3Absolute',
-    NJet_L2L3JetCorrector = 'ic5PFL2L3',
-    NJet_L2L3L4JWJetCorrector = 'ic5PFL2L3'
+    NJet_L1L2L3JetCorrector = 'ic5PFL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ic5PFL1L2L3'
 )
 
 
@@ -338,8 +338,8 @@ process.calibTreeMakerKT4PF = process.calibTreeMakerPF.clone(
     NJet_L1JetCorrector = 'kt4PFL1Offset',
     NJet_L2JetCorrector = 'kt4PFL2Relative',
     NJet_L3JetCorrector = 'kt4PFL3Absolute',
-    NJet_L2L3JetCorrector = 'kt4PFL2L3',
-    NJet_L2L3L4JWJetCorrector = 'kt4PFL2L3'
+    NJet_L1L2L3JetCorrector = 'kt4PFL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'kt4PFL1L2L3'
 )
 
 process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
@@ -350,8 +350,8 @@ process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
     NJet_L1JetCorrector = 'kt6PFL1Offset',
     NJet_L2JetCorrector = 'kt6PFL2Relative',
     NJet_L3JetCorrector = 'kt6PFL3Absolute',
-    NJet_L2L3JetCorrector = 'kt6PFL2L3',
-    NJet_L2L3L4JWJetCorrector = 'kt6PFL2L3'
+    NJet_L1L2L3JetCorrector = 'kt6PFL1L2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'kt6PFL1L2L3'
 )
 
 
@@ -372,12 +372,12 @@ process.pData = cms.Path( #process.hltLevel1GTSeed*
                           * process.calibTreeMakerJPT
                           * process.calibTreeMakerAK7Calo
                           #* process.calibTreeMakerIC5Calo
-                          * process.calibTreeMakerKT4Calo
-                          * process.calibTreeMakerKT6Calo
+                          #* process.calibTreeMakerKT4Calo
+                          #* process.calibTreeMakerKT6Calo
                           * process.calibTreeMakerAK7PF
                           #* process.calibTreeMakerIC5PF
-                          * process.calibTreeMakerKT4PF
-                          * process.calibTreeMakerKT6PF
+                          #* process.calibTreeMakerKT4PF
+                          #* process.calibTreeMakerKT6PF
                           )
 
 process.schedule = cms.Schedule(process.pData)

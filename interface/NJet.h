@@ -17,6 +17,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/Run.h"
 #include "DataFormats/Common/interface/RefToBase.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
@@ -120,8 +121,8 @@ private:
   std::string l2name_;
   std::string l3name_;
   std::string JPTname_;
-  std::string l2l3name_;
-  std::string l2l3l4JWname_;
+  std::string l1l2l3name_;
+  std::string l1l2l3l4JWname_;
   std::string l2l3JPTname_;
 
   double conesize_;
@@ -729,8 +730,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
   l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
   JPTname_ = cfg.getParameter<std::string>("NJet_JPTZSPCorrector");
-  l2l3name_ = cfg.getParameter<std::string>("NJet_L2L3JetCorrector");
-  l2l3l4JWname_ = cfg.getParameter<std::string>("NJet_L2L3L4JWJetCorrector");
+  l1l2l3name_ = cfg.getParameter<std::string>("NJet_L1L2L3JetCorrector");
+  l1l2l3l4JWname_ = cfg.getParameter<std::string>("NJet_L1L2L3L4JWJetCorrector");
   l2l3JPTname_ = cfg.getParameter<std::string>("NJet_L2L3JetCorrectorJPT");
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
   parameters_.loadParameters( parameters );
@@ -1151,6 +1152,13 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
 
+  //RECO jets for JetID in case of reclustering of jets....
+  edm::Handle< edm::View<T> > pJetsReco;
+  evt.getByLabel(edm::InputTag(jets_.label(),jets_.instance(),"RECO"),pJetsReco);
+  
+  
+
+
   edm::Handle<reco::GenJetCollection> genJets;
   evt.getByLabel(genjets_,genJets);
   reco::GenJetCollection::const_iterator genJet;
@@ -1215,8 +1223,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   const JetCorrector* correctorL1   = JetCorrector::getJetCorrector (l1name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name_,setup);   //Define the jet corrector
   const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name_,setup);   //Define the jet corrector
-  const JetCorrector* correctorL2L3  = JetCorrector::getJetCorrector (l2l3name_, setup); //Define the jet corrector
-  const JetCorrector* correctorL2L3L4JW  = JetCorrector::getJetCorrector (l2l3l4JWname_, setup); //Define the jet corrector
+  const JetCorrector* correctorL1L2L3  = JetCorrector::getJetCorrector (l1l2l3name_, setup); //Define the jet corrector
+  const JetCorrector* correctorL1L2L3L4JW  = JetCorrector::getJetCorrector(l1l2l3l4JWname_, setup); //Define the jet corrector
   //const JetCorrector* correctorJPT   = JetCorrector::getJetCorrector (JPTname_,setup);   //Define the jet corrector
   //const JetCorrector* correctorL2L3JPT   = JetCorrector::getJetCorrector (l2l3JPTname_,setup);   //Define the jet corrector
 
@@ -1239,15 +1247,26 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
       edm::Handle<reco::JetIDValueMap> pJetIDMap;
       evt.getByLabel(jetIDs_,pJetIDMap);
-      fillJetID(pJets->refAt(jtno),jtno,pJetIDMap);
-      
+      if(pJetsReco.isValid()) {
+	if(std::abs((*pJetsReco)[jtno].phi() - (*pJets)[jtno].phi()) > 0.0001) {
+	  std::cout << (*pJetsReco)[jtno].print();
+	  std::cout << (*pJets)[jtno].print();
+	  edm::LogError("DiffJets") << "different jets in RECO and the current process!";
+	}
+	fillJetID(pJetsReco->refAt(jtno),jtno,pJetIDMap);
+      } else {
+	fillJetID(pJets->refAt(jtno),jtno,pJetIDMap);
+      }
+	
+	
       // L2L3 correction
       edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
       jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],jetRef,evt,setup);  //calculate the correction
       jscalel2[jtno]   = correctorL2->correction( jscalel1[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel3[jtno]   = correctorL3->correction( jscalel1[jtno] * jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
-      jscalel2l3[jtno] = correctorL2L3->correction( (*pJets)[jtno]);  //calculate the correction
-      jscalel4JW[jtno] = correctorL2L3L4JW->correction((*pJets)[jtno]) / jscalel2l3[jtno];  //calculate the correction
+      jscalel2l3[jtno] = correctorL1L2L3->correction( (*pJets)[jtno],jetRef,evt,setup);  //calculate the correction
+      jscalel4JW[jtno] = correctorL1L2L3L4JW->correction((*pJets)[jtno],jetRef,evt,setup) / jscalel2l3[jtno];  //calculate the correction
+      jscalel2l3[jtno] /= jscalel1[jtno]; //was L1L2L3
       //jscaleJPT[jtno]     = correctorJPT->correction((*zspJet),jetRef,evt,setup);
       //jscalel2l3JPT[jtno] = correctorL2L3JPT ->correction((*pJets)[jtno].p4() * jscaleJPT[jtno] );  //calculate the correction
       // JPT correction (uses ZSP corrected jets)
