@@ -1,454 +1,157 @@
 #include "Calibration/CalibTreeMaker/interface/PhotonJet.h"
-#include "JetMETCorrections/Objects/interface/JetCorrector.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
+#include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
+
+#include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
+#include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
+
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+
+#include "Calibration/CalibTreeMaker/interface/CalibTreeMakerHelper.h"
+
+const int PhotonJet::NMax_ = 10;
+
+PhotonJet::PhotonJet() : nphotons_(0),  ngenphotons_(0), hltPhoton20_(false),
+			 hltPhoton30_(false),hltPhoton50_(false),hltPhoton75_(false)
+{
+  photonpt_ = new float[NMax_];
+  photonphi_ = new float[NMax_];
+  photoneta_ = new float[NMax_];
+  photone_ = new float[NMax_];
+  photonisoecal04_ = new float[NMax_];
+  photonisohcal04_ = new float[NMax_];
+  photonisotrk04_ = new float[NMax_];
+  photonidloose_ = new bool[NMax_];
+  photonidtight_ = new bool[NMax_];
+  genphotonpt_ = new float[NMax_];
+  genphotonphi_ = new float[NMax_];
+  genphotoneta_ = new float[NMax_];
+  genphotone_ = new float[NMax_];
+
+}
+
+PhotonJet::~PhotonJet() {
+  delete [] photonpt_;
+  delete [] photonphi_;
+  delete [] photoneta_;
+  delete [] photone_;
+  delete [] photonisoecal04_;
+  delete [] photonisohcal04_;
+  delete [] photonisotrk04_;
+  delete [] photonidloose_;
+  delete [] photonidtight_;
+  delete [] genphotonpt_;
+  delete [] genphotonphi_;
+  delete [] genphotoneta_;
+  delete [] genphotone_;
+}
 
 
-//check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
-//#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
 
 void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
-  jets_             = cfg.getParameter<edm::InputTag>("PhotonJetJets");
   photon_           = cfg.getParameter<edm::InputTag>("PhotonJetPhotons");
-  genjets_          = cfg.getParameter<edm::InputTag>("PhotonJetGenJets");
   genphotons_       = cfg.getParameter<edm::InputTag>("PhotonJetGenPhotons");
-  met_              = cfg.getParameter<edm::InputTag>("PhotonJetMet");
-  ebrechits_        = cfg.getParameter<edm::InputTag>("EBRecHits");
-  nonleadingjetspt_ = cfg.getParameter<edm::InputTag>("PhotonJetNonLeadingJetsPt");
-  recTracks_        = cfg.getParameter<edm::InputTag>("PhotonJetRecTracks");
-  recMuons_         = cfg.getParameter<edm::InputTag>("PhotonJetRecMuons");
-  conesize_         = cfg.getParameter<double>("PhotonJetConeSize");
-  weight_tag        = cfg.getParameter<edm::InputTag> ("PhotonJet_Weight_Tag");
-  weight_            = (float)(cfg.getParameter<double> ("PhotonJet_Weight"));
-  zspJets_          = cfg.getParameter<edm::InputTag>("ZJetZSPJets");
-   
-  // TrackAssociator parameters
-  edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
-  parameters_.loadParameters( parameters );
 
-  //tower data
-  const int kMAX = 10000;
-  towet  = new float [ kMAX ];
-  toweta = new float [ kMAX ];
-  towphi = new float [ kMAX ];
-  towen  = new float [ kMAX ];
-  towem  = new float [ kMAX ];
-  towhd  = new float [ kMAX ];
-  towoe  = new float [ kMAX ];
-  towid_phi = new int[ kMAX ];
-  towid_eta = new int[ kMAX ];
-  towid     = new int[ kMAX ];
-  townum    = new int[ kMAX ];
-
-  // CaloTower branches
-  CalibTree->Branch( "NobjTowCal",&NobjTowCal,"NobjTowCal/I"            );
-  CalibTree->Branch( "TowNum",    townum,     "TowNum[NobjTowCal]/I"    );
-  CalibTree->Branch( "TowId",     towid,      "TowId[NobjTowCal]/I"     );
-  CalibTree->Branch( "TowId_phi", towid_phi,  "TowId_phi[NobjTowCal]/I" );
-  CalibTree->Branch( "TowId_eta", towid_eta,  "TowId_eta[NobjTowCal]/I" );
-  CalibTree->Branch( "TowEt",     towet,      "TowEt[NobjTowCal]/F"     );
-  CalibTree->Branch( "TowEta",    toweta,     "TowEta[NobjTowCal]/F"    );
-  CalibTree->Branch( "TowPhi",    towphi,     "TowPhi[NobjTowCal]/F"    );
-  CalibTree->Branch( "TowE",      towen,      "TowE[NobjTowCal]/F"      );
-  CalibTree->Branch( "TowEm",     towem,      "TowEm[NobjTowCal]/F"     );
-  CalibTree->Branch( "TowHad",    towhd,      "TowHad[NobjTowCal]/F"    );
-  CalibTree->Branch( "TowOE",     towoe,      "TowOE[NobjTowCal]/F"     );
-
-  //ecal cells data
-  etowet  = new float [ kMAX ];
-  etoweta = new float [ kMAX ];
-  etowphi = new float [ kMAX ];
-  etowe   = new float [ kMAX ];
-  etowid_phi = new int[ kMAX ];
-  etowid_eta = new int[ kMAX ];
-  etowid     = new int[ kMAX ];
-  etownum    = new int[ kMAX ];
-
-  //EcalCell branches
-  CalibTree->Branch( "NobjETowCal",&NobjETowCal,"NobjETowCal/I"            );
-  CalibTree->Branch( "ETowNum",    etownum,     "ETowNum[NobjETowCal]/I"   );
-  CalibTree->Branch( "ETowId",     etowid,      "ETowId[NobjETowCal]/I"    );
-  CalibTree->Branch( "ETowId_phi", etowid_phi,  "ETowId_phi[NobjETowCal]/I");
-  CalibTree->Branch( "ETowId_eta", etowid_eta,  "ETowId_eta[NobjETowCal]/I");
-  CalibTree->Branch( "ETowEt",     etowet,      "ETowEt[NobjETowCal]/F"    );
-  CalibTree->Branch( "ETowEta",    etoweta,     "ETowEta[NobjETowCal]/F"   );
-  CalibTree->Branch( "ETowPhi",    etowphi,     "ETowPhi[NobjETowCal]/F"   );
-  CalibTree->Branch( "ETowE",      etowe,       "ETowE[NobjETowCal]/F"     );
-
-  //track branches
-  trackpt       = new float [ kMAX ];
-  tracketa      = new float [ kMAX ];
-  trackphi      = new float [ kMAX ];
-  trackp        = new float [ kMAX ];
-  trackdr       = new float [ kMAX ];
-  tracketaout   = new float [ kMAX ];
-  trackphiout   = new float [ kMAX ];
-  trackdrout    = new float [ kMAX ];
-  trackemc1     = new float [ kMAX ];
-  trackemc3     = new float [ kMAX ];
-  trackemc5     = new float [ kMAX ];
-  trackhac1     = new float [ kMAX ];
-  trackhac3     = new float [ kMAX ];
-  trackhac5     = new float [ kMAX ];
-  tracktowid    = new int [ kMAX ];
-  tracktowidphi = new int [ kMAX ];
-  tracktowideta = new int [ kMAX ];
-  trackid       = new int[ kMAX ]; // abs(PiD) if available, guess: muons only; =0: unknown
-  tracknhits    = new int[ kMAX ];
-  trackQualityL  = new bool[kMAX];
-  trackQualityT  = new bool[kMAX];
-  trackQualityHP = new bool[kMAX];
-  trackchi2     = new float[ kMAX ];
-  muDR          = new float[ kMAX ];
-  muDE          = new float[ kMAX ];
-
-  //track branches
-  CalibTree->Branch( "NobjTrack",  &NobjTrack, "NobjTrack/I"             );
-  CalibTree->Branch( "TrackTowId", tracktowid, "TrackTowId[NobjTrack]/I" );
-  CalibTree->Branch( "TrackTowIdPhi", tracktowidphi, "TrackTowIdPhi[NobjTrack]/I" );
-  CalibTree->Branch( "TrackTowIdEta", tracktowideta, "TrackTowIdEta[NobjTrack]/I" );
-  CalibTree->Branch( "TrackId",    trackid,    "TrackId[NobjTrack]/I"    );
-  CalibTree->Branch( "TrackNHits", tracknhits, "TrackNHits[NobjTrack]/I" );
-  CalibTree->Branch( "TrackQualityL",trackQualityL,"TrackQualityL[NobjTrack]/O");
-  CalibTree->Branch( "TrackQualityT",trackQualityT,"TrackQualityT[NobjTrack]/O");
-  CalibTree->Branch( "TrackQualityHP",trackQualityHP,"TrackQualityHP[NobjTrack]/O");
-  CalibTree->Branch( "TrackChi2",  trackchi2,  "TrackChi2[NobjTrack]/F"  );
-  CalibTree->Branch( "TrackPt",    trackpt,    "TrackPt[NobjTrack]/F"    );
-  CalibTree->Branch( "TrackEta",   tracketa,   "TrackEta[NobjTrack]/F"   );
-  CalibTree->Branch( "TrackPhi",   trackphi,   "TrackPhi[NobjTrack]/F"   );
-  CalibTree->Branch( "TrackP" ,    trackp,     "TrackP[NobjTrack]/F"     );
-  CalibTree->Branch( "TrackDR" ,   trackdr,    "TrackDR[NobjTrack]/F"    );
-  CalibTree->Branch( "TrackPhiOut",trackphiout,"TrackPhiout[NobjTrack]/F");
-  CalibTree->Branch( "TrackEtaOut",tracketaout,"TrackEtaout[NobjTrack]/F");
-  CalibTree->Branch( "TrackDROut", trackdrout, "TrackDRout[NobjTrack]/F" );
-  CalibTree->Branch( "TrackEMC1",  trackemc1,  "TrackEMC1[NobjTrack]/F"  );
-  CalibTree->Branch( "TrackEMC3",  trackemc3,  "TrackEMC3[NobjTrack]/F"  );
-  CalibTree->Branch( "TrackEMC5",  trackemc5,  "TrackEMC5[NobjTrack]/F"  );
-  CalibTree->Branch( "TrackHAC1",  trackhac1,  "TrackHAC1[NobjTrack]/F"  );
-  CalibTree->Branch( "TrackHAC3",  trackhac3,  "TrackHAC3[NobjTrack]/F"  );
-  CalibTree->Branch( "TrackHAC5",  trackhac5,  "TrackHAC5[NobjTrack]/F"  );
-  CalibTree->Branch( "MuDR", muDR,  "MuDR[NobjTrack]/F"  );
-  CalibTree->Branch( "MuDE", muDE,  "MuDE[NobjTrack]/F"  );
-
-  // CaloJet branches 
-  CalibTree->Branch( "JetCalPt",  &jcalpt,    "JetCalPt/F"  );
-  CalibTree->Branch( "JetCalPhi", &jcalphi,   "JetCalPhi/F" );
-  CalibTree->Branch( "JetCalEta", &jcaleta,   "JetCalEta/F" );
-  CalibTree->Branch( "JetCalEt",  &jcalet,    "JetCalEt/F"  );
-  CalibTree->Branch( "JetCalE",   &jcale,     "JetCalE/F"   );
-  CalibTree->Branch( "JetCorrZSP",&jscaleZSP, "JetCorrZSP/F" );
-  CalibTree->Branch( "JetCorrL2", &jscalel2,  "JetCorrL2/F" );
-  CalibTree->Branch( "JetCorrL3", &jscalel3,  "JetCorrL3/F" );
-  CalibTree->Branch( "JetCorrJPT",&jscaleJPT, "JetCorrJPT/F" );
-  // GenJet branches 
-  CalibTree->Branch( "JetGenPt",  &jgenpt,    "JetGenPt/F"  );
-  CalibTree->Branch( "JetGenPhi", &jgenphi,   "JetGenPhi/F" );
-  CalibTree->Branch( "JetGenEta", &jgeneta,   "JetGenEta/F" );
-  CalibTree->Branch( "JetGenEt",  &jgenet,    "JetGenEt/F"  );
-  CalibTree->Branch( "JetGenE",   &jgene,     "JetGenE/F"   );
-  // MET branches
-  CalibTree->Branch( "MetCal",    &mcalmet,   "MetCal/F"    );
-  CalibTree->Branch( "MetCalPhi", &mcalphi,   "MetCalPhi/F" );
-  CalibTree->Branch( "MetCalSum", &mcalsum,   "MetCalSum/F" );
+  //trigger
+  CalibTree->Branch("HltPhoton20",&hltPhoton20_,"HltPhoton20/O");
+  CalibTree->Branch("HltPhoton30",&hltPhoton30_,"HltPhoton30/O");
+  CalibTree->Branch("HltPhoton50",&hltPhoton50_,"HltPhoton50/O");
+  CalibTree->Branch("HltPhoton75",&hltPhoton75_,"HltPhoton75/O");
   // Photons branches
-  CalibTree->Branch( "PhotonPt",  &photonpt,  "PhotonPt/F"  );
-  CalibTree->Branch( "PhotonPhi", &photonphi, "PhotonPhi/F" );
-  CalibTree->Branch( "PhotonEta", &photoneta, "PhotonEta/F" );
-  CalibTree->Branch( "PhotonEt",  &photonet,  "PhotonEt/F"   );
-  CalibTree->Branch( "PhotonE",   &photone,   "PhotonE/F"   );
+  CalibTree->Branch( "NobjPhoton",&nphotons_,"NobjPhoton/I");
+  CalibTree->Branch( "PhotonPt",  photonpt_,  "PhotonPt[NobjPhoton]/F"  );
+  CalibTree->Branch( "PhotonPhi", photonphi_, "PhotonPhi[NobjPhoton]/F" );
+  CalibTree->Branch( "PhotonEta", photoneta_, "PhotonEta[NobjPhoton]/F" );
+  CalibTree->Branch( "PhotonE",   photone_,   "PhotonE[NobjPhoton]/F"   );
+  CalibTree->Branch( "PhotonIsoECAL04", photonisoecal04_, "PhotonIsoECAL04[NobjPhoton]/F");
+  CalibTree->Branch( "PhotonIsoHCAL04", photonisohcal04_, "PhotonIsoHCAL04[NobjPhoton]/F");
+  CalibTree->Branch( "PhotonIsoTrk04", photonisotrk04_, "PhotonIsoTrk04[NobjPhoton]/F");
+  CalibTree->Branch( "PhotonIDLoose",photonidloose_,"PhotonIDLoose[NobjPhoton]/O");
+  CalibTree->Branch( "PhotonIDTight",photonidtight_,"PhotonIDTight[NobjPhoton]/O");
   // GenPhotons branches
-  CalibTree->Branch( "GenPhotonPt",  &gphotonpt,  "GenPhotonPt/F"  );
-  CalibTree->Branch( "GenPhotonPhi", &gphotonphi, "GenPhotonPhi/F" );
-  CalibTree->Branch( "GenPhotonEta", &gphotoneta, "GenPhotonEta/F" );
-  CalibTree->Branch( "GenPhotonEt",  &gphotonet,  "GenPhotonEt/F"   );
-  CalibTree->Branch( "GenPhotonE",   &gphotone,   "GenPhotonE/F"   );
-  // NonLeadingJetPt branch
-  CalibTree->Branch( "NonLeadingJetPt", &nonleadingjetspt,   "NonLeadingJetPt/F"   );
-
-  // CSA07 weight and pid branches
-  CalibTree->Branch( "EventWeight", &weight,  "EventWeight/F"  );
-  //CalibTree->Branch( "ProcessID"  , &processid,    "ProcessID/I"  );
+  CalibTree->Branch( "NobjGenPhoton",&ngenphotons_,"NobjGenPhoton/I");
+  CalibTree->Branch( "GenPhotonPt",  genphotonpt_,  "GenPhotonPt[NobjGenPhoton]/F"  );
+  CalibTree->Branch( "GenPhotonPhi", genphotonphi_, "GenPhotonPhi[NobjGenPhoton]/F" );
+  CalibTree->Branch( "GenPhotonEta", genphotoneta_, "GenPhotonEta[NobjGenPhoton]/F" );
+  CalibTree->Branch( "GenPhotonE",   genphotone_,   "GenPhotonE[NobjGenPhoton]/F"   );
 }
 
-void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
-{
-  using namespace reco;
-  if(weight_<0)
-    {
-      edm::Handle<double> weightHandle;
-      evt.getByLabel (weight_tag, weightHandle);
-      weight =(float)( *weightHandle);
+void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup)
+{  
+  edm::Handle<edm::TriggerResults> triggerResults;
+  
+  if( evt.getByLabel(edm::InputTag("TriggerResults::HLT"),triggerResults) ) {
+    const edm::TriggerNames & trigNames = evt.triggerNames(*triggerResults);
+    size_t id = 0;
+    
+    hltPhoton20_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon20_CaloIdVL_IsoL");
+    if( id != trigNames.size() ) {
+      if( triggerResults->accept(id) ) hltPhoton20_ = true;
     }
-  else weight = weight_;
-
-  edm::Handle<CaloJet> jet;
-  evt.getByLabel(jets_, jet);
-
-  edm::Handle<Photon> photon;
-  evt.getByLabel(photon_,photon);
-
-  edm::Handle<GenJet> genJet;
-  evt.getByLabel(genjets_,genJet);
-
-  edm::Handle<GenParticle> genPhoton;
-  evt.getByLabel(genphotons_,genPhoton);
-
-  edm::Handle<CaloMETCollection> met;
-  evt.getByLabel(met_,met);
-
-  edm::Handle<double> NonLeadingJetsPt;
-  evt.getByLabel( nonleadingjetspt_, NonLeadingJetsPt );
-
-  // get calo jet after zsp collection
-  edm::Handle<CaloJetCollection> zspJets;
-  evt.getByLabel(zspJets_, zspJets);
-
-  const CaloJet& calojet = *jet;
-  const Photon& Photon = *photon; 
-  const GenJet& genjet = *genJet;
-  const GenParticle&  genphoton = *genPhoton; 
-  const CaloMETCollection& recmets = *met; 
-
-  /*
-  const EBRecHitCollection *EBRecHit = 0;
-  edm::Handle<EBRecHitCollection> EcalRecHitEB;
-  evt.getByLabel( ebrechits_, EcalRecHitEB);
-  if( EcalRecHitEB.isValid() ){ 
-    EBRecHit = EcalRecHitEB.product();
-  } else {
-    cerr << "Error! can't get the product " 
-	 << ebrechits_.label() 
-	 << ":" 
-	 << ebrechits_.instance()
-         << endl;
-  }
-  */
-
-  /*
-  edm::ESHandle<CaloGeometry> pG;
-  setup.get<IdealGeometryRecord>().get(pG);
-  const CaloGeometry cG = *pG;
-  const CaloSubdetectorGeometry* EBgeom=cG.getSubdetectorGeometry(DetId::Ecal,1);
-  */
-
-  std::string l2name = "L2RelativeJetCorrector";
-  std::string l3name = "L3AbsoluteJetCorrector";
-  std::string JPTname = "JetPlusTrackZSPCorrectorScone5";
-
-  const JetCorrector* correctorL2   = JetCorrector::getJetCorrector (l2name,setup);   //Define the jet corrector
-  const JetCorrector* correctorL3   = JetCorrector::getJetCorrector (l3name,setup);   //Define the jet corrector
-  const JetCorrector* correctorJPT  = JetCorrector::getJetCorrector (JPTname, setup); //Define the jet corrector
-  jscalel2   = correctorL2  ->correction(calojet.p4());  //calculate the correction
-  jscalel3   = correctorL3  ->correction(calojet.p4());  //calculate the correction
-  for( reco::CaloJetCollection::const_iterator zspJet = zspJets->begin(); zspJet != zspJets->end(); ++zspJet)
-      {
-	if( deltaR(zspJet->eta(),zspJet->phi(), calojet.eta() , calojet.phi()) < 0.01)//no change in R
-	  {
-	    jscaleZSP = zspJet->et()/calojet.et();
-	    jscaleJPT = correctorJPT ->correction((*zspJet));  //calculate the correction
-	  }
-      }
-  /*
-  cout<<" Jet Pt = "<<calojet.pt()
-      <<" Jet Eta = "<<calojet.eta()
-      <<" Scale L2 = "<<jscalel2
-      <<" Scale L3 = "<<jscalel3
-      <<endl;
-  */
-
-  jcalpt  = calojet.pt();
-  jcalphi = calojet.phi();
-  jcaleta = calojet.eta();
-  jcalet  = calojet.et();
-  jcale   = calojet.energy();
-
-  int jtow=0, icell=0;
-
-  // uncomment for CMSSW_2_1_X compatibility
-  std::vector <CaloTowerPtr> jetTowers = calojet.getCaloConstituents();
-  NobjTowCal=jetTowers.size();
-  for(std::vector<CaloTowerPtr>::const_iterator tow = jetTowers.begin();
-      tow != jetTowers.end(); ++tow, ++jtow){
-
-    // uncomment for CMSSW_2_0_X compatibility
-//  std::vector <CaloTowerRef> jetTowers = calojet.getConstituents();
-//  NobjTowCal=jetTowers.size();
-//  for(std::vector<CaloTowerRef>::const_iterator tow = jetTowers.begin();
-//      tow != jetTowers.end(); ++tow, ++jtow){
-
-    towet [jtow] = (*tow)->et();
-    toweta[jtow] = (*tow)->eta();
-    towphi[jtow] = (*tow)->phi();
-    towen [jtow] = (*tow)->energy();
-    towem [jtow] = (*tow)->emEnergy();
-    towhd [jtow] = (*tow)->hadEnergy();
-    towoe [jtow] = (*tow)->outerEnergy();
-    towid_phi[jtow] = (*tow)->id().iphi();
-    towid_eta[jtow] = (*tow)->id().ieta();
-    towid [jtow] = (*tow)->id().rawId();
-    townum[jtow] = jtow;
-
-    /*
-    double eem=0.;
-    for (size_t it=0; it<(*tow)->constituentsSize(); ++it) {
-      const DetId detid = (*tow)->constituent(it);
-      EcalRecHitCollection::const_iterator myRecHit = EBRecHit->find(detid);
-      if(myRecHit != EBRecHit->end()) {
-	eem +=  myRecHit->energy(); 
-	EBDetId det = myRecHit->id();
-	
-	const CaloCellGeometry* cell=EBgeom->getGeometry( myRecHit->id() );
-	etowet [icell] = myRecHit->energy()*sin( cell->getPosition().theta());
-	etoweta[icell] = cell->getPosition().eta();
-	etowphi[icell] = cell->getPosition().phi();
-	etowe  [icell] = myRecHit->energy();
-	etowid_phi[icell] = det.iphi();
-	etowid_eta[icell] = det.ieta();
-	etowid [icell] = myRecHit->id().rawId();
-	etownum[icell] = icell;
-	++icell;
-      }
+    hltPhoton30_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon30_CaloIdVL_IsoL");
+    if( id != trigNames.size() ) {
+      if( triggerResults->accept(id) ) hltPhoton30_ = true;
     }
-    */
-  }
-  NobjETowCal = icell;
-
-  jgenpt  = genjet.pt();
-  jgenphi = genjet.phi();
-  jgeneta = genjet.eta();
-  jgenet  = genjet.et();
-  jgene   = genjet.energy();
-
-  photonpt  = Photon.pt();
-  photonphi = Photon.phi();
-  photoneta = Photon.eta();
-  photonet  = Photon.et();
-  photone   = Photon.energy();
-
-  gphotonpt  = genphoton.pt();
-  gphotonphi = genphoton.phi();
-  gphotoneta = genphoton.eta();
-  gphotonet  = genphoton.et();
-  gphotone   = genphoton.energy();
-
-  typedef CaloMETCollection::const_iterator cmiter;
-  for ( cmiter i=recmets.begin(); i!=recmets.end(); i++) {
-    mcalmet = i->pt();
-    mcalphi = i->phi();
-    mcalsum = i->sumEt();
-    break;
-  }
-
-  nonleadingjetspt = (float)(*NonLeadingJetsPt);
-
-  //Tracks
-  edm::Handle<reco::TrackCollection> tracks;
-  evt.getByLabel(recTracks_,tracks);
-
-  //Muons
-  edm::Handle<reco::MuonCollection> muons;
-  //edm::Handle<reco::TrackCollection> muons;
-  evt.getByLabel(recMuons_,muons);
-
-  // see here for detailed track cluster matching and jet track association
-  //   -> CMSSW/TrackingTools/TrackAssociator/test/CaloMatchingExample.cc
-
-  int iTrack = 0;
-  for(reco::TrackCollection::const_iterator it = tracks->begin(); it != tracks->end(); ++it) {
-    // skip low Pt tracks
-    if (it->pt() < 1) continue;
-    bool saveTrack = false;
-    TrackDetMatchInfo info = trackAssociator_.associate(evt, setup, *it, parameters_);
-
-    double dRin   = deltaR(*it,calojet);
-    double outeta = info.trkGlobPosAtEcal.eta();
-    double outphi = info.trkGlobPosAtEcal.phi();
-    double dRout  = deltaR(calojet.eta(),calojet.phi(),outeta,outphi);
-    if (dRin < conesize_ || dRout < conesize_){
-      saveTrack=true;
+    hltPhoton50_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon50_CaloIdVL_IsoL");
+    if( id != trigNames.size() ) {
+      if( triggerResults->accept(id) ) hltPhoton50_ = true;
     }
-    /*
-    std::cout<<"trackpt["<<iTrack<<"]       ="<< it->pt()<<std::endl;
-    std::cout<<"trackemc1["<<iTrack<<"]     ="<< info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0)<<std::endl;
-    std::cout<<"trackemc3["<<iTrack<<"]     ="<< info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1)<<std::endl;
-    std::cout<<"trackemc5["<<iTrack<<"]     ="<< info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2)<<std::endl;
-    std::cout<<"trackecaltow1["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::TowerEcal, 0)<<std::endl;
-    std::cout<<"trackecaltow3["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::TowerEcal, 1)<<std::endl;
-    std::cout<<"trackecaltow5["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::TowerEcal, 2)<<std::endl;
-    std::cout<<"trackhcaltow1["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::TowerHcal, 0)<<std::endl;
-    std::cout<<"trackhcaltow3["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::TowerHcal, 1)<<std::endl;
-    std::cout<<"trackhcaltow5["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::TowerHcal, 2)<<std::endl;
-    std::cout<<"trackecalrh1["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0)<<std::endl;
-    std::cout<<"trackecalrh3["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1)<<std::endl;
-    std::cout<<"trackecalrh5["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2)<<std::endl;
-    std::cout<<"trackhcalrh1["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0)<<std::endl;
-    std::cout<<"trackhcalrh3["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1)<<std::endl;
-    std::cout<<"trackhcalrh5["<<iTrack<<"] ="<< info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2)<<std::endl;
-    */
-    if (saveTrack){
-      trackpt[iTrack]     = it->pt();
-      tracketa[iTrack]    = it->eta();
-      trackphi[iTrack]    = it->phi();
-      trackp[iTrack]      = it->p();
-      trackdr[iTrack]     = dRin;
-      trackdrout[iTrack]  = dRout;
-      tracketaout[iTrack] = outeta;
-      trackphiout[iTrack] = outphi;
-      trackemc1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 0);
-      trackemc3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 1);
-      trackemc5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::EcalRecHits, 2);
-      trackhac1[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 0);
-      trackhac3[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 1);
-      trackhac5[iTrack]   = info.nXnEnergy(TrackDetMatchInfo::HcalRecHits, 2);
-      DetId centerId = info.findMaxDeposition(TrackDetMatchInfo::HcalRecHits);
-      HcalDetId HcalCenterId(centerId);
-      tracktowidphi[iTrack] = HcalCenterId.iphi();
-      tracktowideta[iTrack] = HcalCenterId.ieta();
-      tracktowid[iTrack]    = centerId.rawId();
-      trackchi2[iTrack]     = it->normalizedChi2();
-      tracknhits[iTrack]    = it->numberOfValidHits();
-
-      //if(it->quality(reco::TrackBase::undefQuality)) trackQuality[iTrack] = -1;
-      if(it->quality(reco::TrackBase::loose))  trackQualityL[iTrack] = true;
-      else  trackQualityL[iTrack] = false;
-      if(it->quality(reco::TrackBase::tight))  trackQualityT[iTrack] = true;
-      else  trackQualityT[iTrack] = false;
-      if(it->quality(reco::TrackBase::highPurity)) trackQualityHP[iTrack] = true; 
-      else  trackQualityHP[iTrack] = false;
-      //if(it->quality(reco::TrackBase::loose))  trackQuality[iTrack] = 0;
-      //if(it->quality(reco::TrackBase::tight))  trackQuality[iTrack] = 1;
-      //if(it->quality(reco::TrackBase::highPurity)) trackQuality[iTrack] = 2; 
-      //if(it->quality(reco::TrackBase::confirmed))  trackQuality[iTrack] = 3;
-      //if(it->quality(reco::TrackBase::goodIterative))  trackQuality[iTrack] = 4;
-      //if(it->quality(reco::TrackBase::qualitySize))  trackQuality[iTrack] = 5;
-      /*
-     std::cout<<"rawId: "<<centerId.rawId()
-	       <<"iphiId: "<<HcalCenterId.iphi()
-	       <<"ietaId: "<<HcalCenterId.ieta()
-	       <<std::endl;
-      */
-      
-      //Match track with muons
-      muDR[iTrack] = -1;
-      muDE[iTrack] = -1;
-      bool muonMatch = false;
-//       for(reco::MuonCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-// 	//for(reco::TrackCollection::const_iterator im = muons->begin(); im != muons->end(); ++im) {
-// 	if(im->isGood(reco::Muon::AllGlobalMuons) && im->isGood(reco::Muon::TMLastStationLoose)) continue;
-// 	double dRm = deltaR(*im,*it);
-// 	double dE = fabs( (im->pt()-it->pt())/it->pt() );
-// 	muDR[iTrack] = dRm;
-// 	muDE[iTrack] = dE;
-// 	if (dRm<0.1 && dE < 0.2) muonMatch = true;
-//       }
-      if (muonMatch) {
-	trackid[iTrack] = 13;
-      } else {
-	trackid[iTrack] = 0;
-      }
-      ++iTrack;
+    hltPhoton75_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon75_CaloIdVL_IsoL");
+    if( id != trigNames.size() ) {
+      if( triggerResults->accept(id) ) hltPhoton75_ = true;
     }
   }
-  NobjTrack=iTrack;
 
-  CalibTree->Fill();
+  edm::Handle<reco::PhotonCollection> photonColl;
+  evt.getByLabel(photon_, photonColl);
+
+  edm::Handle<edm::ValueMap<Bool_t> > loosePhotonQual,tightPhotonQual;
+  evt.getByLabel("PhotonIDProd", "PhotonCutBasedIDLoose", loosePhotonQual);
+  evt.getByLabel("PhotonIDProd", "PhotonCutBasedIDTight", tightPhotonQual);
+
+  // create reference to the object types we are interested in
+  const edm::ValueMap<Bool_t> *phoMapLoose = loosePhotonQual.product();
+  const edm::ValueMap<Bool_t> *phoMapTight = tightPhotonQual.product();
+  
+  nphotons_ = 0;
+  for (reco::PhotonCollection::const_iterator pho = photonColl->begin(); pho!= photonColl->end(); ++pho){   
+    edm::Ref<reco::PhotonCollection> photonref(photonColl, nphotons_);
+    
+    photonpt_[nphotons_]  = pho->pt();
+    photonphi_[nphotons_] = pho->phi();
+    photoneta_[nphotons_] = pho->eta();
+    photone_[nphotons_]   = pho->energy();
+    photonisoecal04_[nphotons_] = pho->ecalRecHitSumEtConeDR04();
+    photonisohcal04_[nphotons_] = pho->hcalTowerSumEtConeDR04();
+    photonisotrk04_[nphotons_] = pho->trkSumPtSolidConeDR04();
+    photonidloose_[nphotons_] = (*phoMapLoose)[photonref];
+    photonidtight_[nphotons_] = (*phoMapTight)[photonref];
+    
+    ++nphotons_;
+    if(nphotons_ == NMax_) break;
+  }
+  
+  
+  edm::Handle<reco::GenParticleCollection> genphotonColl;
+  evt.getByLabel(genphotons_,genphotonColl);
+  
+  ngenphotons_ = 0;
+  if(! genphotonColl.isValid()) return;
+  for (reco::GenParticleCollection::const_iterator ig = genphotonColl->begin(); ig!= genphotonColl->end(); ++ig){  
+    genphotonpt_[ngenphotons_]  = ig->pt();
+    genphotonphi_[ngenphotons_] = ig->phi();
+    genphotoneta_[ngenphotons_] = ig->eta();
+    genphotone_[ngenphotons_]   = ig->energy();
+    ++ngenphotons_;
+    if(ngenphotons_ == NMax_) break;
+  }
 }

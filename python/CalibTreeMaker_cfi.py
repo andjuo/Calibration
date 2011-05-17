@@ -2,62 +2,35 @@ import FWCore.ParameterSet.Config as cms
 
 from TrackingTools.TrackAssociator.default_cfi import *
 
+genParticleCandidates = cms.EDProducer("FastGenParticleCandidateProducer",
+    src = cms.InputTag("genParticles")
+)                         
+
+
+genPhotonCandidates = cms.EDFilter("PdgIdAndStatusCandSelector",
+    status = cms.vint32(1, 3),
+    src = cms.InputTag("genParticleCandidates"),
+    pdgId = cms.vint32(22)
+)
+
+goodGenPhotons = cms.EDFilter("EtaPtMinCandSelector",
+    src = cms.InputTag("genPhotonCandidates"),
+    etaMin = cms.double(-3.0),
+    etaMax = cms.double(3.0),
+    ptMin = cms.double(20)
+)
+
+
 calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     TrackAssociatorParameters,
     TrackAssociatorParameterBlock,
                               
     OutputFile         = cms.string('calib.root'),
-
-    TriJetTreeName     = cms.string('TriJetTree'),
-    DiJetTreeName      = cms.string('DiJetTree'),
-    PhotonJetTreeName  = cms.string('GammaJetTree'),
-    TrackTowerTreeName = cms.string('TrackTowerTree'),
-    TopTreeName        = cms.string('TopTree'),
-    ZJetTreeName       = cms.string('ZJetTree'),
-
+    TreeName      = cms.string('DiJetTree'),
     GenEventScaleLabel   = cms.InputTag("genEventScale"),                             
                
-    PhotonJetJets        = cms.InputTag("MyPhotonJetJets"),
-    PhotonJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    PhotonJetPhotons     = cms.InputTag("MyPhotonJetPhotons"),
-    PhotonJetGenPhotons  = cms.InputTag("MyPhotonJetGenPhotons"),
-    PhotonJetGenJets     = cms.InputTag("MyPhotonJetGenJets"),
-    PhotonJetNonLeadingJetsPt = cms.InputTag("MyPhotonJetNonLeadingJetsPt"),
-    EBRecHits            = cms.InputTag("ecalRecHit","EcalRecHitsEB","Rec1"),
-    PhotonJetRecTracks   = cms.InputTag("MyPhotonJetRecTracks"),
-    PhotonJetRecMuons    = cms.InputTag("MyPhotonJetRecMuons"),
-    PhotonJetTowers      = cms.InputTag("MyPhotonJetTowers"),
-    PhotonJetMet         = cms.InputTag("MyPhotonJetMet"),
-    PhotonJetConeSize    = cms.double(0.5),
-    PhotonJet_Weight     = cms.double(1.),
-    PhotonJet_Weight_Tag = cms.InputTag("MyPhotonJet_Weight_Tag"),
-    PhotonJetZSPJets     = cms.InputTag("MyPhotonJetZSPJets"),
-    PhotonJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-               
-    ZJetJets        = cms.InputTag("MyZJetJets"),
-    ZJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    ZJetZs          = cms.InputTag("MyZJetZs"),
-    ZJetGenZs  = cms.InputTag("MyZJetGenZs"),
-    ZJetGenJets     = cms.InputTag("MyZJetGenJets"),
-    ZJetNonLeadingJetsPt = cms.InputTag("MyZJetNonLeadingJetsPt"),
-    ZJetRecTracks   = cms.InputTag("MyZJetRecTracks"),
-    ZJetRecMuons    = cms.InputTag("MyZJetRecMuons"),
-    ZJetTowers      = cms.InputTag("MyZJetTowers"),
-    ZJetMet         = cms.InputTag("MyZJetMet"),
-    ZJetConeSize    = cms.double(0.5),
-    ZJet_Weight     = cms.double(1.),
-    ZJet_Weight_Tag = cms.InputTag("MyZJet_Weight_Tag"),
-    ZJetGenZ        = cms.InputTag("MyZGenZs"),
-    ZJetZSPJets     = cms.InputTag("MyZJetZSPJets"),
-    ZJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-                              
-
-    TrackTowerTracks = cms.InputTag("MyTrackTowerTracks"),
-    TrackTowerTowers = cms.InputTag("MyTrackTowerTowers"),
+    PhotonJetPhotons     = cms.InputTag("photons"),
+    PhotonJetGenPhotons  = cms.InputTag("goodGenPhotons"),
 
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
@@ -85,22 +58,10 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    TopHadBJets    = cms.InputTag("topSample:TopHadBJets"),
-    TopHadWJets    = cms.InputTag("topSample:TopHadWJets"),
-    TopHadBGenJets = cms.InputTag("topSample:TopHadBGenJets"),
-    TopHadWGenJets = cms.InputTag("topSample:TopHadWGenJets"),
-    Top_Weight     = cms.double(1.),
-    Top_Weight_Tag = cms.InputTag("tag"),
-
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
-    WritePhotonJetTree  = cms.bool(False),
-    WriteDiJetTree      = cms.bool(False),
-    WriteTriJetTree     = cms.bool(False),
-    WriteTrackTowerTree = cms.bool(False),
-    WriteTopTree        = cms.bool(False),
-    WriteZJetTree       = cms.bool(False),
+    WritePhotons  = cms.bool(False)
 )
 
 calibTreeMaker = calibTreeMakerCalo.clone()
@@ -110,57 +71,12 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     TrackAssociatorParameterBlock,
                               
     OutputFile         = cms.string('calib.root'),
-
-    TriJetTreeName     = cms.string('TriJetTree'),
-    DiJetTreeName      = cms.string('DiJetTree'),
-    PhotonJetTreeName  = cms.string('GammaJetTree'),
-    TrackTowerTreeName = cms.string('TrackTowerTree'),
-    TopTreeName        = cms.string('TopTree'),
-    ZJetTreeName       = cms.string('ZJetTree'),
+    TreeName      = cms.string('DiJetTree'),
 
     GenEventScaleLabel   = cms.InputTag("genEventScale"),                             
                
-    PhotonJetJets        = cms.InputTag("MyPhotonJetJets"),
-    PhotonJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    PhotonJetPhotons     = cms.InputTag("MyPhotonJetPhotons"),
-    PhotonJetGenPhotons  = cms.InputTag("MyPhotonJetGenPhotons"),
-    PhotonJetGenJets     = cms.InputTag("MyPhotonJetGenJets"),
-    PhotonJetNonLeadingJetsPt = cms.InputTag("MyPhotonJetNonLeadingJetsPt"),
-    EBRecHits            = cms.InputTag("ecalRecHit","EcalRecHitsEB","Rec1"),
-    PhotonJetRecTracks   = cms.InputTag("MyPhotonJetRecTracks"),
-    PhotonJetRecMuons    = cms.InputTag("MyPhotonJetRecMuons"),
-    PhotonJetTowers      = cms.InputTag("MyPhotonJetTowers"),
-    PhotonJetMet         = cms.InputTag("MyPhotonJetMet"),
-    PhotonJetConeSize    = cms.double(0.5),
-    PhotonJet_Weight     = cms.double(1.),
-    PhotonJet_Weight_Tag = cms.InputTag("MyPhotonJet_Weight_Tag"),
-    PhotonJetZSPJets     = cms.InputTag("MyPhotonJetZSPJets"),
-    PhotonJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-               
-    ZJetJets        = cms.InputTag("MyZJetJets"),
-    ZJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    ZJetZs          = cms.InputTag("MyZJetZs"),
-    ZJetGenZs  = cms.InputTag("MyZJetGenZs"),
-    ZJetGenJets     = cms.InputTag("MyZJetGenJets"),
-    ZJetNonLeadingJetsPt = cms.InputTag("MyZJetNonLeadingJetsPt"),
-    ZJetRecTracks   = cms.InputTag("MyZJetRecTracks"),
-    ZJetRecMuons    = cms.InputTag("MyZJetRecMuons"),
-    ZJetTowers      = cms.InputTag("MyZJetTowers"),
-    ZJetMet         = cms.InputTag("MyZJetMet"),
-    ZJetConeSize    = cms.double(0.5),
-    ZJet_Weight     = cms.double(1.),
-    ZJet_Weight_Tag = cms.InputTag("MyZJet_Weight_Tag"),
-    ZJetGenZ        = cms.InputTag("MyZGenZs"),
-    ZJetZSPJets     = cms.InputTag("MyZJetZSPJets"),
-    ZJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-                              
-
-    TrackTowerTracks = cms.InputTag("MyTrackTowerTracks"),
-    TrackTowerTowers = cms.InputTag("MyTrackTowerTowers"),
+    PhotonJetPhotons     = cms.InputTag("photons"),
+    PhotonJetGenPhotons  = cms.InputTag("goodGenPhotons"),
 
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
@@ -189,22 +105,10 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    TopHadBJets    = cms.InputTag("topSample:TopHadBJets"),
-    TopHadWJets    = cms.InputTag("topSample:TopHadWJets"),
-    TopHadBGenJets = cms.InputTag("topSample:TopHadBGenJets"),
-    TopHadWGenJets = cms.InputTag("topSample:TopHadWGenJets"),
-    Top_Weight     = cms.double(1.),
-    Top_Weight_Tag = cms.InputTag("tag"),
-
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
-    WritePhotonJetTree  = cms.bool(False),
-    WriteDiJetTree      = cms.bool(False),
-    WriteTriJetTree     = cms.bool(False),
-    WriteTrackTowerTree = cms.bool(False),
-    WriteTopTree        = cms.bool(False),
-    WriteZJetTree       = cms.bool(False),
+    WritePhotons  = cms.bool(False)
 )
 
 calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
@@ -212,57 +116,12 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     TrackAssociatorParameterBlock,
                               
     OutputFile         = cms.string('calib.root'),
-
-    TriJetTreeName     = cms.string('TriJetTree'),
-    DiJetTreeName      = cms.string('DiJetTree'),
-    PhotonJetTreeName  = cms.string('GammaJetTree'),
-    TrackTowerTreeName = cms.string('TrackTowerTree'),
-    TopTreeName        = cms.string('TopTree'),
-    ZJetTreeName       = cms.string('ZJetTree'),
+    TreeName      = cms.string('DiJetTree'),
 
     GenEventScaleLabel   = cms.InputTag("genEventScale"),                             
                
-    PhotonJetJets        = cms.InputTag("MyPhotonJetJets"),
-    PhotonJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    PhotonJetPhotons     = cms.InputTag("MyPhotonJetPhotons"),
-    PhotonJetGenPhotons  = cms.InputTag("MyPhotonJetGenPhotons"),
-    PhotonJetGenJets     = cms.InputTag("MyPhotonJetGenJets"),
-    PhotonJetNonLeadingJetsPt = cms.InputTag("MyPhotonJetNonLeadingJetsPt"),
-    EBRecHits            = cms.InputTag("ecalRecHit","EcalRecHitsEB","Rec1"),
-    PhotonJetRecTracks   = cms.InputTag("MyPhotonJetRecTracks"),
-    PhotonJetRecMuons    = cms.InputTag("MyPhotonJetRecMuons"),
-    PhotonJetTowers      = cms.InputTag("MyPhotonJetTowers"),
-    PhotonJetMet         = cms.InputTag("MyPhotonJetMet"),
-    PhotonJetConeSize    = cms.double(0.5),
-    PhotonJet_Weight     = cms.double(1.),
-    PhotonJet_Weight_Tag = cms.InputTag("MyPhotonJet_Weight_Tag"),
-    PhotonJetZSPJets     = cms.InputTag("MyPhotonJetZSPJets"),
-    PhotonJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-               
-    ZJetJets        = cms.InputTag("MyZJetJets"),
-    ZJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    ZJetZs          = cms.InputTag("MyZJetZs"),
-    ZJetGenZs  = cms.InputTag("MyZJetGenZs"),
-    ZJetGenJets     = cms.InputTag("MyZJetGenJets"),
-    ZJetNonLeadingJetsPt = cms.InputTag("MyZJetNonLeadingJetsPt"),
-    ZJetRecTracks   = cms.InputTag("MyZJetRecTracks"),
-    ZJetRecMuons    = cms.InputTag("MyZJetRecMuons"),
-    ZJetTowers      = cms.InputTag("MyZJetTowers"),
-    ZJetMet         = cms.InputTag("MyZJetMet"),
-    ZJetConeSize    = cms.double(0.5),
-    ZJet_Weight     = cms.double(1.),
-    ZJet_Weight_Tag = cms.InputTag("MyZJet_Weight_Tag"),
-    ZJetGenZ        = cms.InputTag("MyZGenZs"),
-    ZJetZSPJets     = cms.InputTag("MyZJetZSPJets"),
-    ZJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-                              
-
-    TrackTowerTracks = cms.InputTag("MyTrackTowerTracks"),
-    TrackTowerTowers = cms.InputTag("MyTrackTowerTowers"),
+    PhotonJetPhotons     = cms.InputTag("photons"),
+    PhotonJetGenPhotons  = cms.InputTag("goodGenPhotons"),    
 
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
@@ -290,22 +149,10 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    TopHadBJets    = cms.InputTag("topSample:TopHadBJets"),
-    TopHadWJets    = cms.InputTag("topSample:TopHadWJets"),
-    TopHadBGenJets = cms.InputTag("topSample:TopHadBGenJets"),
-    TopHadWGenJets = cms.InputTag("topSample:TopHadWGenJets"),
-    Top_Weight     = cms.double(1.),
-    Top_Weight_Tag = cms.InputTag("tag"),
-
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
-    WritePhotonJetTree  = cms.bool(False),
-    WriteDiJetTree      = cms.bool(False),
-    WriteTriJetTree     = cms.bool(False),
-    WriteTrackTowerTree = cms.bool(False),
-    WriteTopTree        = cms.bool(False),
-    WriteZJetTree       = cms.bool(False),
+    WritePhotons  = cms.bool(False)
 )
 
 calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
@@ -313,57 +160,12 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     TrackAssociatorParameterBlock,
                               
     OutputFile         = cms.string('calib.root'),
-
-    TriJetTreeName     = cms.string('TriJetTree'),
-    DiJetTreeName      = cms.string('DiJetTree'),
-    PhotonJetTreeName  = cms.string('GammaJetTree'),
-    TrackTowerTreeName = cms.string('TrackTowerTree'),
-    TopTreeName        = cms.string('TopTree'),
-    ZJetTreeName       = cms.string('ZJetTree'),
+    TreeName      = cms.string('DiJetTree'),
 
     GenEventScaleLabel   = cms.InputTag("genEventScale"),                             
                
-    PhotonJetJets        = cms.InputTag("MyPhotonJetJets"),
-    PhotonJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    PhotonJetPhotons     = cms.InputTag("MyPhotonJetPhotons"),
-    PhotonJetGenPhotons  = cms.InputTag("MyPhotonJetGenPhotons"),
-    PhotonJetGenJets     = cms.InputTag("MyPhotonJetGenJets"),
-    PhotonJetNonLeadingJetsPt = cms.InputTag("MyPhotonJetNonLeadingJetsPt"),
-    EBRecHits            = cms.InputTag("ecalRecHit","EcalRecHitsEB","Rec1"),
-    PhotonJetRecTracks   = cms.InputTag("MyPhotonJetRecTracks"),
-    PhotonJetRecMuons    = cms.InputTag("MyPhotonJetRecMuons"),
-    PhotonJetTowers      = cms.InputTag("MyPhotonJetTowers"),
-    PhotonJetMet         = cms.InputTag("MyPhotonJetMet"),
-    PhotonJetConeSize    = cms.double(0.5),
-    PhotonJet_Weight     = cms.double(1.),
-    PhotonJet_Weight_Tag = cms.InputTag("MyPhotonJet_Weight_Tag"),
-    PhotonJetZSPJets     = cms.InputTag("MyPhotonJetZSPJets"),
-    PhotonJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-               
-    ZJetJets        = cms.InputTag("MyZJetJets"),
-    ZJetCaloJets    = cms.InputTag('sisCone5CaloJets'),
-    ZJetZs          = cms.InputTag("MyZJetZs"),
-    ZJetGenZs  = cms.InputTag("MyZJetGenZs"),
-    ZJetGenJets     = cms.InputTag("MyZJetGenJets"),
-    ZJetNonLeadingJetsPt = cms.InputTag("MyZJetNonLeadingJetsPt"),
-    ZJetRecTracks   = cms.InputTag("MyZJetRecTracks"),
-    ZJetRecMuons    = cms.InputTag("MyZJetRecMuons"),
-    ZJetTowers      = cms.InputTag("MyZJetTowers"),
-    ZJetMet         = cms.InputTag("MyZJetMet"),
-    ZJetConeSize    = cms.double(0.5),
-    ZJet_Weight     = cms.double(1.),
-    ZJet_Weight_Tag = cms.InputTag("MyZJet_Weight_Tag"),
-    ZJetGenZ        = cms.InputTag("MyZGenZs"),
-    ZJetZSPJets     = cms.InputTag("MyZJetZSPJets"),
-    ZJetPFJets      = cms.InputTag("MyZJetPFJets"),
-
-
-                              
-
-    TrackTowerTracks = cms.InputTag("MyTrackTowerTracks"),
-    TrackTowerTowers = cms.InputTag("MyTrackTowerTowers"),
+    PhotonJetPhotons     = cms.InputTag("photons"),
+    PhotonJetGenPhotons  = cms.InputTag("goodGenPhotons"),    
 
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
@@ -391,21 +193,9 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    TopHadBJets    = cms.InputTag("topSample:TopHadBJets"),
-    TopHadWJets    = cms.InputTag("topSample:TopHadWJets"),
-    TopHadBGenJets = cms.InputTag("topSample:TopHadBGenJets"),
-    TopHadWGenJets = cms.InputTag("topSample:TopHadWGenJets"),
-    Top_Weight     = cms.double(1.),
-    Top_Weight_Tag = cms.InputTag("tag"),
-
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
-    WritePhotonJetTree  = cms.bool(False),
-    WriteDiJetTree      = cms.bool(False),
-    WriteTriJetTree     = cms.bool(False),
-    WriteTrackTowerTree = cms.bool(False),
-    WriteTopTree        = cms.bool(False),
-    WriteZJetTree       = cms.bool(False),
+    WritePhotons  = cms.bool(False)
 )
 

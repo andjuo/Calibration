@@ -174,7 +174,6 @@ process.load("RecoJets.Configuration.RecoJPTJets_cff")
 ##################################################################
 #  Parameters for module calibTreeMaker
 ##################################################################
-process.calibTreeMakerCalo.WriteDiJetTree          = True
 process.calibTreeMakerCalo.WriteStableGenParticles = False
 process.calibTreeMakerCalo.WriteStableGenParticles = False
 process.calibTreeMakerCalo.OutputFile         = 'ak5Calo.root'
@@ -191,7 +190,6 @@ process.calibTreeMakerCalo.NJet_L2L3L4JWJetCorrector    = cms.string('ak5CaloL2L
 process.calibTreeMakerCalo.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerCalo.NJetConeSize      = 0.5
 
-process.calibTreeMakerPF.WriteDiJetTree          = True
 process.calibTreeMakerPF.WriteStableGenParticles = False
 process.calibTreeMakerPF.OutputFile         = 'ak5PF.root'
 process.calibTreeMakerPF.NJet_Jets         = 'ak5PFJets'
@@ -208,7 +206,6 @@ process.calibTreeMakerPF.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3Residu
 process.calibTreeMakerPF.NJetConeSize      = 0.5
 
 
-process.calibTreeMakerTrack.WriteDiJetTree          = True
 process.calibTreeMakerTrack.WriteStableGenParticles = False
 process.calibTreeMakerTrack.OutputFile        = 'ak5Track.root'
 process.calibTreeMakerTrack.NJet_Jets         = 'ak5TrackJets'
@@ -216,7 +213,6 @@ process.calibTreeMakerTrack.NJet_JetIDs       = ''
 process.calibTreeMakerTrack.NJet_GenJets      = 'ak5GenJets'
 process.calibTreeMakerTrack.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
 
-#ATTENTION: use CALO correction for the time being....
 process.calibTreeMakerTrack.NJet_L1JetCorrector      = cms.string('ak5PFL1Offset')
 process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TrackL2Relative')
 process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TrackL3Absolute')
@@ -226,8 +222,6 @@ process.calibTreeMakerTrack.NJet_L2L3L4JWJetCorrector    = cms.string('ak5TrackL
 process.calibTreeMakerTrack.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3Residual')
 process.calibTreeMakerTrack.NJetConeSize      = 0.5
 
-#ATTENTION: use CALOcorrections for the time being
-process.calibTreeMakerJPT.WriteDiJetTree          = True
 process.calibTreeMakerJPT.WriteStableGenParticles = False
 process.calibTreeMakerJPT.OutputFile        = 'ak5JPT.root'
 process.calibTreeMakerJPT.NJet_Jets         = 'JetPlusTrackZSPCorJetAntiKt5'
@@ -345,8 +339,8 @@ process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
 process.pDump = cms.Path( process.dump )
 
 process.pData = cms.Path( #process.hltLevel1GTSeed*
-                          process.hltHighLevel
-                          * process.primaryVertexFilter
+                          #process.hltHighLevel *
+                          process.primaryVertexFilter
                           #* process.noscraping
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5

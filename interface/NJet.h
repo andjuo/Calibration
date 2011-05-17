@@ -77,7 +77,27 @@
 #include "TrackingTools/TrackAssociator/interface/TrackDetectorAssociator.h"
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 
-#include <boost/regex.hpp> 
+#include "Calibration/CalibTreeMaker/interface/CalibTreeMakerHelper.h"
+
+#include "DataFormats/Common/interface/Ref.h"
+#include "DataFormats/Common/interface/RefProd.h"
+#include "DataFormats/Common/interface/RefToBase.h"
+#include "DataFormats/JetReco/interface/JetID.h"
+#include "DataFormats/METReco/interface/CaloMET.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+#include "DataFormats/Provenance/interface/EventAuxiliary.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
+#include "DataFormats/L1GlobalTrigger/interface/L1GtFdlWord.h"
+#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 
 template <typename T> class NJet {
 public:
@@ -85,7 +105,7 @@ public:
   ~NJet(); 
 
   void setup(const edm::ParameterSet&, TTree*);
-  void analyze(const edm::Event&, const edm::EventSetup&, TTree*);
+  void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
   static unsigned int findTrigger(const std::vector<std::string>& list, const std::string& name);
@@ -138,6 +158,16 @@ private:
   bool hltDiJetAve240_;
   bool hltDiJetAve300_;
   bool hltDiJetAve370_;
+  bool hltJet30_;
+  bool hltJet60_;
+  bool hltJet80_;
+  bool hltJet110_;
+  bool hltJet150_;
+  bool hltJet190_;
+  bool hltJet240_;
+  bool hltJet300_;
+  bool hltJet370_;
+  
   int vtxN_,vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
@@ -223,27 +253,6 @@ private:
 };
 
 //implementation
-#include "Calibration/CalibTreeMaker/interface/NJet.h"
-#include "DataFormats/Common/interface/Ref.h"
-#include "DataFormats/Common/interface/RefProd.h"
-#include "DataFormats/Common/interface/RefToBase.h"
-#include "DataFormats/JetReco/interface/JetID.h"
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/MuonReco/interface/MuonSelectors.h"
-#include "DataFormats/Provenance/interface/EventAuxiliary.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "JetMETCorrections/Objects/interface/JetCorrector.h"
-#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
-#include "DataFormats/L1GlobalTrigger/interface/L1GtFdlWord.h"
-#include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
-#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
-#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
-
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Common/interface/TriggerNames.h"
-
 
 template <typename T> NJet<T>::NJet()
   : kjMAX(50), kMAX(10000), kMaxStableGenPart_(1000),
@@ -280,7 +289,17 @@ template <typename T> NJet<T>::NJet()
   hltDiJetAve240_ = false;
   hltDiJetAve300_ = false;
   hltDiJetAve370_ = false;
-
+  
+  hltJet30_ = false;
+  hltJet60_ = false;
+  hltJet80_ = false;
+  hltJet110_ = false;
+  hltJet150_ = false;
+  hltJet190_ = false;
+  hltJet240_ = false;
+  hltJet300_ = false;
+  hltJet370_ = false;
+  
   vtxN_ = 0;
   vtxNTracks_ = 0;
   vtxPosX_ = 0.;
@@ -684,8 +703,6 @@ template <typename T> NJet<T>::~NJet() {
   delete [] stableGenPartPDGId_;
 } 
 
-
-
 template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
   // Read parameters
@@ -747,6 +764,16 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("HltDiJetAve240",&hltDiJetAve240_,"HltDiJetAve240/O");
   CalibTree->Branch("HltDiJetAve300",&hltDiJetAve300_,"HltDiJetAve300/O");
   CalibTree->Branch("HltDiJetAve370",&hltDiJetAve370_,"HltDiJetAve370/O");
+
+  CalibTree->Branch("HltJet30", &hltJet30_, "HltJet30/O");
+  CalibTree->Branch("HltJet60", &hltJet60_, "HltJet60/O");
+  CalibTree->Branch("HltJet80", &hltJet80_, "HltJet80/O");
+  CalibTree->Branch("HltJet110", &hltJet110_, "HltJet110/O");
+  CalibTree->Branch("HltJet150", &hltJet150_, "HltJet150/O");
+  CalibTree->Branch("HltJet190", &hltJet190_, "HltJet190/O");
+  CalibTree->Branch("HltJet240", &hltJet240_, "HltJet240/O");
+  CalibTree->Branch("HltJet300", &hltJet300_, "HltJet300/O");
+  CalibTree->Branch("HltJet370", &hltJet370_, "HltJet370/O");
 
   CalibTree->Branch("VtxN",&vtxN_,"VtxN/I");
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
@@ -921,18 +948,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   }
 }
 
-
-template <typename T> unsigned int NJet<T>::findTrigger(const std::vector<std::string>& list, const std::string& name)
-{
-  boost::regex re(std::string("^(")+name+"|"+name+"_v\\d*)$");
-  for (unsigned int i = 0,n = list.size() ; i < n ; ++i) {
-    if(boost::regex_match(list[i],re)) return i;
-  }
-  return list.size();
-}
-
-
-template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* CalibTree)
+template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
   // Event
   edm::EventAuxiliary aux = evt.eventAuxiliary();
@@ -955,100 +971,145 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   if( evt.getByLabel(edm::InputTag("TriggerResults::HLT"),triggerResults) ) {
     const edm::TriggerNames & trigNames = evt.triggerNames(*triggerResults);
     size_t id = 0;
-    boost::cmatch matches;
+    //boost::cmatch matches;
     hltL1Jet6U_ = false;
 /*     id = trigNames.triggerIndex("HLT_L1Jet6U"); */
 /*     if( id != trigNames.size() ) */
 /*       if( triggerResults->accept(id) ) hltL1Jet6U_ = true; */
    
     hltDiJetAve15U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve15U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve15U");
     if( id != trigNames.size() ) {
       if( triggerResults->accept(id) ) hltDiJetAve15U_ = true;
     }
     hltDiJetAve30U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve30U_ = true;
 
     hltDiJetAve50U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve50U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve50U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve50U_ = true;
 
     hltDiJetAve70U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve70U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve70U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve70U_ = true;
     
     hltDiJetAve100U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve100U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve100U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve100U_ = true;
 
     hltDiJetAve140U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve140U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve140U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve140U_ = true;
 
     hltDiJetAve180U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve180U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve180U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve180U_ = true;
 
     hltDiJetAve300U_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300U");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300U");
     if( id != trigNames.size()  )
       if( triggerResults->accept(id) ) hltDiJetAve300U_ = true;
 
 
     // The DiJetAve trigger decisions for corrected jet pt
     hltDiJetAve30_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve30_ = true;
 
     hltDiJetAve60_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve60");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve60");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve60_ = true;
 
     hltDiJetAve80_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve80");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve80");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve80_ = true;
 
     hltDiJetAve110_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve110");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve110");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve110_ = true;
 
     hltDiJetAve150_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve150");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve150");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve150_ = true;
 
     hltDiJetAve190_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve190");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve190");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve190_ = true;
 
     hltDiJetAve240_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve240");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve240");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve240_ = true;
 
     hltDiJetAve300_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve300_ = true;
 
     hltDiJetAve370_ = false;
-    id = findTrigger(trigNames.triggerNames(),"HLT_DiJetAve370");
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve370");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltDiJetAve370_ = true;
-  }
 
+    //single jet triggers
+    hltJet30_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet30");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet30_ = true;
+    
+    hltJet60_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet60");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet60_ = true;
+
+    hltJet80_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet80");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet80_ = true;
+    
+    hltJet110_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet110");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet110_ = true;
+    
+    hltJet150_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet150");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet150_ = true;
+    
+    hltJet190_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet190");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet190_ = true;
+    
+    hltJet240_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet240");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet240_ = true;
+    
+    hltJet300_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet300");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet300_ = true;
+    
+    hltJet370_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet370");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltJet370_ = true;
+  }
 
   // Vertex info
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
@@ -1207,7 +1268,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       jetieta_[jtno] = towerId.ieta();
       jetiphi_[jtno] = towerId.iphi();
 
-
       if( genJets.isValid() ) {
 	// Find closest genjet (DeltaR) to the current calo jet
 	double closestDeltaR    = 1000;
@@ -1236,6 +1296,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	  genjetet[  jtno ] = 0.;
 	  genjete[   jtno ] = 0.;
 	}
+      } else {
+	jetgenjetDeltaR[ jtno ] = 0;
       }
       //check if daughters are present 
       if((*pJets)[jtno].numberOfDaughters() &&
@@ -1493,8 +1555,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	if( NobjStableGenPart_ == kMaxStableGenPart_ ) break;
       } // End of loop over genparticles  
     }
-
-    CalibTree->Fill();
   }
 }
 
