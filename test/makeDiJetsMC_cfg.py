@@ -38,7 +38,8 @@ process.maxEvents = cms.untracked.PSet(
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),
-    wantSummary = cms.untracked.bool(True)
+    wantSummary = cms.untracked.bool(True),
+    useData = cms.untracked.bool(False)
 )
 
 # Vertex filter
@@ -293,6 +294,62 @@ process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
     NJet_L1L2L3L4JWJetCorrector = 'kt6PFL1L2L3'
 )
 
+process.calibTreeMakerAK5FastCalo = process.calibTreeMakerCalo.clone(
+    OutputFile = 'ak5FastCalo.root',
+    NJet_L1JetCorrector = 'ak5CaloL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5CaloL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5CaloL1FastL2L3'
+)
+
+process.calibTreeMakerAK5FastPF = process.calibTreeMakerPF.clone(
+    OutputFile = 'ak5FastPF.root',
+    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3'
+)
+
+##CHS PF jets
+#process.load("PhysicsTools.PatAlgos.patSequences_cff")
+#process.out = cms.OutputModule("PoolOutputModule",
+#                               fileName = cms.untracked.string('patTuple.root'),
+#                               outputCommands = cms.untracked.vstring('drop *')
+#)
+#
+#from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+#
+#process.goodOfflinePrimaryVertices = cms.EDFilter(
+#    "PrimaryVertexObjectFilter",
+#    filterParams = pvSelector.clone( minNdof = cms.double(7.0), maxZ = cms.double(24.0) ),
+#    src=cms.InputTag('offlinePrimaryVertices')
+#    )
+#
+#from PhysicsTools.PatAlgos.tools.pfTools import *
+#postfix = "PFlow"
+#usePF2PAT(process,runPF2PAT=True, jetAlgo='AK5', runOnMC=not process.options.useData, postfix=postfix)
+#process.pfPileUpPFlow.Enable = True
+#process.pfPileUpPFlow.Vertices = 'goodOfflinePrimaryVertices'
+#process.pfJetsPFlow.doAreaFastjet = True
+#process.pfJetsPFlow.doRhoFastjet = False
+#process.patJetCorrFactorsPFlow.rho = cms.InputTag("kt6PFJetsPFlow", "rho")
+#process.pfPileUpPFlow.checkClosestZVertex = cms.bool(False)
+#
+#
+#process.kt6PFJetsPFlow = process.kt4PFJets.clone(
+#    rParam = cms.double(0.6),
+#    src = cms.InputTag('pfNoElectron'+postfix),
+#    doAreaFastjet = cms.bool(True),
+#    doRhoFastjet = cms.bool(True),
+#    voronoiRfact = cms.double(0.9)
+#    )
+#
+#getattr(process,"patPF2PATSequence"+postfix).replace( getattr(process,"pfNoElectron"+postfix), getattr(process,"pfNoElectron"+postfix)*process.kt6PFJetsPFlow )
+#process.patseq = cms.Sequence(    
+#    process.goodOfflinePrimaryVertices*
+#    getattr(process,"patPF2PATSequence"+postfix)
+#    )
+
+
+
 process.pDump = cms.Path( process.dump )
 
 process.pMC = cms.Path( #process.dump *
@@ -327,6 +384,10 @@ process.pMC = cms.Path( #process.dump *
 #                        * process.calibTreeMakerKT4PF
 #                        * process.KT6PFJetPartonMatching
 #                        * process.calibTreeMakerKT6PF
+                        * process.calibTreeMakerAK5FastCalo
+                        * process.calibTreeMakerAK5FastPF
+#                        * process.patseq
+#                        * process.dump
                         )
 
 process.schedule = cms.Schedule(process.pMC)

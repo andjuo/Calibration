@@ -284,6 +284,19 @@ process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
     NJet_L1L2L3L4JWJetCorrector = 'kt6PFL1L2L3'
 )
 
+process.calibTreeMakerAK5FastCalo = process.calibTreeMakerCalo.clone(
+    OutputFile = 'ak5FastCalo.root',
+    NJet_L1JetCorrector = 'ak5CaloL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5CaloL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5CaloL1FastL2L3Residual'
+)
+
+process.calibTreeMakerAK5FastPF = process.calibTreeMakerPF.clone(
+    OutputFile = 'ak5FastPF.root',
+    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
+)
 
 process.pDump = cms.Path( process.dump )
 
@@ -308,6 +321,8 @@ process.pData = cms.Path( #process.hltLevel1GTSeed*
                           #* process.calibTreeMakerIC5PF
 #                          * process.calibTreeMakerKT4PF
 #                          * process.calibTreeMakerKT6PF
+                           * process.calibTreeMakerAK5FastCalo
+                           * process.calibTreeMakerAK5FastPF 
                           )
 
 process.schedule = cms.Schedule(process.pData)
