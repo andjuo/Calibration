@@ -173,7 +173,7 @@ private:
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
   bool vtxIsFake_;
-  int puMCNumVtx_;
+  int puMCNumVtx_,puMCNumVtxOOT_;
   float rho_;
 
   // Calo jets and jet ID
@@ -310,6 +310,7 @@ template <typename T> NJet<T>::NJet()
   vtxNDof_ = 0.;
   vtxIsFake_ = false;
   puMCNumVtx_ = 0;
+  puMCNumVtxOOT_ = 0;
   rho_ = 0;
 
   // CaloTower branches for all jets
@@ -786,6 +787,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("VtxIsFake",&vtxIsFake_,"VtxIsFake/O");
 
   CalibTree->Branch("PUMCNumVtx",&puMCNumVtx_,"PUMCNumVtx/I");
+  CalibTree->Branch("PUMCNumVtxOOT",&puMCNumVtxOOT_,"PUMCNumVtxOOT/I");
   CalibTree->Branch("Rho",&rho_,"Rho/F");
 
   // CaloTower branches for all jets
@@ -1115,7 +1117,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   // Vertex info
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
   evt.getByLabel("offlinePrimaryVertices",offlinePrimaryVertices);
-  vtxN_ = 0;
+  vtxN_ = 0;      
   //vertex cuts: ndof > 4 && abs(z) <= 24 && position.Rho <= 2
   for(int i = 0, n = offlinePrimaryVertices->size() ; i < n ; ++i) {
     const reco::Vertex& vtx = (*offlinePrimaryVertices)[i];
@@ -1191,14 +1193,15 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   // Number of generated PU events
   edm::Handle< std::vector<PileupSummaryInfo> > puInfo;
   evt.getByLabel("addPileupInfo",puInfo);
+  puMCNumVtxOOT_ = 0;
   if( puInfo.isValid() ) {
-    std::vector<PileupSummaryInfo>::const_iterator puIt;
-    int n = 0;
-    for(puIt = puInfo->begin(); puIt != puInfo->end(); ++puIt,++n) {
+    for(std::vector<PileupSummaryInfo>::const_iterator puIt = puInfo->begin(); 
+	puIt != puInfo->end(); ++puIt) {
       //std::cout << " Pileup Information: bunchXing, nvtx: " << puIt->getBunchCrossing() << " " << puIt->getPU_NumInteractions() << std::endl;
       if( puIt->getBunchCrossing() == 0 ) { // Select in-time bunch crossing
 	puMCNumVtx_ = puIt->getPU_NumInteractions();
-	break;
+      } else {
+	puMCNumVtxOOT_ +=  puIt->getPU_NumInteractions();
       }
     }
   } else {
@@ -1247,7 +1250,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
       edm::Handle<reco::JetIDValueMap> pJetIDMap;
       evt.getByLabel(jetIDs_,pJetIDMap);
-      if(pJetsReco.isValid()) {
+      if(pJetsReco.isValid() && (pJetsReco.id() !=  pJets.id())) {
 	if(std::abs((*pJetsReco)[jtno].phi() - (*pJets)[jtno].phi()) > 0.0001) {
 	  std::cout << (*pJetsReco)[jtno].print();
 	  std::cout << (*pJets)[jtno].print();
@@ -1323,6 +1326,9 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	 (*pJets)[jtno].daughterPtr(0).isAvailable()) { 
 	jetEtWeightedSigmaPhi_[jtno] = (*pJets)[jtno].phiphiMoment() > 0 ? sqrt((*pJets)[jtno].phiphiMoment()) : 0;
 	jetEtWeightedSigmaEta_[jtno] = (*pJets)[jtno].etaetaMoment() > 0 ? sqrt((*pJets)[jtno].etaetaMoment()) : 0;
+      } else {
+	jetEtWeightedSigmaPhi_[jtno] = 0;
+	jetEtWeightedSigmaEta_[jtno] = 0;
       }
       jetarea_[jtno] = (*pJets)[jtno].jetArea();
       fillExtra(*pJets, jtno);
