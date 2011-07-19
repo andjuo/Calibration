@@ -1113,7 +1113,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltJet370_ = true;
   }
-
   // Vertex info
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
   evt.getByLabel("offlinePrimaryVertices",offlinePrimaryVertices);
@@ -1145,11 +1144,13 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
   edm::Handle<double> pRho;
   evt.getByLabel(rho_tag_,pRho);
-  if( pRho.isValid() ) {
-    rho_ = *pRho;
-  } else {
-    rho_ = 0;
-  }
+  //if( pRho.isValid() ) {
+  rho_ = *pRho;
+  if(*pRho < 0) edm::LogError("BadRho") << "Rho negative!";
+  if(*pRho != *pRho) edm::LogError("BadRho") << "Rho is NaN!";
+  //} else {
+  //  rho_ = 0;
+  //}
 
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
@@ -1251,12 +1252,18 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       edm::Handle<reco::JetIDValueMap> pJetIDMap;
       evt.getByLabel(jetIDs_,pJetIDMap);
       if(pJetsReco.isValid() && (pJetsReco.id() !=  pJets.id())) {
-	if(std::abs((*pJetsReco)[jtno].phi() - (*pJets)[jtno].phi()) > 0.0001) {
-	  std::cout << (*pJetsReco)[jtno].print();
-	  std::cout << (*pJets)[jtno].print();
-	  edm::LogError("DiffJets") << "different jets in RECO and the current process!";
+	if((jtno >= pJetsReco->size()) ||  (std::abs((*pJetsReco)[jtno].phi() - (*pJets)[jtno].phi()) > 0.0001)) {
+	  //std::cout << (*pJetsReco)[jtno].print();
+	  //std::cout << (*pJets)[jtno].print();
+	  edm::LogWarning("DiffJets") << "mismatching jets in RECO and the current process!";
+	  jetIDLoose_[jtno] = false;
+	  jetIDTight_[jtno] = false;
+	  n90Hits_[jtno] = -1;
+	  fHPD_[jtno] = -1;
+	  fRBX_[jtno] = -1;
+	} else {
+	  fillJetID(pJetsReco->refAt(jtno),jtno,pJetIDMap);
 	}
-	fillJetID(pJetsReco->refAt(jtno),jtno,pJetIDMap);
       } else {
 	fillJetID(pJets->refAt(jtno),jtno,pJetIDMap);
       }
@@ -1331,6 +1338,12 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	jetEtWeightedSigmaEta_[jtno] = 0;
       }
       jetarea_[jtno] = (*pJets)[jtno].jetArea();
+      if( (*pJets)[jtno].jetArea() < 0 ) {
+	edm::LogError("BadArea") << "Area negative!";
+      }
+      if((*pJets)[jtno].jetArea() != (*pJets)[jtno].jetArea()) {
+	edm::LogError("BadArea") << "Area is NaN!";
+      }
       fillExtra(*pJets, jtno);
       //// GenParticle Matching ALGO and PHYSICS
       if( matchedParticleMap.isValid() ) {
