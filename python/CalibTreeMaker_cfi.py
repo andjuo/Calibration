@@ -39,7 +39,7 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     NJet_JetIDs       = cms.InputTag("ak5JetID"),
     NJet_PartonMatch  = cms.InputTag("CaloJetPartonMatching"),
     NJet_MET          = cms.InputTag("corMetGlobalMuons"),
-    NJet_Rho          = cms.InputTag('kt6PFJets','rho'),
+    NJet_Rho          = cms.InputTag('kt6CaloJets','rho'),
     NJetRecTracks     = cms.InputTag("generalTracks"),
     NJetRecMuons      = cms.InputTag("muons"),
     NJet_Weight       = cms.double(1.),
@@ -199,3 +199,47 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     WritePhotons  = cms.bool(False)
 )
 
+calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
+    TrackAssociatorParameters,
+    TrackAssociatorParameterBlock,
+                              
+    OutputFile =  cms.string('ak5PFCluster.root'),
+    TreeName      = cms.string('DiJetTree'),
+
+    GenEventScaleLabel   = cms.InputTag("genEventScale"),                             
+               
+    PhotonJetPhotons     = cms.InputTag("photons"),
+    PhotonJetGenPhotons  = cms.InputTag("goodGenPhotons"),
+
+    BeamSpot = cms.InputTag("offlineBeamSpot"),
+                              
+    NJet_Jets         = cms.InputTag("ak5PFClusterJets"),
+    NJet_MinNumJets   = cms.int32(0),                             
+    NJet_JetIDs       = cms.InputTag(""), 
+    NJet_PartonMatch  = cms.InputTag(""),
+    NJet_MET          = cms.InputTag("pfClusterMet"),
+    NJet_Rho          = cms.InputTag('kt6CaloJets','rho'),
+    NJetRecTracks     = cms.InputTag("generalTracks"),
+    NJetRecMuons      = cms.InputTag("muons"),
+    NJet_Weight       = cms.double(1.),
+    NJet_Weight_Tag   = cms.InputTag("genEventWeight"),
+    NJet_GenJets      = cms.InputTag("ak5GenJets"),
+    NJet_GenParticles = cms.InputTag("genParticles"),
+    NJetConeSize      = cms.double(0.5),
+    NJetZSPJets       = cms.InputTag("ZSPJetCorJetAntiKt5"),
+
+    NJet_L1JetCorrector       = cms.string('ak5CaloL1Offset'),
+    NJet_L2JetCorrector       = cms.string('ak5CaloL2Relative'),
+    NJet_L3JetCorrector       = cms.string('ak5CaloL3Absolute'),
+    NJet_JPTZSPCorrector      = cms.string('JetPlusTrackZSPCorrectorAntiKt5'),
+    NJet_L1L2L3JetCorrector     = cms.string('ak5CaloL1L2L3'),
+    NJet_L1L2L3L4JWJetCorrector = cms.string('ak5CaloL1L2L3'),
+    NJet_L2L3JetCorrectorJPT  = cms.string('ak5JPTL2L3'),
+    NJet_writeTracks  = cms.bool(False),
+    NJet_writeTowers  = cms.bool(False),
+
+    WriteGenJetParticles = cms.bool(False), 
+    WriteStableGenParticles = cms.bool(False),                             
+                                  
+    WritePhotons  = cms.bool(False)
+)
