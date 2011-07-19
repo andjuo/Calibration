@@ -19,12 +19,18 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/8CE5E293-227C-E011-B58F-0024E86E8D4C.root'
-            )
+        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0002/4C8D2782-F17B-E011-BFC0-0015178C49C0.root',
+        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/862F1DCB-307C-E011-86F0-001D0967D55D.root'
+
+#        '/store/data/Run2011A/Jet/RECO/PromptReco-v2/000/163/586/4C80085D-0A73-E011-93A4-0030487A17B8.root'
+#        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/8CE5E293-227C-E011-B58F-0024E86E8D4C.root'
+        )
+                            ,
+                            eventsToProcess =  cms.untracked.VEventRange('163252:26075640','163255:546909755')               
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(50) )
+    input = cms.untracked.int32(-1) )
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),
@@ -79,6 +85,10 @@ process.kt6PFJets.doAreaFastjet = True
 process.kt6PFJets.voronoiRfact = 0.9
 process.ak5PFJets.doAreaFastjet = True
 process.ak7PFJets.doAreaFastjet = True
+
+
+#run fixedGrid
+process.load("RecoJets.JetProducers.fixedGridRhoProducer_cfi")
 
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
@@ -185,6 +195,7 @@ process.calibTreeMakerJPT.NJet_L1L2L3JetCorrector    = cms.string('ak5JPTL1L2L3R
 process.calibTreeMakerJPT.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5JPTL1L2L3Residual')
 process.calibTreeMakerJPT.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
 process.calibTreeMakerJPT.NJetConeSize      = 0.5
+process.calibTreeMakerJPT.NJet_Rho          = cms.InputTag('fixedGridRhoAll')
 
 process.calibTreeMakerAK7Calo = process.calibTreeMakerCalo.clone(
     OutputFile = 'ak7Calo.root',
@@ -298,20 +309,25 @@ process.calibTreeMakerAK5FastPF = process.calibTreeMakerPF.clone(
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
 )
 
+#process.load("RecoMET/METProducers/PFClusterMET_cfi")
+#process.load("RecoJets/Configuration/RecoPFClusterJets_cff")
+
+
 process.pDump = cms.Path( process.dump )
 
 process.pData = cms.Path( #process.hltLevel1GTSeed*
-                          process.hltHighLevel *
-                          process.primaryVertexFilter
+#                          process.hltHighLevel 
+#                          * process.primaryVertexFilter
                           #* process.noscraping
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5
                           #* process.ZSPrecoJetAssociationsAntiKt5
-                          * process.recoJets
+                          process.recoJets
                           * process.recoPFJets
                           * process.calibTreeMakerCalo
                           * process.calibTreeMakerPF
 #                          * process.calibTreeMakerTrack
+                          * process.fixedGridRhoAll
                           * process.calibTreeMakerJPT
                           * process.calibTreeMakerAK7Calo
                           #* process.calibTreeMakerIC5Calo
@@ -323,6 +339,9 @@ process.pData = cms.Path( #process.hltLevel1GTSeed*
 #                          * process.calibTreeMakerKT6PF
                            * process.calibTreeMakerAK5FastCalo
                            * process.calibTreeMakerAK5FastPF 
+#                           * process.recoPFClusterJets
+#                           * process.pfClusterMet
+#                           * process.calibTreeMakerAK5PFCluster
                           )
 
 process.schedule = cms.Schedule(process.pData)

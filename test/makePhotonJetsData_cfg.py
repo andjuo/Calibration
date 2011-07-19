@@ -5,6 +5,15 @@ process = cms.Process("Calib")
 
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.load('Configuration/StandardSequences/Services_cff')
+process.load('Configuration.StandardSequences.GeometryDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+process.load('Configuration.StandardSequences.Reconstruction_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+
+process.GlobalTag.globaltag = 'GR_R_42_V12::All'
+
 process.MessageLogger.cerr.threshold             = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
@@ -18,16 +27,7 @@ process.AdaptorConfig = cms.Service("AdaptorConfig",
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-        '/store/data/Run2011A/Photon/AOD/PromptReco-v2/000/163/817/CC46F519-8076-E011-8BC6-001D09F29114.root'
-#        '/store/data/Run2011A/Jet/AOD/PromptReco-v1/000/161/311/7293853E-CA57-E011-8DEF-001D09F24D4E.root'
-#        '/store/data/Run2010B/Jet/AOD/Nov4ReReco_v1/0037/CC0418DC-22EB-DF11-9D28-002481E0D50C.root',
-#        '/store/data/Run2010A/JetMET/RECO/Nov4ReReco_v1/0111/3A4C3A92-87E9-DF11-83FA-003048678C9A.root',
-#        '/store/data/Run2010B/Jet/RECO/Nov4ReReco_v1/0039/3A0C842D-A4EB-DF11-B0F8-002481E94B2A.root'
-    #'/store/data/Run2010A/JetMETTau/RECO/v1/000/136/082/147EC62F-DF66-DF11-9678-003048D2BE08.root'
-    #'/store/data/Commissioning10/MinimumBias/RECO/May6thPDSkim2_SD_JetMETTau-v1/0137/FE3CCCB6-D05D-DF11-BB30-00261894383F.root'
-    # '/store/data/Commissioning10/MinimumBias/RECO/GOODCOLL-Jun9thSkim_v1/0039/20C793BD-3678-DF11-AF29-0018F3D09706.root'
-    # '/store/data/Run2010A/JetMET/RECO/v4/000/141/960/48753CF6-D39B-DF11-AB95-0030487A18F2.root'
-    #'/store/data/Run2010A/JetMET/RECO/Sep17ReReco_v2/0024/7E51025E-18C7-DF11-BEA3-0018F3D0962A.root'
+        '/store/data/Run2011A/Photon/AOD/PromptReco-v4/000/165/364/981DE32D-A584-E011-A16A-001D09F2305C.root'
             )
                             )
 
@@ -69,25 +69,21 @@ numtrack = cms.untracked.uint32(10),
 thresh = cms.untracked.double(0.25)
 )
 
-
-process.load('Configuration/StandardSequences/Services_cff')
-process.load('Configuration/StandardSequences/GeometryDB_cff')
-process.load('Configuration/StandardSequences/MagneticField_AutoFromDBCurrent_cff')
-process.load("Configuration/StandardSequences/Reconstruction_cff")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagator_cfi")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi")
-process.load("TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi")
-process.load("TrackingTools.TrackAssociator.DetIdAssociatorESProducer_cff")
-process.load("TrackingTools.TrackAssociator.default_cfi")
-
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR_R_311_V2::All'
-
-
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")
 
-process.load("RecoJets.Configuration.RecoJets_cff")
+#process.load("RecoJets.Configuration.RecoJets_cff")
+process.kt6CaloJets.doRhoFastjet = True
+process.kt6CaloJets.doAreaFastjet = True
+process.kt6CaloJets.voronoiRfact = 0.9
+process.ak5CaloJets.doAreaFastjet = True
+process.ak7CaloJets.doAreaFastjet = True
+
+#process.load("RecoJets.Configuration.RecoPFJets_cff")
+process.kt6PFJets.doRhoFastjet = True
+process.kt6PFJets.doAreaFastjet = True
+process.kt6PFJets.voronoiRfact = 0.9
+process.ak5PFJets.doAreaFastjet = True
+process.ak7PFJets.doAreaFastjet = True
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
@@ -117,64 +113,12 @@ process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 #    'JetCorrectionServiceChain',
 #    correctors = cms.vstring('ak5CaloL2L3Residual','ak5CaloL4JW')
 #)
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
-process.jec = cms.ESSource("PoolDBESSource",
-      DBParameters = cms.PSet(
-        messageLevel = cms.untracked.int32(0)
-        ),
-      timetype = cms.string('runnumber'),
-      toGet = cms.VPSet(
-      cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5PF'),
-            label  = cms.untracked.string('AK5PF')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5Calo'),
-            label  = cms.untracked.string('AK5Calo')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK5JPT'),
-            label  = cms.untracked.string('AK5JPT')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK7PF'),
-            label  = cms.untracked.string('AK7PF')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_AK7Calo'),
-            label  = cms.untracked.string('AK7Calo')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT4PF'),
-            label  = cms.untracked.string('KT4PF')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT6PF'),
-            label  = cms.untracked.string('KT6PF')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT4Calo'),
-            label  = cms.untracked.string('KT4Calo')
-            ),
-     cms.PSet(
-            record = cms.string('JetCorrectionsRecord'),
-            tag    = cms.string('JetCorrectorParametersCollection_Jec10V3_KT6Calo'),
-            label  = cms.untracked.string('KT6Calo')
-            )
-      ),
-      ## here you add as many jet types as you need (AK5Calo, AK5JPT, AK7PF, AK7Calo, KT4PF, KT4Calo, KT6PF, KT6Calo)
-      connect = cms.string('sqlite_file:'+os.environ['CMSSW_BASE']+'/src/Jec10V3.db/Jec10V3.db')
-)
-
-process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
+process.ak5CaloResidual.useCondDB = False
+process.ak5CaloResidual.era = "Jec10V3"
+process.ak5PFResidual.useCondDB = False
+process.ak5PFResidual.era = "Jec10V3"
+process.ak5JPTResidual.useCondDB = False
+process.ak5JPTResidual.era = "Jec10V3"
 
 # ZSP and JPT corrections
 process.load("RecoJets.Configuration.RecoJPTJets_cff")
@@ -354,6 +298,19 @@ process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
     NJet_L1L2L3L4JWJetCorrector = 'kt6PFL1L2L3'
 )
 
+process.calibTreeMakerAK5FastCalo = process.calibTreeMakerCalo.clone(
+    OutputFile = 'ak5FastCalo.root',
+    NJet_L1JetCorrector = 'ak5CaloL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5CaloL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5CaloL1FastL2L3Residual'
+)
+
+process.calibTreeMakerAK5FastPF = process.calibTreeMakerPF.clone(
+    OutputFile = 'ak5FastPF.root',
+    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
+)
 
 process.pDump = cms.Path( process.dump )
 
@@ -365,10 +322,12 @@ process.pData = cms.Path( #process.hltLevel1GTSeed*
                           #* process.noscraping
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5
-                          #* process.ZSPrecoJetAssociationsAntiKt5
+                          #* process.ZSPrecoJetAssociationsAntiKt5 
+                          * process.recoJets
+                          * process.recoPFJets
                           * process.calibTreeMakerCalo
                           * process.calibTreeMakerPF
-                          * process.calibTreeMakerTrack
+#                          * process.calibTreeMakerTrack
                           * process.calibTreeMakerJPT
                           * process.calibTreeMakerAK7Calo
                           #* process.calibTreeMakerIC5Calo
@@ -377,7 +336,9 @@ process.pData = cms.Path( #process.hltLevel1GTSeed*
                           * process.calibTreeMakerAK7PF
                           #* process.calibTreeMakerIC5PF
                           #* process.calibTreeMakerKT4PF
-                          #* process.calibTreeMakerKT6PF
+                          #* process.calibTreeMakerKT6PF  
+                          * process.calibTreeMakerAK5FastCalo
+                          * process.calibTreeMakerAK5FastPF 
                           )
 
 process.schedule = cms.Schedule(process.pData)
