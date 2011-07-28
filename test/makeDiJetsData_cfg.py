@@ -11,7 +11,7 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.GlobalTag.globaltag = 'GR_R_42_V12::All'
+process.GlobalTag.globaltag = 'GR_R_42_V19::All'
 
 process.MessageLogger.cerr.threshold             = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
@@ -70,278 +70,57 @@ thresh = cms.untracked.double(0.25)
 
 
 
-process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cfi")
+
 
 #process.load("RecoJets.Configuration.RecoJets_cff")
 process.kt6CaloJets.doRhoFastjet = True
 process.kt6CaloJets.doAreaFastjet = True
-process.kt6CaloJets.voronoiRfact = 0.9
+#process.kt6CaloJets.voronoiRfact = 0.9
 process.ak5CaloJets.doAreaFastjet = True
 process.ak7CaloJets.doAreaFastjet = True
 
 #process.load("RecoJets.Configuration.RecoPFJets_cff")
 process.kt6PFJets.doRhoFastjet = True
 process.kt6PFJets.doAreaFastjet = True
-process.kt6PFJets.voronoiRfact = 0.9
+#process.kt6PFJets.voronoiRfact = 0.9
 process.ak5PFJets.doAreaFastjet = True
 process.ak7PFJets.doAreaFastjet = True
-
-
-#run fixedGrid
-process.load("RecoJets.JetProducers.fixedGridRhoProducer_cfi")
 
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 
-#process.load("RecoJets.Configuration.GenJetParticles_cff")
-#process.load("RecoJets.Configuration.RecoGenJets_cff")
-
-
 # Jet Energy Corrections
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 
-# L4JW and L2L3Residual Correction Services
-# you need special versions of CondFormats and JetMETCorrections:
-# copy the following dirs to your release (this works with 3_8_4):
-# /afs/cern.ch/user/s/stadie/public/CondFormats
-# /afs/cern.ch/user/s/stadie/public/JetMETCorrections
-#
-#process.ak5CaloL4JW = cms.ESSource(
-#    'LXXXCorrectionService',
-#    era = cms.string('Spring10'),
-#    section   = cms.string(''),
-#    level     = cms.string('L4JW'),
-#    algorithm = cms.string('AK5Calo'),
-#    useCondDB = cms.untracked.bool(False)
-#)
-#process.ak5CaloL2L3L4JW = cms.ESSource(
-#    'JetCorrectionServiceChain',
-#    correctors = cms.vstring('ak5CaloL2L3Residual','ak5CaloL4JW')
-#)
-process.ak5CaloResidual.useCondDB = False
-process.ak5CaloResidual.era = "Jec10V3"
-process.ak5PFResidual.useCondDB = False
-process.ak5PFResidual.era = "Jec10V3"
-process.ak5JPTResidual.useCondDB = False
-process.ak5JPTResidual.era = "Jec10V3"
 
-
-# ZSP and JPT corrections
-process.load("RecoJets.Configuration.RecoJPTJets_cff")
-
-##################################################################
-#  Parameters for module calibTreeMaker
-##################################################################
-process.calibTreeMakerCalo.WriteStableGenParticles = False
-process.calibTreeMakerCalo.WriteStableGenParticles = False
-process.calibTreeMakerCalo.OutputFile         = 'ak5Calo.root'
-process.calibTreeMakerCalo.NJet_Jets         = 'ak5CaloJets'
-process.calibTreeMakerCalo.NJet_JetIDs       = 'ak5JetID'
-process.calibTreeMakerCalo.NJet_GenJets      = 'ak5GenJets'
-process.calibTreeMakerCalo.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
-process.calibTreeMakerCalo.NJet_L1JetCorrector      = cms.string('ak5CaloL1Offset')
-process.calibTreeMakerCalo.NJet_L2JetCorrector      = cms.string('ak5CaloL2Relative')
-process.calibTreeMakerCalo.NJet_L3JetCorrector      = cms.string('ak5CaloL3Absolute')
-process.calibTreeMakerCalo.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerCalo.NJet_L1L2L3JetCorrector    = cms.string('ak5CaloL1L2L3Residual')
-process.calibTreeMakerCalo.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5CaloL1L2L3Residual')
-process.calibTreeMakerCalo.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
-process.calibTreeMakerCalo.NJetConeSize      = 0.5
-
-process.calibTreeMakerPF.WriteStableGenParticles = False
-process.calibTreeMakerPF.OutputFile         = 'ak5PF.root'
-process.calibTreeMakerPF.NJet_Jets         = 'ak5PFJets'
-process.calibTreeMakerPF.NJet_JetIDs       = ''
-process.calibTreeMakerPF.NJet_GenJets      = 'ak5GenJets'
-process.calibTreeMakerPF.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
-process.calibTreeMakerPF.NJet_L1JetCorrector      = cms.string('ak5PFL1Offset')
-process.calibTreeMakerPF.NJet_L2JetCorrector      = cms.string('ak5PFL2Relative')
-process.calibTreeMakerPF.NJet_L3JetCorrector      = cms.string('ak5PFL3Absolute')
-process.calibTreeMakerPF.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerPF.NJet_L1L2L3JetCorrector    = cms.string('ak5PFL1L2L3Residual')
-process.calibTreeMakerPF.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5PFL1L2L3Residual')
-process.calibTreeMakerPF.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
-process.calibTreeMakerPF.NJetConeSize      = 0.5
-
-
-process.calibTreeMakerTrack.WriteStableGenParticles = False
-process.calibTreeMakerTrack.OutputFile        = 'ak5Track.root'
-process.calibTreeMakerTrack.NJet_Jets         = 'ak5TrackJets'
-process.calibTreeMakerTrack.NJet_JetIDs       = ''
-process.calibTreeMakerTrack.NJet_GenJets      = 'ak5GenJets'
-process.calibTreeMakerTrack.NJetZSPJets       = 'ZSPJetCorJetAntiKt5'
-
-process.calibTreeMakerTrack.NJet_L1JetCorrector      = cms.string('ak5PFL1Offset')
-process.calibTreeMakerTrack.NJet_L2JetCorrector      = cms.string('ak5TrackL2Relative')
-process.calibTreeMakerTrack.NJet_L3JetCorrector      = cms.string('ak5TrackL3Absolute')
-process.calibTreeMakerTrack.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerTrack.NJet_L1L2L3JetCorrector    = cms.string('ak5TrackL1L2L3')
-process.calibTreeMakerTrack.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5TrackL1L2L3')
-process.calibTreeMakerTrack.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
-process.calibTreeMakerTrack.NJetConeSize      = 0.5
-
-process.calibTreeMakerJPT.WriteStableGenParticles = False
-process.calibTreeMakerJPT.OutputFile        = 'ak5JPT.root'
-process.calibTreeMakerJPT.NJet_Jets         = 'JetPlusTrackZSPCorJetAntiKt5'
-process.calibTreeMakerJPT.NJet_JetIDs       = 'ak5JetID'
-process.calibTreeMakerJPT.NJet_GenJets    = 'ak5GenJets'
-process.calibTreeMakerJPT.NJetZSPJets     = 'ZSPJetCorJetAntiKt5'
-process.calibTreeMakerJPT.NJet_L1JetCorrector      = cms.string('ak5JPTL1Offset')
-process.calibTreeMakerJPT.NJet_L2JetCorrector      = cms.string('ak5JPTL2Relative')
-process.calibTreeMakerJPT.NJet_L3JetCorrector      = cms.string('ak5JPTL3Absolute')
-process.calibTreeMakerJPT.NJet_JPTZSPCorrector     = cms.string('JetPlusTrackZSPCorrectorAntiKt5')
-process.calibTreeMakerJPT.NJet_L1L2L3JetCorrector    = cms.string('ak5JPTL1L2L3Residual')
-process.calibTreeMakerJPT.NJet_L1L2L3L4JWJetCorrector    = cms.string('ak5JPTL1L2L3Residual')
-process.calibTreeMakerJPT.NJet_L2L3JetCorrectorJPT = cms.string('ak5JPTL2L3')
-process.calibTreeMakerJPT.NJetConeSize      = 0.5
-process.calibTreeMakerJPT.NJet_Rho          = cms.InputTag('fixedGridRhoAll')
-
-process.calibTreeMakerAK7Calo = process.calibTreeMakerCalo.clone(
-    OutputFile = 'ak7Calo.root',
-    NJet_Jets  = 'ak7CaloJets',
-    NJet_JetIDs = 'ak7JetID',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'ak7GenJets',
-    NJet_L1JetCorrector = 'ak7CaloL1Offset',
-    NJet_L2JetCorrector = 'ak7CaloL2Relative',
-    NJet_L3JetCorrector = 'ak7CaloL3Absolute',
-    NJet_L1L2L3JetCorrector = 'ak7CaloL1L2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ak7CaloL1L2L3'
-)
-process.calibTreeMakerIC5Calo = process.calibTreeMakerCalo.clone(
-    OutputFile = 'ic5Calo.root',
-    NJet_Jets  = 'iterativeCone5CaloJets',
-    NJet_JetIDs = 'ic5JetID',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'iterativeCone5GenJets',
-    NJet_L1JetCorrector = 'ic5CaloL1Offset',
-    NJet_L2JetCorrector = 'ic5CaloL2Relative',
-    NJet_L3JetCorrector = 'ic5CaloL3Absolute',
-    NJet_L1L2L3JetCorrector = 'ic5CaloL1L2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ic5CaloL1L2L3'
-)
-
-process.calibTreeMakerKT4Calo = process.calibTreeMakerCalo.clone(
-    OutputFile = 'kt4Calo.root',
-    NJet_Jets  = 'kt4CaloJets',
-    NJet_JetIDs = 'kt4JetID',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'kt4GenJets',
-    NJet_L1JetCorrector = 'kt4CaloL1Offset',
-    NJet_L2JetCorrector = 'kt4CaloL2Relative',
-    NJet_L3JetCorrector = 'kt4CaloL3Absolute',
-    NJet_L1L2L3JetCorrector = 'kt4CaloL1L2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'kt4CaloL1L2L3'
-)
-
-process.calibTreeMakerKT6Calo = process.calibTreeMakerCalo.clone(
-    OutputFile = 'kt6Calo.root',
-    NJet_Jets  = 'kt6CaloJets',
-    NJet_JetIDs = 'kt6JetID',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'kt6GenJets',
-    NJet_L2JetCorrector = 'kt6CaloL2Relative',
-    NJet_L3JetCorrector = 'kt6CaloL3Absolute',
-    NJet_L1L2L3JetCorrector = 'kt6CaloL1L2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'kt6CaloL1L2L3'
-)
-
-process.calibTreeMakerAK7PF = process.calibTreeMakerPF.clone(
-    OutputFile = 'ak7PF.root',
-    NJet_Jets  = 'ak7PFJets',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'ak7GenJets',
-    NJet_L1JetCorrector = 'ak7PFL1Offset',
-    NJet_L2JetCorrector = 'ak7PFL2Relative',
-    NJet_L3JetCorrector = 'ak7PFL3Absolute',
-    NJet_L1L2L3JetCorrector = 'ak7PFL1L2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ak7PFL1L2L3'
-)
-
-process.calibTreeMakerIC5PF = process.calibTreeMakerPF.clone(
-    OutputFile = 'ic5PF.root',
-    NJet_Jets  = 'iterativeCone5PFJets',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'iterativeCone5GenJets',
-    NJet_L2JetCorrector = 'ic5PFL2Relative',
-    NJet_L3JetCorrector = 'ic5PFL3Absolute',
-    NJet_L1L2L3JetCorrector = 'ic5PFL2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ic5PFL2L3'
-)
-
-
-process.calibTreeMakerKT4PF = process.calibTreeMakerPF.clone(
-    OutputFile = 'kt4PF.root',
-    NJet_Jets  = 'kt4PFJets',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'kt4GenJets',
-    NJet_L1JetCorrector = 'kt4PFL1Offset',
-    NJet_L2JetCorrector = 'kt4PFL2Relative',
-    NJet_L3JetCorrector = 'kt4PFL3Absolute',
-    NJet_L1L2L3JetCorrector = 'kt4PFL1L2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'kt4PFL1L2L3'
-)
-
-process.calibTreeMakerKT6PF = process.calibTreeMakerPF.clone(
-    OutputFile = 'kt6PF.root',
-    NJet_Jets  = 'kt6PFJets',
-    NJet_PartonMatch = '',
-    NJet_GenJets = 'kt6GenJets',
-    NJet_L1JetCorrector = 'kt6PFL1Offset',
-    NJet_L2JetCorrector = 'kt6PFL2Relative',
-    NJet_L3JetCorrector = 'kt6PFL3Absolute',
-    NJet_L1L2L3JetCorrector = 'kt6PFL1L2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'kt6PFL1L2L3'
-)
-
-process.calibTreeMakerAK5FastCalo = process.calibTreeMakerCalo.clone(
-    OutputFile = 'ak5FastCalo.root',
-    NJet_L1JetCorrector = 'ak5CaloL1Fastjet',
-    NJet_L1L2L3JetCorrector = 'ak5CaloL1FastL2L3Residual',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5CaloL1FastL2L3Residual'
-)
-
-process.calibTreeMakerAK5FastPF = process.calibTreeMakerPF.clone(
-    OutputFile = 'ak5FastPF.root',
-    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
-    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3Residual',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
-)
-
-#process.load("RecoMET/METProducers/PFClusterMET_cfi")
-#process.load("RecoJets/Configuration/RecoPFClusterJets_cff")
-
+process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
 process.pDump = cms.Path( process.dump )
 
+#CHS
+process.load('CommonTools.ParticleFlow.pfNoPileUp_cff')
+
+process.ak5PFCHSJets = process.ak5PFJets.clone(
+    src = 'pfNoPileUp'
+)
+process.kt6PFCHSJets = process.kt6PFJets.clone(
+    src = 'pfNoPileUp'
+)
+
 process.pData = cms.Path( #process.hltLevel1GTSeed*
-#                          process.hltHighLevel 
-#                          * process.primaryVertexFilter
+                          process.hltHighLevel 
+                          * process.primaryVertexFilter
                           #* process.noscraping
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5
                           #* process.ZSPrecoJetAssociationsAntiKt5
-                          process.recoJets
-                          * process.recoPFJets
-                          * process.calibTreeMakerCalo
-                          * process.calibTreeMakerPF
-#                          * process.calibTreeMakerTrack
-                          * process.fixedGridRhoAll
-                          * process.calibTreeMakerJPT
-                          * process.calibTreeMakerAK7Calo
-                          #* process.calibTreeMakerIC5Calo
-#                          * process.calibTreeMakerKT4Calo
-#                          * process.calibTreeMakerKT6Calo
-                          * process.calibTreeMakerAK7PF
-                          #* process.calibTreeMakerIC5PF
-#                          * process.calibTreeMakerKT4PF
-#                          * process.calibTreeMakerKT6PF
-                           * process.calibTreeMakerAK5FastCalo
-                           * process.calibTreeMakerAK5FastPF 
-#                           * process.recoPFClusterJets
-#                           * process.pfClusterMet
-#                           * process.calibTreeMakerAK5PFCluster
+                          * process.recoJets
+                          * process.recoPFJets 
+                          * process.pfNoPileUpSequence 
+                          * process.ak5PFCHSJets 
+                          * process.kt6PFCHSJets 
+                          * process.calibTreeMakersData
                           )
 
 process.schedule = cms.Schedule(process.pData)
