@@ -55,42 +55,16 @@ process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # Jet Energy Corrections
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 
-#process.load("RecoJets.Configuration.RecoJets_cff")
-process.kt6CaloJets.doRhoFastjet = True
-process.kt6CaloJets.doAreaFastjet = True
-#process.kt6CaloJets.voronoiRfact = 0.9
-process.ak5CaloJets.doAreaFastjet = True
-process.ak7CaloJets.doAreaFastjet = True
-
-#process.load("RecoJets.Configuration.RecoPFJets_cff")
-process.kt6PFJets.doRhoFastjet = True
-process.kt6PFJets.doAreaFastjet = True
-#process.kt6PFJets.voronoiRfact = 0.9
-process.ak5PFJets.doAreaFastjet = True
-process.ak7PFJets.doAreaFastjet = True
-
-
-#CHS
-process.load('CommonTools.ParticleFlow.pfNoPileUp_cff')
-
-process.ak5PFCHSJets = process.ak5PFJets.clone(
-    src = 'pfNoPileUp'
-)
-process.kt6PFCHSJets = process.kt6PFJets.clone(
-    src = 'pfNoPileUp'
-)
 
 process.pDump = cms.Path( process.dump )
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
+process.load("Calibration.CalibTreeMaker.calibjets_cff")
+
 process.pMC = cms.Path( #process.dump *
                         #process.recoJPTJets * 
-                        process.recoJets *
-                        process.recoPFJets *
-                        process.pfNoPileUpSequence *
-                        process.ak5PFCHSJets *
-                        process.kt6PFCHSJets *
+                        process.calibjets *
                         process.calibTreeMakersMC
                         )
 

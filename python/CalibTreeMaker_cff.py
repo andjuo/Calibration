@@ -254,7 +254,7 @@ calibTreeMakerAK5FastPFData = calibTreeMakerAK5FastPF.clone(
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
 )
 
-calibTreeMakerAK5PFCHSData = calibTreeMakerAK5FastPF.clone(
+calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
     NJet_PartonMatch = '',
     NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3Residual',
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'

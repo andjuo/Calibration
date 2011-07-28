@@ -69,20 +69,6 @@ numtrack = cms.untracked.uint32(10),
 thresh = cms.untracked.double(0.25)
 )
 
-#process.load("RecoJets.Configuration.RecoJets_cff")
-process.kt6CaloJets.doRhoFastjet = True
-process.kt6CaloJets.doAreaFastjet = True
-#process.kt6CaloJets.voronoiRfact = 0.9
-process.ak5CaloJets.doAreaFastjet = True
-process.ak7CaloJets.doAreaFastjet = True
-
-#process.load("RecoJets.Configuration.RecoPFJets_cff")
-process.kt6PFJets.doRhoFastjet = True
-process.kt6PFJets.doAreaFastjet = True
-#process.kt6PFJets.voronoiRfact = 0.9
-process.ak5PFJets.doAreaFastjet = True
-process.ak7PFJets.doAreaFastjet = True
-
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 
@@ -106,19 +92,12 @@ process.calibTreeMakerAK5FastCaloData.TreeName          = "GammaJetTree"
 process.calibTreeMakerAK5FastCaloData.WritePhotons = True
 process.calibTreeMakerAK5FastPFData.TreeName          = "GammaJetTree"
 process.calibTreeMakerAK5FastPFData.WritePhotons = True
+process.calibTreeMakerAK5PFCHSData.TreeName          = "GammaJetTree"
+process.calibTreeMakerAK5PFCHSData.WritePhotons = True
 
 process.pDump = cms.Path( process.dump )
 
-#CHS
-process.load('CommonTools.ParticleFlow.pfNoPileUp_cff')
-
-process.ak5PFCHSJets = process.ak5PFJets.clone(
-    src = 'pfNoPileUp'
-)
-process.kt6PFCHSJets = process.kt6PFJets.clone(
-    src = 'pfNoPileUp'
-)
-
+process.load("Calibration.CalibTreeMaker.calibjets_cff")
 
 process.pData = cms.Path( #process.hltLevel1GTSeed*
                           process.hltHighLevel *
@@ -129,11 +108,7 @@ process.pData = cms.Path( #process.hltLevel1GTSeed*
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5
                           #* process.ZSPrecoJetAssociationsAntiKt5 
-                          * process.recoJets
-                          * process.recoPFJets
-                          * process.pfNoPileUpSequence 
-                          * process.ak5PFCHSJets 
-                          * process.kt6PFCHSJets 
+                          * process.calibjets
                           * process.calibTreeMakersData
                           )
 
