@@ -29,7 +29,7 @@ private:
 
   //tree variables
   int nphotons_, ngenphotons_;
-  bool hltPhoton20_, hltPhoton30_, hltPhoton50_,hltPhoton75_;
+  bool hltPhoton20_, hltPhoton30_, hltPhoton50_,hltPhoton75_,hltPhoton90_;
   float *photonpt_, *photonphi_, *photoneta_, *photone_;
   float *photonisoecal04_,*photonisohcal04_, *photonisotrk04_;
   bool *photonidloose_,*photonidtight_;
