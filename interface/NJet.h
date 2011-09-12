@@ -1185,10 +1185,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   weight = weight_;
   if( genInfoHandle.isValid() ) {
     genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]); 
-    if(weight_ <= 0)
-      {
-	weight = static_cast<float>(genInfoHandle->weight());
-      }
+    weight = static_cast<float>(genInfoHandle->weight());
   }
 
   // Number of generated PU events
