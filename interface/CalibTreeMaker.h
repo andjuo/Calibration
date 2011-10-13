@@ -17,6 +17,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 
 #include "Calibration/CalibTreeMaker/interface/PhotonJet.h"
+#include "Calibration/CalibTreeMaker/interface/DimuonJet.h"
 #include "Calibration/CalibTreeMaker/interface/NJet.h"
 
 
@@ -33,10 +34,12 @@ template <typename T> class CalibTreeMaker : public edm::EDAnalyzer {
   virtual void endJob() ;
   
   PhotonJet photon_analysis_;
+  DimuonJet dimuon_analysis_;
   NJet<T>  jet_analysis_;
 
   TFile* file_;
   bool writePhotons_;
+  bool writeMuons_;
 };
 
 //implementation
@@ -48,6 +51,7 @@ CalibTreeMaker<T>::CalibTreeMaker(const edm::ParameterSet& cfg)
   std::string treeName  = cfg.getParameter<std::string>("TreeName");
   //select
   writePhotons_ = cfg.getParameter<bool>("WritePhotons" );
+  writeMuons_ = cfg.getParameter<bool>("WriteMuons" );
 
   //open tree file
   file_= new TFile(fileName.c_str(),"RECREATE");
@@ -61,6 +65,9 @@ CalibTreeMaker<T>::CalibTreeMaker(const edm::ParameterSet& cfg)
  
   if( writePhotons_){
     photon_analysis_.setup( cfg, tree_ );
+  } 
+  if( writeMuons_){
+    dimuon_analysis_.setup( cfg, tree_ );
   }
 }
 
@@ -77,6 +84,9 @@ template <typename T> void CalibTreeMaker<T>::analyze(const edm::Event& evt, con
 
   if( writePhotons_){
     photon_analysis_.analyze(evt, setup);
+  }  
+  if( writeMuons_){
+    dimuon_analysis_.analyze(evt, setup);
   }
   tree_->Fill();
 }

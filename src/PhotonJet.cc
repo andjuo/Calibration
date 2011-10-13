@@ -147,12 +147,12 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup)
   }
   
   
-  edm::Handle<reco::GenParticleCollection> genphotonColl;
+  edm::Handle<reco::CandidateCollection> genphotonColl;
   evt.getByLabel(genphotons_,genphotonColl);
   
   ngenphotons_ = 0;
   if(! genphotonColl.isValid()) return;
-  for (reco::GenParticleCollection::const_iterator ig = genphotonColl->begin(); ig!= genphotonColl->end(); ++ig){  
+  for (reco::CandidateCollection::const_iterator ig = genphotonColl->begin(); ig!= genphotonColl->end(); ++ig){  
     genphotonpt_[ngenphotons_]  = ig->pt();
     genphotonphi_[ngenphotons_] = ig->phi();
     genphotoneta_[ngenphotons_] = ig->eta();

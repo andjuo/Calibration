@@ -2,26 +2,33 @@ from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
 
 
 from TrackingTools.TrackAssociator.default_cfi import *
+from PhysicsTools.HepMCCandAlgos.genParticles_cfi import *
 
-genParticleCandidates = cms.EDProducer("FastGenParticleCandidateProducer",
-    src = cms.InputTag("genParticles")
-)                         
-
-
-genPhotonCandidates = cms.EDFilter("PdgIdAndStatusCandSelector",
-    status = cms.vint32(1, 3),
-    src = cms.InputTag("genParticleCandidates"),
-    pdgId = cms.vint32(22)
+genPhotons = cms.EDFilter("PdgIdAndStatusCandViewSelector",
+    src = cms.InputTag("genParticles"),
+    pdgId = cms.vint32(22),
+    status = cms.vint32(1)
 )
 
-goodGenPhotons = cms.EDFilter("EtaPtMinCandSelector",
-    src = cms.InputTag("genPhotonCandidates"),
+goodGenPhotons = cms.EDFilter("EtaPtMinCandViewSelector",
+    src = cms.InputTag("genPhotons"),
     etaMin = cms.double(-3.0),
     etaMax = cms.double(3.0),
-    ptMin = cms.double(20)
+    ptMin = cms.double(20.0)
 )
 
+genMuons = cms.EDFilter("PdgIdAndStatusCandViewSelector",
+    src = cms.InputTag("genParticles"),
+    pdgId = cms.vint32(13),
+    status = cms.vint32(1)
+)
 
+goodGenMuons = cms.EDFilter("EtaPtMinCandViewSelector",
+     src = cms.InputTag("genMuons"),
+     etaMin = cms.double(-2.5),
+     etaMax = cms.double(2.5),
+     ptMin = cms.double(5.0)
+)
 
 calibTreeMakerAK7Calo = calibTreeMakerCalo.clone(
     OutputFile = 'ak7Calo.root',
@@ -200,7 +207,10 @@ AK5PFCHSJetPartonMatching = PFJetPartonMatching.clone(
     jets = 'ak5PFCHSJets' 
 )
 
-calibTreeMakersMC = cms.Sequence( myPartons * CaloJetPartonMatching
+calibTreeMakersMC = cms.Sequence( genPhotons * goodGenPhotons 
+                                  * genMuons * goodGenMuons
+                                  * myPartons 
+                                  * CaloJetPartonMatching
                                   * PFJetPartonMatching
                                   * JPTJetPartonMatching
                                   * calibTreeMakerCalo
