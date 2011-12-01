@@ -168,7 +168,14 @@ private:
   bool hltJet240_;
   bool hltJet300_;
   bool hltJet370_;
-  
+  bool hltQuadJet40_;
+  bool hltQuadJet45DiJet40_;
+  bool hltQuadJet50DiJet40_;
+  bool hltQuadJet50DiJet40L1_;
+  bool hltSixJet45_;
+  bool hltSixJet45L1_;
+
+
   int vtxN_,vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
@@ -289,8 +296,8 @@ template <typename T> NJet<T>::NJet()
   hltDiJetAve190_ = false;
   hltDiJetAve240_ = false;
   hltDiJetAve300_ = false;
-  hltDiJetAve370_ = false;
-  
+  hltDiJetAve370_ = false; 
+
   hltJet30_ = false;
   hltJet60_ = false;
   hltJet80_ = false;
@@ -300,6 +307,13 @@ template <typename T> NJet<T>::NJet()
   hltJet240_ = false;
   hltJet300_ = false;
   hltJet370_ = false;
+
+  hltQuadJet40_ = false;
+  hltQuadJet45DiJet40_ = false;
+  hltQuadJet50DiJet40_ = false;
+  hltQuadJet50DiJet40L1_ = false;
+  hltSixJet45_ = false;
+  hltSixJet45L1_ = false;
   
   vtxN_ = 0;
   vtxNTracks_ = 0;
@@ -777,6 +791,13 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("HltJet300", &hltJet300_, "HltJet300/O");
   CalibTree->Branch("HltJet370", &hltJet370_, "HltJet370/O");
 
+  CalibTree->Branch("HltQuadJet40",&hltQuadJet40_, "HltQuadJet40/O");
+  CalibTree->Branch("HltQuadJet45DiJet40",&hltQuadJet45DiJet40_, "HltQuadJet45DiJet40/O");
+  CalibTree->Branch("HltQuadJet50DiJet40",&hltQuadJet50DiJet40_, "HltQuadJet50DiJet40/O");
+  CalibTree->Branch("HltQuadJet50DiJet40L1",&hltQuadJet50DiJet40L1_, "HltQuadJet50DiJet40L1/O");
+  CalibTree->Branch("HltSixJet45",&hltSixJet45_, "HltSixJet45/O");
+  CalibTree->Branch("HltSixJet45L1",&hltSixJet45L1_, "HltSixJet45L1/O");
+
   CalibTree->Branch("VtxN",&vtxN_,"VtxN/I");
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
   CalibTree->Branch("VtxPosX",&vtxPosX_,"VtxPosX/F");
@@ -1112,6 +1133,38 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet370");
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltJet370_ = true;
+
+    //mulit-jet trigger
+    hltQuadJet40_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet40");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltQuadJet40_ = true;
+    
+    hltQuadJet45DiJet40_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet45_DiJet40");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltQuadJet45DiJet40_ = true;
+     
+    hltQuadJet50DiJet40_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet50_DiJet40");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltQuadJet50DiJet40_ = true; 
+    
+    hltQuadJet50DiJet40L1_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet50_DiJet40_L1FastJet");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltQuadJet50DiJet40L1_ = true;
+     
+    hltSixJet45_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_SixJet45");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltSixJet45_ = true;  
+    
+    hltSixJet45L1_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_SixJet45_L1FastJet");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltSixJet45L1_ = true;
+ 
   }
   // Vertex info
   edm::Handle<reco::VertexCollection> offlinePrimaryVertices;
@@ -1184,7 +1237,9 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   evt.getByLabel("generator", genInfoHandle); 
   weight = weight_;
   if( genInfoHandle.isValid() ) {
-    genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]); 
+    if(genInfoHandle->hasBinningValues()) {
+      genEvtScale = static_cast<float>(genInfoHandle->binningValues()[0]);
+    } 
     weight = static_cast<float>(genInfoHandle->weight());
   }
 
