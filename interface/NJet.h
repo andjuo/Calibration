@@ -117,6 +117,7 @@ private:
   edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, rho_tag_, weight_tag;
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
+  edm::InputTag secVx_;
   std::string l1name_;
   std::string l2name_;
   std::string l3name_;
@@ -192,7 +193,7 @@ private:
   int    minNumJets_;
   int    NobjJet;
   bool *jetIDLoose_, *jetIDTight_;
-  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR;
+  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR, *jetbtag; //added simple secondary vertex b-tag
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
   float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_;
@@ -388,6 +389,7 @@ template <typename T> NJet<T>::NJet()
   jetet           = new float [ kjMAX ];
   jete            = new float [ kjMAX ];
   jetgenjetDeltaR = new float [ kjMAX ];
+  jetbtag         = new float [ kjMAX ]; //to be filled with simple secondary vertex
 
   // Jet IDs
   n90Hits_ = new int[kjMAX];
@@ -628,6 +630,7 @@ template <typename T> NJet<T>::~NJet() {
   delete [] jetet;          
   delete [] jete;        
   delete [] jetgenjetDeltaR;
+  delete [] jetbtag;
 
   delete [] n90Hits_;
   delete [] fHad_;
@@ -893,7 +896,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetCorrL4JW",         jscalel4JW,      "JetCorrL4JW[NobjJet]/F" );
   CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
   CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
-  CalibTree->Branch( "JetNChargedHadrons",nChargedHadrons_,"JetNChargedHadrons[NobjJet]/I");  
+  CalibTree->Branch( "JetNChargedHadrons",nChargedHadrons_,"JetNChargedHadrons[NobjJet]/I"); 
+  CalibTree->Branch( "JetBtag",         jetbtag,      "JetBtag[NobjJet]/F" );
 
   // Gen jets (matched to calo jets)
   CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
@@ -1134,7 +1138,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltJet370_ = true;
 
-    //mulit-jet trigger
+    //multi-jet trigger
     hltQuadJet40_ = false;
     id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet40");
     if( id != trigNames.size() )
@@ -1319,8 +1323,17 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       } else {
 	fillJetID(pJets->refAt(jtno),jtno,pJetIDMap);
       }
-	
-	
+
+      //btag readout	
+      edm::Handle<reco::JetTagCollection> bTagHandle;
+      evt.getByLabel(secVx_, bTagHandle);
+      if(bTagHandle.isValid())
+       {
+        const reco::JetTagCollection & bTags = *(bTagHandle.product());
+	jetbtag[jtno]=bTags[jtno].second;
+       }
+
+
       // L2L3 correction
       edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
       jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],jetRef,evt,setup);  //calculate the correction

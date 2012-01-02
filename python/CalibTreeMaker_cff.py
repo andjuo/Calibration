@@ -1,8 +1,8 @@
 from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
-
-
+from Calibration.CalibTreeMaker.bTag_cfi import *
 from TrackingTools.TrackAssociator.default_cfi import *
 from PhysicsTools.HepMCCandAlgos.genParticles_cfi import *
+from Calibration.CalibTreeMaker.calibjets_cff import *
 
 genPhotons = cms.EDFilter("PdgIdAndStatusCandViewSelector",
     src = cms.InputTag("genParticles"),
@@ -36,6 +36,7 @@ calibTreeMakerAK7Calo = calibTreeMakerCalo.clone(
     NJet_JetIDs = 'ak7JetID',
     NJet_PartonMatch = 'AK7CaloJetPartonMatching',
     NJet_GenJets = 'ak7GenJets',
+    NJetSecondVx = 'ak7CaloSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'ak7CaloL1Offset',
     NJet_L2JetCorrector = 'ak7CaloL2Relative',
     NJet_L3JetCorrector = 'ak7CaloL3Absolute',
@@ -47,7 +48,8 @@ calibTreeMakerIC5Calo = calibTreeMakerCalo.clone(
     NJet_Jets  = 'iterativeCone5CaloJets',
     NJet_JetIDs = 'ic5JetID',
     NJet_PartonMatch = 'IC5CaloJetPartonMatching',
-    NJet_GenJets = 'iterativeCone5GenJets',
+    NJet_GenJets = 'iterativeCone5GenJets',    
+    NJetSecondVx = 'ic5CaloSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'ic5CaloL1Offset',
     NJet_L2JetCorrector = 'ic5CaloL2Relative',
     NJet_L3JetCorrector = 'ic5CaloL3Absolute',
@@ -60,7 +62,8 @@ calibTreeMakerKT4Calo = calibTreeMakerCalo.clone(
     NJet_Jets  = 'kt4CaloJets',
     NJet_JetIDs = 'kt4JetID',
     NJet_PartonMatch = 'KT4CaloJetPartonMatching',
-    NJet_GenJets = 'kt4GenJets',
+    NJet_GenJets = 'kt4GenJets',    
+    NJetSecondVx = 'kt4CaloSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'kt4CaloL1Offset',
     NJet_L2JetCorrector = 'kt4CaloL2Relative',
     NJet_L3JetCorrector = 'kt4CaloL3Absolute',
@@ -73,7 +76,8 @@ calibTreeMakerKT6Calo = calibTreeMakerCalo.clone(
     NJet_Jets  = 'kt6CaloJets',
     NJet_JetIDs = 'kt6JetID',
     NJet_PartonMatch = 'KT6CaloJetPartonMatching',
-    NJet_GenJets = 'kt6GenJets',
+    NJet_GenJets = 'kt6GenJets',    
+    NJetSecondVx = 'kt6CaloSimpleSecondaryVertexBJetTags',
     NJet_L2JetCorrector = 'kt6CaloL2Relative',
     NJet_L3JetCorrector = 'kt6CaloL3Absolute',
     NJet_L1L2L3JetCorrector = 'kt6CaloL1L2L3',
@@ -85,6 +89,7 @@ calibTreeMakerAK7PF = calibTreeMakerPF.clone(
     NJet_Jets  = 'ak7PFJets',
     NJet_PartonMatch = 'AK7PFJetPartonMatching',
     NJet_GenJets = 'ak7GenJets',
+    NJetSecondVx = 'ak7PFSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'ak7PFL1Offset',
     NJet_L2JetCorrector = 'ak7PFL2Relative',
     NJet_L3JetCorrector = 'ak7PFL3Absolute',
@@ -97,6 +102,7 @@ calibTreeMakerIC5PF = calibTreeMakerPF.clone(
     NJet_Jets  = 'iterativeCone5PFJets',
     NJet_PartonMatch = 'IC5PFJetPartonMatching',
     NJet_GenJets = 'iterativeCone5GenJets',
+    NJetSecondVx = 'ic5PFSimpleSecondaryVertexBJetTags',
     NJet_L2JetCorrector = 'ic5PFL2Relative',
     NJet_L3JetCorrector = 'ic5PFL3Absolute',
     NJet_L1L2L3JetCorrector = 'ic5PFL2L3',
@@ -109,6 +115,7 @@ calibTreeMakerKT4PF = calibTreeMakerPF.clone(
     NJet_Jets  = 'kt4PFJets',
     NJet_PartonMatch = 'KT4PFJetPartonMatching',
     NJet_GenJets = 'kt4GenJets',
+    NJetSecondVx = 'kt4PFSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'kt4PFL1Offset',
     NJet_L2JetCorrector = 'kt4PFL2Relative',
     NJet_L3JetCorrector = 'kt4PFL3Absolute',
@@ -121,6 +128,7 @@ calibTreeMakerKT6PF = calibTreeMakerPF.clone(
     NJet_Jets  = 'kt6PFJets',
     NJet_PartonMatch = 'KT6PFJetPartonMatching',
     NJet_GenJets = 'kt6GenJets',
+    NJetSecondVx = 'kt6PFSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'kt6PFL1Offset',
     NJet_L2JetCorrector = 'kt6PFL2Relative',
     NJet_L3JetCorrector = 'kt6PFL3Absolute',
@@ -132,14 +140,16 @@ calibTreeMakerAK5PFCHS = calibTreeMakerPF.clone(
     OutputFile = 'ak5PFCHS.root',
     NJet_Jets  = 'ak5PFCHSJets',
     NJet_PartonMatch = 'AK5PFCHSJetPartonMatching',
-    NJet_Rho         = cms.InputTag('kt6PFJets','rho'),
+    NJet_Rho         = cms.InputTag('kt6PFJets','rho'),    
+    NJetSecondVx = 'ak5PFCHSSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'ak5PFL1Fastjet',
     NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3',
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3'
 )
 
 calibTreeMakerAK5FastCalo = calibTreeMakerCalo.clone(
-    OutputFile = 'ak5FastCalo.root',
+    OutputFile = 'ak5FastCalo.root',    
+    NJetSecondVx = 'ak5CaloSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'ak5CaloL1Fastjet',
     NJet_L1L2L3JetCorrector = 'ak5CaloL1FastL2L3',
     NJet_L1L2L3L4JWJetCorrector = 'ak5CaloL1FastL2L3'
@@ -147,6 +157,7 @@ calibTreeMakerAK5FastCalo = calibTreeMakerCalo.clone(
 
 calibTreeMakerAK5FastPF = calibTreeMakerPF.clone(
     OutputFile = 'ak5FastPF.root',
+    NJetSecondVx = 'ak5PFSimpleSecondaryVertexBJetTags',
     NJet_L1JetCorrector = 'ak5PFL1Fastjet',
     NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3',
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3'
@@ -207,22 +218,29 @@ AK5PFCHSJetPartonMatching = PFJetPartonMatching.clone(
     jets = 'ak5PFCHSJets' 
 )
 
-calibTreeMakersMC = cms.Sequence( genPhotons * goodGenPhotons 
+calibTreeMakersMC = cms.Sequence( calibjets
+                                  * genPhotons * goodGenPhotons 
                                   * genMuons * goodGenMuons
                                   * myPartons 
                                   * CaloJetPartonMatching
                                   * PFJetPartonMatching
                                   * JPTJetPartonMatching
-                                  * calibTreeMakerCalo
+				  * ak5CaloJetsBtag
+                                  * calibTreeMakerCalo                                  
+				  * calibTreeMakerAK5FastCalo
+				  * ak7CaloJetsBtag
+				  * calibTreeMakerAK7Calo
+				  * ak5PFJetsBtag
                                   * calibTreeMakerPF
+                                  * calibTreeMakerAK5FastPF
+				  * ak7PFJetsBtag
+                                  * calibTreeMakerAK7PF
+				  * ak5JPTJetsBtag
                                   * calibTreeMakerJPT
                                   * AK7CaloJetPartonMatching
-                                  * calibTreeMakerAK7Calo
                                   * AK7PFJetPartonMatching
-                                  * calibTreeMakerAK7PF
-                                  * calibTreeMakerAK5FastCalo
-                                  * calibTreeMakerAK5FastPF
                                   * AK5PFCHSJetPartonMatching
+				  * ak5PFCHSJetsBtag
                                   * calibTreeMakerAK5PFCHS)
 
 ### data
@@ -270,11 +288,20 @@ calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
 )
 
-calibTreeMakersData = cms.Sequence( calibTreeMakerCaloData
-                                    * calibTreeMakerPFData
-                                    * calibTreeMakerJPTData
-                                    * calibTreeMakerAK7CaloData
-                                    * calibTreeMakerAK7PFData
-                                    * calibTreeMakerAK5FastCaloData
-                                    * calibTreeMakerAK5FastPFData
-                                    * calibTreeMakerAK5PFCHSData)
+calibTreeMakersData = cms.Sequence(   
+				   calibjets *
+ 				   ak5CaloJetsBtag *
+				   calibTreeMakerCaloData *
+                                   calibTreeMakerAK5FastCaloData *
+				   ak5PFJetsBtag *
+                                   calibTreeMakerPFData *
+                                   calibTreeMakerAK5FastPFData *
+				   ak5JPTJetsBtag *
+                                   calibTreeMakerJPTData *
+				   ak7CaloJetsBtag *
+                                   calibTreeMakerAK7CaloData *
+				   ak7PFJetsBtag *
+                                   calibTreeMakerAK7PFData *
+				   ak5PFCHSJetsBtag *
+                                   calibTreeMakerAK5PFCHSData
+				  )
