@@ -739,6 +739,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   recMuons_           = cfg.getParameter<edm::InputTag>("NJetRecMuons");
   conesize_           = cfg.getParameter<double>("NJetConeSize");
   zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
+  secVx_              = cfg.getParameter<edm::InputTag>("NJetSecondVx");
   writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
   writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
