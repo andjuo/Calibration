@@ -878,8 +878,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetEMF",fEMF_,"JetEMF[NobjJet]/F");  
   CalibTree->Branch( "JetFHPD",fHPD_,"JetFHPD[NobjJet]/F");
   CalibTree->Branch( "JetFRBX",fRBX_,"JetFRBX[NobjJet]/F");
-  CalibTree->Branch( "JetFChargedHadron",fChargedHadrons_,"JetFChargedHadrons[NobjJet]/F");  
-  CalibTree->Branch( "JetNeutralHadrons",fNeutralHadrons_,"JetFNeutralHadrons[NobjJet]/F");  
+  CalibTree->Branch( "JetFChargedHadrons",fChargedHadrons_,"JetFChargedHadrons[NobjJet]/F");  
+  CalibTree->Branch( "JetFNeutralHadrons",fNeutralHadrons_,"JetFNeutralHadrons[NobjJet]/F");  
   CalibTree->Branch( "JetFPhotons",fPhotons_,"JetFPhotons[NobjJet]/F");  
   CalibTree->Branch( "JetFElectrons",fElectrons_,"JetFElectrons[NobjJet]/F");  
   CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
