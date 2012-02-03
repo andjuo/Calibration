@@ -62,7 +62,7 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch("HltPhoton30",&hltPhoton30_,"HltPhoton30/O");
   CalibTree->Branch("HltPhoton50",&hltPhoton50_,"HltPhoton50/O");
   CalibTree->Branch("HltPhoton75",&hltPhoton75_,"HltPhoton75/O");
-  CalibTree->Branch("HltPhoton90",&hltPhoton75_,"HltPhoton90/O");
+  CalibTree->Branch("HltPhoton90",&hltPhoton90_,"HltPhoton90/O");
   // Photons branches
   CalibTree->Branch( "NobjPhoton",&nphotons_,"NobjPhoton/I");
   CalibTree->Branch( "PhotonPt",  photonpt_,  "PhotonPt[NobjPhoton]/F"  );
