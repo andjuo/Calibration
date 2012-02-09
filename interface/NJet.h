@@ -181,7 +181,7 @@ private:
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
   bool vtxIsFake_;
-  int puMCNumVtx_,puMCNumVtxOOT_;
+  int puMCNumVtx_,puMCNumVtxOOT_,puMCNumTruth_;
   float rho_;
 
   // Calo jets and jet ID
@@ -326,6 +326,7 @@ template <typename T> NJet<T>::NJet()
   vtxIsFake_ = false;
   puMCNumVtx_ = 0;
   puMCNumVtxOOT_ = 0;
+  puMCNumTruth_ = 0;
   rho_ = 0;
 
   // CaloTower branches for all jets
@@ -813,6 +814,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 
   CalibTree->Branch("PUMCNumVtx",&puMCNumVtx_,"PUMCNumVtx/I");
   CalibTree->Branch("PUMCNumVtxOOT",&puMCNumVtxOOT_,"PUMCNumVtxOOT/I");
+  CalibTree->Branch("PUMCNumTruth",&puMCNumTruth_,"PUMCNumTruth/I");
   CalibTree->Branch("Rho",&rho_,"Rho/F");
 
   // CaloTower branches for all jets
@@ -1252,12 +1254,14 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   edm::Handle< std::vector<PileupSummaryInfo> > puInfo;
   evt.getByLabel("addPileupInfo",puInfo);
   puMCNumVtxOOT_ = 0;
+  puMCNumTruth_ = 0;
   if( puInfo.isValid() ) {
     for(std::vector<PileupSummaryInfo>::const_iterator puIt = puInfo->begin(); 
 	puIt != puInfo->end(); ++puIt) {
       //std::cout << " Pileup Information: bunchXing, nvtx: " << puIt->getBunchCrossing() << " " << puIt->getPU_NumInteractions() << std::endl;
       if( puIt->getBunchCrossing() == 0 ) { // Select in-time bunch crossing
 	puMCNumVtx_ = puIt->getPU_NumInteractions();
+	puMCNumTruth_ = puIt->getTrueNumInteractions();
       } else {
 	puMCNumVtxOOT_ +=  puIt->getPU_NumInteractions();
       }
