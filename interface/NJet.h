@@ -181,7 +181,8 @@ private:
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
   bool vtxIsFake_;
-  int puMCNumVtx_,puMCNumVtxOOT_,puMCNumTruth_;
+  int puMCNumVtx_,puMCNumVtxOOT_;
+  float puMCNumTruth_;
   float rho_;
 
   // Calo jets and jet ID
@@ -196,7 +197,7 @@ private:
   float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR, *jetbtag; //added simple secondary vertex b-tag
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
-  float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_;
+  float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_, *fHFEm_, *fHFHad_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_,*jetarea_;
   float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW;
   int *nChargedHadrons_,*jetieta_, *jetiphi_;
@@ -402,6 +403,8 @@ template <typename T> NJet<T>::NJet()
   fNeutralHadrons_ = new float[kjMAX];
   fPhotons_ = new float[kjMAX];
   fElectrons_ = new float[kjMAX];
+  fHFEm_ = new float[kjMAX];
+  fHFHad_ = new float[kjMAX];
   nChargedHadrons_ = new int[kjMAX];
   jetIDLoose_ = new bool[kjMAX];
   jetIDTight_ = new bool[kjMAX];
@@ -642,6 +645,8 @@ template <typename T> NJet<T>::~NJet() {
   delete [] fNeutralHadrons_;
   delete [] fPhotons_;
   delete [] fElectrons_;
+  delete [] fHFEm_;
+  delete [] fHFHad_;
   delete [] nChargedHadrons_;
   delete [] jetIDLoose_;
   delete [] jetIDTight_;
@@ -814,7 +819,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 
   CalibTree->Branch("PUMCNumVtx",&puMCNumVtx_,"PUMCNumVtx/I");
   CalibTree->Branch("PUMCNumVtxOOT",&puMCNumVtxOOT_,"PUMCNumVtxOOT/I");
-  CalibTree->Branch("PUMCNumTruth",&puMCNumTruth_,"PUMCNumTruth/I");
+  CalibTree->Branch("PUMCNumTruth",&puMCNumTruth_,"PUMCNumTruth/F");
   CalibTree->Branch("Rho",&rho_,"Rho/F");
 
   // CaloTower branches for all jets
@@ -884,6 +889,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetFNeutralHadrons",fNeutralHadrons_,"JetFNeutralHadrons[NobjJet]/F");  
   CalibTree->Branch( "JetFPhotons",fPhotons_,"JetFPhotons[NobjJet]/F");  
   CalibTree->Branch( "JetFElectrons",fElectrons_,"JetFElectrons[NobjJet]/F");  
+  CalibTree->Branch( "JetFHFEm",fHFEm_,"JetFHFEm[NobjJet]/F");  
+  CalibTree->Branch( "JetFHFHad",fHFHad_,"JetFHFHad[NobjJet]/F");  
   CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
   CalibTree->Branch( "JetIDTight",jetIDTight_,"JetIDTight[NobjJet]/O");
   CalibTree->Branch( "JetEtWeightedSigmaPhi",jetEtWeightedSigmaPhi_,"JetEtWeightedSigmaPhi[NobjJet]/F" );
@@ -1674,6 +1681,8 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
   fNeutralHadrons_[ jtno ] = -1;
   fPhotons_[ jtno ]        = -1;
   fElectrons_[ jtno ]      = -1;
+  fHFEm_[ jtno ]           = -1;
+  fHFHad_[ jtno ]          = -1;
   nChargedHadrons_[ jtno ]  = -1;
   if(! writeTowers_) return;
   std::vector<CaloTowerPtr> j_towers = pJets[jtno].getCaloConstituents();
@@ -1711,6 +1720,8 @@ template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJet
   fNeutralHadrons_[ jtno ] = pJets[jtno].neutralHadronEnergyFraction();
   fPhotons_[ jtno ]      = pJets[jtno].photonEnergyFraction();
   fElectrons_[ jtno ]      = pJets[jtno].electronEnergyFraction();
+  fHFEm_[ jtno ]           = pJets[jtno].HFEMEnergyFraction ();
+  fHFHad_[ jtno ]          = pJets[jtno].HFHadronEnergyFraction () ;
   nChargedHadrons_[ jtno ]  = pJets[jtno].chargedHadronMultiplicity();
 }  
 
@@ -1722,6 +1733,8 @@ template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtn
   fNeutralHadrons_[ jtno ] = -1;
   fPhotons_[ jtno ]        = -1;
   fElectrons_[ jtno ]      = -1;
+  fHFEm_[ jtno ]           = -1;
+  fHFHad_[ jtno ]          = -1;
   nChargedHadrons_[ jtno ]  = -1;
 }
 

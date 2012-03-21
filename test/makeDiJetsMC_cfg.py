@@ -14,7 +14,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 
-process.GlobalTag.globaltag = 'START42_V13::All'
+process.GlobalTag.globaltag = 'START42_V17::All' #not sure whether these are really th eones corresponding to GR_R_42_V23
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold             = 'INFO'

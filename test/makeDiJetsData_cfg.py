@@ -11,7 +11,7 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.GlobalTag.globaltag = 'GR_R_42_V19::All'
+process.GlobalTag.globaltag = 'GR_R_42_V23::All'
 
 process.MessageLogger.cerr.threshold             = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
@@ -48,7 +48,7 @@ process.hltLevel1GTSeed.L1SeedsLogicalExpression = cms.string('0 AND (40 OR 41) 
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 #process.hltHighLevel.HLTPaths = ('HLT_DiJetAve15U','HLT_DiJetAve30U','HLT_DiJetAve50U','HLT_DiJetAve70U','HLT_DiJetAve100U','HLT_DiJetAve140U','HLT_DiJetAve15U_v*','HLT_DiJetAve30U_v*','HLT_DiJetAve50U_v*','HLT_DiJetAve70U_v*','HLT_DiJetAve100U_v*','HLT_DiJetAve140U_v*','HLT_DiJetAve180U_v*','HLT_DiJetAve300U_v*')
 #process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve30U')
-process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve*')
+process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve*','HLT_Jet*')
 process.hltHighLevel.andOr = cms.bool(True)
 process.hltHighLevel.throw = cms.bool(False)
 
