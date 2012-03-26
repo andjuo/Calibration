@@ -218,8 +218,7 @@ AK5PFCHSJetPartonMatching = PFJetPartonMatching.clone(
     jets = 'ak5PFCHSJets' 
 )
 
-calibTreeMakersMC = cms.Sequence( calibjets
-                                  * genPhotons * goodGenPhotons 
+calibTreeMakersMC = cms.Sequence( genPhotons * goodGenPhotons 
                                   * genMuons * goodGenMuons
                                   * myPartons 
                                   * CaloJetPartonMatching
@@ -235,8 +234,8 @@ calibTreeMakersMC = cms.Sequence( calibjets
                                   * calibTreeMakerAK5FastPF
 				  * ak7PFJetsBtag
                                   * calibTreeMakerAK7PF
-				  * ak5JPTJetsBtag
-                                  * calibTreeMakerJPT
+				  #* ak5JPTJetsBtag
+                                  #* calibTreeMakerJPT
                                   * AK7CaloJetPartonMatching
                                   * AK7PFJetPartonMatching
                                   * AK5PFCHSJetPartonMatching
@@ -288,16 +287,14 @@ calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
 )
 
-calibTreeMakersData = cms.Sequence(   
-				   calibjets *
- 				   ak5CaloJetsBtag *
+calibTreeMakersData = cms.Sequence(ak5CaloJetsBtag *
 				   calibTreeMakerCaloData *
                                    calibTreeMakerAK5FastCaloData *
 				   ak5PFJetsBtag *
                                    calibTreeMakerPFData *
                                    calibTreeMakerAK5FastPFData *
-				   ak5JPTJetsBtag *
-                                   calibTreeMakerJPTData *
+				   #ak5JPTJetsBtag *
+                                   #calibTreeMakerJPTData *
 				   ak7CaloJetsBtag *
                                    calibTreeMakerAK7CaloData *
 				   ak7PFJetsBtag *

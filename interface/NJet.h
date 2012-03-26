@@ -1348,11 +1348,11 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
       // L2L3 correction
       edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
-      jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],jetRef,evt,setup);  //calculate the correction
+      jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],evt,setup);  //calculate the correction
       jscalel2[jtno]   = correctorL2->correction( jscalel1[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel3[jtno]   = correctorL3->correction( jscalel1[jtno] * jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
-      jscalel2l3[jtno] = correctorL1L2L3->correction( (*pJets)[jtno],jetRef,evt,setup);  //calculate the correction
-      jscalel4JW[jtno] = correctorL1L2L3L4JW->correction((*pJets)[jtno],jetRef,evt,setup) / jscalel2l3[jtno];  //calculate the correction
+      jscalel2l3[jtno] = correctorL1L2L3->correction( (*pJets)[jtno],evt,setup);  //calculate the correction
+      jscalel4JW[jtno] = correctorL1L2L3L4JW->correction((*pJets)[jtno],evt,setup) / jscalel2l3[jtno];  //calculate the correction
       jscalel2l3[jtno] /= jscalel1[jtno]; //was L1L2L3
       //jscaleJPT[jtno]     = correctorJPT->correction((*zspJet),jetRef,evt,setup);
       //jscalel2l3JPT[jtno] = correctorL2L3JPT ->correction((*pJets)[jtno].p4() * jscaleJPT[jtno] );  //calculate the correction
@@ -1723,6 +1723,7 @@ template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJet
   fHFEm_[ jtno ]           = pJets[jtno].HFEMEnergyFraction ();
   fHFHad_[ jtno ]          = pJets[jtno].HFHadronEnergyFraction () ;
   nChargedHadrons_[ jtno ]  = pJets[jtno].chargedHadronMultiplicity();
+
 }  
 
 template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtno)

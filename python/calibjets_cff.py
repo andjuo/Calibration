@@ -1,6 +1,7 @@
 from RecoJets.Configuration.RecoJets_cff import *
 from RecoJets.Configuration.RecoPFJets_cff import *
-from CommonTools.ParticleFlow.pfNoPileUp_cff import *
+from CommonTools.ParticleFlow.pfNoPileUp_cff import *	
+#from CommonTools.ParticleFlow.pfParticleSelection_cff import *
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 
 
@@ -25,6 +26,8 @@ goodOfflinePrimaryVertices = cms.EDFilter(
 
 pfPileUp.Vertices = 'goodOfflinePrimaryVertices'
 pfPileUp.checkClosestZVertex = cms.bool(False)
+pfPileUp.PFCandidates = 'particleFlow'
+pfNoPileUp.bottomCollection = 'particleFlow'
 
 ak5PFCHSJets = ak5PFJets.clone(
     src = 'pfNoPileUp'
