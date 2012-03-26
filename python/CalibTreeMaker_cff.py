@@ -234,8 +234,8 @@ calibTreeMakersMC = cms.Sequence( genPhotons * goodGenPhotons
                                   * calibTreeMakerAK5FastPF
 				  * ak7PFJetsBtag
                                   * calibTreeMakerAK7PF
-				  #* ak5JPTJetsBtag
-                                  #* calibTreeMakerJPT
+				  * ak5JPTJetsBtag
+                                  * calibTreeMakerJPT
                                   * AK7CaloJetPartonMatching
                                   * AK7PFJetPartonMatching
                                   * AK5PFCHSJetPartonMatching

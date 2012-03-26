@@ -14,7 +14,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 
-process.GlobalTag.globaltag = 'START44_V12::All'
+process.GlobalTag.globaltag = 'START44_V13::All'
 
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -30,6 +30,8 @@ process.AdaptorConfig = cms.Service("AdaptorConfig",
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
+#    '/store/mc/Summer11/QCD_Pt-15to3000_TuneD6T_Flat_7TeV-pythia6/AODSIM/PU_S3_START42_V11-v1/0000/6AD764B7-D878-E011-9AB5-E41F131817C4.root'
+#    '/store/mc/Fall11/QCD_Pt-15to3000_Tune23_Flat_7TeV_herwigpp/AODSIM/PU_S6_START44_V9B-v1/0000/BA0F5C39-3B41-E111-9960-002481E0E912.root'
     '/store/mc/Fall11/QCD_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/PU_S6_START44_V9B-v1/0000/4A9F238C-CB3F-E111-ADAF-003048678B76.root'
             )
 )
