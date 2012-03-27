@@ -11,7 +11,7 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.GlobalTag.globaltag = 'GR_R_42_V23::All'
+process.GlobalTag.globaltag = 'GR_R_44_V14::All'
 
 process.MessageLogger.cerr.threshold             = 'INFO'
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
@@ -19,18 +19,20 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0002/4C8D2782-F17B-E011-BFC0-0015178C49C0.root',
-        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/862F1DCB-307C-E011-86F0-001D0967D55D.root'
+        '/store/data/Run2011B/Jet/AOD/19Nov2011-v1/0000/8EA85FAA-3A15-E111-B1B0-001D09690ABD.root'
+#        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0002/4C8D2782-F17B-E011-BFC0-0015178C49C0.root',
+#        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/862F1DCB-307C-E011-86F0-001D0967D55D.root'
 
 #        '/store/data/Run2011A/Jet/RECO/PromptReco-v2/000/163/586/4C80085D-0A73-E011-93A4-0030487A17B8.root'
 #        '/store/data/Run2011A/Jet/AOD/May10ReReco-v1/0000/8CE5E293-227C-E011-B58F-0024E86E8D4C.root'
         )
-                            ,
-                            eventsToProcess =  cms.untracked.VEventRange('163252:26075640','163255:546909755')               
+#May10 selection of events
+#                            ,
+#                            eventsToProcess =  cms.untracked.VEventRange('163252:26075640','163255:546909755')               
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1) )
+    input = cms.untracked.int32(50) )
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),

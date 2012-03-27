@@ -293,8 +293,8 @@ calibTreeMakersData = cms.Sequence(ak5CaloJetsBtag *
 				   ak5PFJetsBtag *
                                    calibTreeMakerPFData *
                                    calibTreeMakerAK5FastPFData *
-				   #ak5JPTJetsBtag *
-                                   #calibTreeMakerJPTData *
+				   ak5JPTJetsBtag *
+                                   calibTreeMakerJPTData *
 				   ak7CaloJetsBtag *
                                    calibTreeMakerAK7CaloData *
 				   ak7PFJetsBtag *
