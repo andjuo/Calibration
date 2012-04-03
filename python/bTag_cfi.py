@@ -19,12 +19,14 @@ ak5CaloImpactParameterTagInfos = impactParameterTagInfos.clone()
 ak5CaloImpactParameterTagInfos.jetTracks = "ak5CaloJetTracksAssociatorAtVertex"
 ak5CaloSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
 ak5CaloSecondaryVertexTagInfos.trackIPTagInfos = "ak5CaloImpactParameterTagInfos"
-ak5CaloSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
-ak5CaloSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5CaloSecondaryVertexTagInfos") )
+#ak5CaloSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak5CaloSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5CaloSecondaryVertexTagInfos") )
+ak5CaloCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak5CaloCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5CaloImpactParameterTagInfos"), cms.InputTag("ak5CaloSecondaryVertexTagInfos") )
 ak5CaloJetBtaggingSV = cms.Sequence(
                                     ak5CaloImpactParameterTagInfos *
                                     ak5CaloSecondaryVertexTagInfos * 
-                                    ak5CaloSimpleSecondaryVertexBJetTags
+                                    ak5CaloCombinedSecondaryVertexBJetTags
                                    )
 ak5CaloJetsBtag = cms.Sequence(
                                ak5CaloJetTracksAssociatorAtVertex *
@@ -39,12 +41,14 @@ ak5PFImpactParameterTagInfos = impactParameterTagInfos.clone()
 ak5PFImpactParameterTagInfos.jetTracks = "ak5PFJetTracksAssociatorAtVertex"
 ak5PFSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
 ak5PFSecondaryVertexTagInfos.trackIPTagInfos = "ak5PFImpactParameterTagInfos"
-ak5PFSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
-ak5PFSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFSecondaryVertexTagInfos") )
+#ak5PFSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak5PFSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFSecondaryVertexTagInfos") )
+ak5PFCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak5PFCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFImpactParameterTagInfos"), cms.InputTag("ak5PFSecondaryVertexTagInfos") )
 ak5PFJetBtaggingSV = cms.Sequence(
                                     ak5PFImpactParameterTagInfos *
                                     ak5PFSecondaryVertexTagInfos * 
-                                    ak5PFSimpleSecondaryVertexBJetTags
+                                    ak5PFCombinedSecondaryVertexBJetTags
                                    )
 ak5PFJetsBtag = cms.Sequence(
                                ak5PFJetTracksAssociatorAtVertex *
@@ -59,12 +63,14 @@ ak5JPTImpactParameterTagInfos = impactParameterTagInfos.clone()
 ak5JPTImpactParameterTagInfos.jetTracks = "ak5JPTJetTracksAssociatorAtVertex"
 ak5JPTSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
 ak5JPTSecondaryVertexTagInfos.trackIPTagInfos = "ak5JPTImpactParameterTagInfos"
-ak5JPTSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
-ak5JPTSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5JPTSecondaryVertexTagInfos") )
+#ak5JPTSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak5JPTSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5JPTSecondaryVertexTagInfos") )
+ak5JPTCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak5JPTCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5JPTImpactParameterTagInfos"), cms.InputTag("ak5JPTSecondaryVertexTagInfos") )
 ak5JPTJetBtaggingSV = cms.Sequence(
                                     ak5JPTImpactParameterTagInfos *
                                     ak5JPTSecondaryVertexTagInfos * 
-                                    ak5JPTSimpleSecondaryVertexBJetTags
+                                    ak5JPTCombinedSecondaryVertexBJetTags
                                    )
 ak5JPTJetsBtag = cms.Sequence(
                                ak5JPTJetTracksAssociatorAtVertex *
@@ -79,12 +85,14 @@ ak7CaloImpactParameterTagInfos = impactParameterTagInfos.clone()
 ak7CaloImpactParameterTagInfos.jetTracks = "ak7CaloJetTracksAssociatorAtVertex"
 ak7CaloSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
 ak7CaloSecondaryVertexTagInfos.trackIPTagInfos = "ak7CaloImpactParameterTagInfos"
-ak7CaloSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
-ak7CaloSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7CaloSecondaryVertexTagInfos") )
+#ak7CaloSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak7CaloSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7CaloSecondaryVertexTagInfos") )
+ak7CaloCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak7CaloCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7CaloImpactParameterTagInfos"), cms.InputTag("ak7CaloSecondaryVertexTagInfos") )
 ak7CaloJetBtaggingSV = cms.Sequence(
                                     ak7CaloImpactParameterTagInfos *
                                     ak7CaloSecondaryVertexTagInfos * 
-                                    ak7CaloSimpleSecondaryVertexBJetTags
+                                    ak7CaloCombinedSecondaryVertexBJetTags
                                    )
 ak7CaloJetsBtag = cms.Sequence(
                                ak7CaloJetTracksAssociatorAtVertex *
@@ -99,12 +107,14 @@ ak7PFImpactParameterTagInfos = impactParameterTagInfos.clone()
 ak7PFImpactParameterTagInfos.jetTracks = "ak7PFJetTracksAssociatorAtVertex"
 ak7PFSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
 ak7PFSecondaryVertexTagInfos.trackIPTagInfos = "ak7PFImpactParameterTagInfos"
-ak7PFSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
-ak7PFSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7PFSecondaryVertexTagInfos") )
+#ak7PFSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak7PFSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7PFSecondaryVertexTagInfos") )
+ak7PFCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak7PFCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7PFImpactParameterTagInfos"), cms.InputTag("ak7PFSecondaryVertexTagInfos") )
 ak7PFJetBtaggingSV = cms.Sequence(
                                     ak7PFImpactParameterTagInfos *
                                     ak7PFSecondaryVertexTagInfos * 
-                                    ak7PFSimpleSecondaryVertexBJetTags
+                                    ak7PFCombinedSecondaryVertexBJetTags
                                    )
 ak7PFJetsBtag = cms.Sequence(
                                ak7PFJetTracksAssociatorAtVertex *
@@ -119,12 +129,14 @@ ak5PFCHSImpactParameterTagInfos = impactParameterTagInfos.clone()
 ak5PFCHSImpactParameterTagInfos.jetTracks = "ak5PFCHSJetTracksAssociatorAtVertex"
 ak5PFCHSSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
 ak5PFCHSSecondaryVertexTagInfos.trackIPTagInfos = "ak5PFCHSImpactParameterTagInfos"
-ak5PFCHSSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
-ak5PFCHSSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFCHSSecondaryVertexTagInfos") )
+#ak5PFCHSSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak5PFCHSSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFCHSSecondaryVertexTagInfos") )
+ak5PFCHSCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak5PFCHSCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFCHSImpactParameterTagInfos"), cms.InputTag("ak5PFCHSSecondaryVertexTagInfos") )
 ak5PFCHSJetBtaggingSV = cms.Sequence(
                                     ak5PFCHSImpactParameterTagInfos *
                                     ak5PFCHSSecondaryVertexTagInfos * 
-                                    ak5PFCHSSimpleSecondaryVertexBJetTags
+                                    ak5PFCHSCombinedSecondaryVertexBJetTags
                                    )
 ak5PFCHSJetsBtag = cms.Sequence(
                                ak5PFCHSJetTracksAssociatorAtVertex *
