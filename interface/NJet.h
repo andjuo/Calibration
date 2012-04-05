@@ -326,10 +326,14 @@ template <typename T> NJet<T>::NJet()
   vtxNDof_ = 0.;
   vtxIsFake_ = false;
   puMCNumVtx_ = 0;
+<<<<<<< NJet.h
+  puMCNumVtxOOT_ = 0; 
+  puMCNumTruth_ = 0;
+=======
   puMCNumVtxOOT_ = 0;
   puMCNumTruth_ = 0;
+>>>>>>> 1.51
   rho_ = 0;
-
   // CaloTower branches for all jets
   NobjTow    = 0;
   towet      = new float [ kMAX ];
@@ -818,8 +822,13 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("VtxIsFake",&vtxIsFake_,"VtxIsFake/O");
 
   CalibTree->Branch("PUMCNumVtx",&puMCNumVtx_,"PUMCNumVtx/I");
+<<<<<<< NJet.h
+  CalibTree->Branch("PUMCNumVtxOOT",&puMCNumVtxOOT_,"PUMCNumVtxOOT/I"); 
+  CalibTree->Branch("PUMCNumTruth",&puMCNumTruth_,"PUMCNumTruth/F");
+=======
   CalibTree->Branch("PUMCNumVtxOOT",&puMCNumVtxOOT_,"PUMCNumVtxOOT/I");
   CalibTree->Branch("PUMCNumTruth",&puMCNumTruth_,"PUMCNumTruth/F");
+>>>>>>> 1.51
   CalibTree->Branch("Rho",&rho_,"Rho/F");
 
   // CaloTower branches for all jets
@@ -885,12 +894,22 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetEMF",fEMF_,"JetEMF[NobjJet]/F");  
   CalibTree->Branch( "JetFHPD",fHPD_,"JetFHPD[NobjJet]/F");
   CalibTree->Branch( "JetFRBX",fRBX_,"JetFRBX[NobjJet]/F");
+<<<<<<< NJet.h
+  CalibTree->Branch( "JetFChargedHadron",fChargedHadrons_,"JetFChargedHadrons[NobjJet]/F");  
+  CalibTree->Branch( "JetFNeutralHadrons",fNeutralHadrons_,"JetFNeutralHadrons[NobjJet]/F");  
+=======
   CalibTree->Branch( "JetFChargedHadrons",fChargedHadrons_,"JetFChargedHadrons[NobjJet]/F");  
   CalibTree->Branch( "JetFNeutralHadrons",fNeutralHadrons_,"JetFNeutralHadrons[NobjJet]/F");  
+>>>>>>> 1.51
   CalibTree->Branch( "JetFPhotons",fPhotons_,"JetFPhotons[NobjJet]/F");  
   CalibTree->Branch( "JetFElectrons",fElectrons_,"JetFElectrons[NobjJet]/F");  
+<<<<<<< NJet.h
+  CalibTree->Branch( "JetFHFEm",fHFEm_,"JetFHFEm[NobjJet]/F");
+  CalibTree->Branch( "JetFHFHad",fHFHad_,"JetFHFHad[NobjJet]/F");
+=======
   CalibTree->Branch( "JetFHFEm",fHFEm_,"JetFHFEm[NobjJet]/F");  
   CalibTree->Branch( "JetFHFHad",fHFHad_,"JetFHFHad[NobjJet]/F");  
+>>>>>>> 1.51
   CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
   CalibTree->Branch( "JetIDTight",jetIDTight_,"JetIDTight[NobjJet]/O");
   CalibTree->Branch( "JetEtWeightedSigmaPhi",jetEtWeightedSigmaPhi_,"JetEtWeightedSigmaPhi[NobjJet]/F" );
@@ -1268,7 +1287,11 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       //std::cout << " Pileup Information: bunchXing, nvtx: " << puIt->getBunchCrossing() << " " << puIt->getPU_NumInteractions() << std::endl;
       if( puIt->getBunchCrossing() == 0 ) { // Select in-time bunch crossing
 	puMCNumVtx_ = puIt->getPU_NumInteractions();
+<<<<<<< NJet.h
+        puMCNumTruth_ = puIt->getTrueNumInteractions();
+=======
 	puMCNumTruth_ = puIt->getTrueNumInteractions();
+>>>>>>> 1.51
       } else {
 	puMCNumVtxOOT_ +=  puIt->getPU_NumInteractions();
       }
@@ -1341,10 +1364,11 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       evt.getByLabel(secVx_, bTagHandle);
       if(bTagHandle.isValid())
        {
-        const reco::JetTagCollection & bTags = *(bTagHandle.product());
+        const reco::JetTagCollection & bTags = *(bTagHandle.product());	
+        assert(jtno < bTags.size());	
 	jetbtag[jtno]=bTags[jtno].second;
        }
-
+      else jetbtag[jtno]=-1;
 
       // L2L3 correction
       edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
@@ -1714,14 +1738,20 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
 
 template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJets, int jtno)
 {
-  fEMF_[ jtno ] = pJets[jtno].chargedEmEnergyFraction() + pJets[jtno].neutralEmEnergyFraction() +  pJets[jtno].HFEMEnergyFraction ();
+  fEMF_[ jtno ] = pJets[jtno].chargedEmEnergyFraction() + pJets[jtno].neutralEmEnergyFraction();// +  pJets[jtno].HFEMEnergyFraction ();
   fHad_[ jtno ] = 1 - fEMF_[ jtno ];
   fChargedHadrons_[ jtno ] = pJets[jtno].chargedHadronEnergyFraction();
   fNeutralHadrons_[ jtno ] = pJets[jtno].neutralHadronEnergyFraction();
   fPhotons_[ jtno ]      = pJets[jtno].photonEnergyFraction();
+<<<<<<< NJet.h
+  fElectrons_[ jtno ]      = pJets[jtno].electronEnergyFraction(); 
+  fHFEm_[ jtno ]           = pJets[jtno].HFEMEnergyFraction ();
+  fHFHad_[ jtno ]          = pJets[jtno].HFHadronEnergyFraction () ;
+=======
   fElectrons_[ jtno ]      = pJets[jtno].electronEnergyFraction();
   fHFEm_[ jtno ]           = pJets[jtno].HFEMEnergyFraction ();
   fHFHad_[ jtno ]          = pJets[jtno].HFHadronEnergyFraction () ;
+>>>>>>> 1.51
   nChargedHadrons_[ jtno ]  = pJets[jtno].chargedHadronMultiplicity();
 
 }  
