@@ -40,3 +40,7 @@ kt6PFCHSJets = kt6PFJets.clone(
 calibjets = cms.Sequence(recoJets * recoPFJets * goodOfflinePrimaryVertices 
                          * pfNoPileUpSequence * ak5PFCHSJets)
  
+calibjets.remove(kt6PFJetsCentralChargedPileUp)
+calibjets.remove(kt6PFJetsCentralNeutral)
+calibjets.remove(kt6PFJetsCentralNeutralTight)
+
