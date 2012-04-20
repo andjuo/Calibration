@@ -1,4 +1,4 @@
-# $Id: $
+# $Id: runTreeMaker_cff.py,v 1.1 2012/04/19 17:37:56 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -85,11 +85,40 @@ def runTreeMaker(
         thresh      = cms.untracked.double(0.25)
         ) 
 
+    # Dead ECAL cell filters
+    from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import EcalDeadCellEventFilter
+    process.ecalDeadCellTPFilter = EcalDeadCellEventFilter.clone(
+        taggingMode               = cms.bool(True),
+        tpDigiCollection          = cms.InputTag("ecalTPSkim"),
+        etValToBeFlagged          = cms.double(63.75),
+        ebReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEB"),
+        eeReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEE"),
+        maskedEcalChannelStatusThreshold = cms.int32( 1 ),
+        doEEfilter                = cms.untracked.bool( True ),
+        makeProfileRoot           = cms.untracked.bool( False ),
+        )
+
+    from PhysicsTools.EcalAnomalousEventFilter.ecalanomalouseventfilter_cfi import EcalAnomalousEventFilter
+    process.ecalDeadCellBEFilter = EcalAnomalousEventFilter.clone(
+	FilterAlgo                     = cms.untracked.string("TaggingMode"),
+        recHitsEB                      = cms.InputTag("reducedEcalRecHitsEB"),
+        recHitsEE                      = cms.InputTag("reducedEcalRecHitsEE"),
+	cutBoundEnergyGapEE            = cms.untracked.double(100),
+	cutBoundEnergyGapEB            = cms.untracked.double(100),
+	cutBoundEnergyDeadCellsEB      = cms.untracked.double(10),
+	cutBoundEnergyDeadCellsEE      = cms.untracked.double(10),
+	limitDeadCellToChannelStatusEB = cms.vint32(12,14),
+	limitDeadCellToChannelStatusEE = cms.vint32(12,14),
+        enableGap                      = cms.untracked.bool(False)
+        )
+
     # sequence with filters
     process.filterSequence = cms.Sequence(
         process.hltHighLevel *
         process.vertexFilter *
-        process.trackFilter
+        process.trackFilter *
+        process.ecalDeadCellBEFilter *
+        process.ecalDeadCellTPFilter
         )
 
     if not isData:
@@ -100,15 +129,33 @@ def runTreeMaker(
     # ---- Tree makers ------------------------------------------------------------
     process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
-    process.calibTreeMakerCaloData.TreeName         = treeName
-    process.calibTreeMakerAK5FastCaloData.TreeName  = treeName
-    process.calibTreeMakerAK5FastPFData.TreeName    = treeName
-    process.calibTreeMakerAK5PFCHSData.TreeName     = treeName
+    process.tmAK5CaloL1Offset = process.calibTreeMakerCaloData.clone(
+        TreeName                       = treeName,
+        WritePhotons                   = writePhotons,
+        ECALDeadCellBEFilterModuleName = cms.InputTag("ecalDeadCellBEFilter"),
+        ECALDeadCellTPFilterModuleName = cms.InputTag("ecalDeadCellTPFilter")
+        )
 
-    process.calibTreeMakerCaloData.WritePhotons         = writePhotons
-    process.calibTreeMakerAK5FastCaloData.WritePhotons  = writePhotons
-    process.calibTreeMakerAK5FastPFData.WritePhotons    = writePhotons
-    process.calibTreeMakerAK5PFCHSData.WritePhotons     = writePhotons
+    process.tmAK5CaloL1FastJet = process.calibTreeMakerAK5FastCaloData.clone(
+        TreeName                       = process.tmAK5CaloL1Offset.TreeName,
+        WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
+        ECALDeadCellBEFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellBEFilterModuleName,
+        ECALDeadCellTPFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellTPFilterModuleName
+        )
+
+    process.tmAK5PFL1FastJet = process.calibTreeMakerAK5FastPFData.clone(
+        TreeName                       = process.tmAK5CaloL1Offset.TreeName,
+        WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
+        ECALDeadCellBEFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellBEFilterModuleName,
+        ECALDeadCellTPFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellTPFilterModuleName
+        )
+
+    process.tmAK5PFL1CHS = process.calibTreeMakerAK5PFCHSData.clone(
+        TreeName                       = process.tmAK5CaloL1Offset.TreeName,
+        WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
+        ECALDeadCellBEFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellBEFilterModuleName,
+        ECALDeadCellTPFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellTPFilterModuleName
+        )
 
     process.products = cms.Sequence(
         process.calibjets 
@@ -122,7 +169,6 @@ def runTreeMaker(
             process.PFJetPartonMatching *
             process.AK5PFCHSJetPartonMatching
             )
-        
 
 
     # ---- Path -------------------------------------------------------------------
@@ -130,12 +176,12 @@ def runTreeMaker(
         process.filterSequence *
         process.products *
         process.ak5CaloJetsBtag *
-        process.calibTreeMakerCaloData *
-        process.calibTreeMakerAK5FastCaloData *
+        process.tmAK5CaloL1Offset *
+        process.tmAK5CaloL1FastJet *
         process.ak5PFJetsBtag *
-        process.calibTreeMakerAK5FastPFData *
+        process.tmAK5PFL1FastJet *
         process.ak5PFCHSJetsBtag *
-        process.calibTreeMakerAK5PFCHSData
+        process.tmAK5PFL1CHS
         )
 
     process.schedule = cms.Schedule(process.makeTrees)
