@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.1 2012/04/19 17:37:56 mschrode Exp $
+# $Id: runTreeMaker_cff.py,v 1.2 2012/04/20 17:09:47 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -122,7 +122,7 @@ def runTreeMaker(
         )
 
     if not isData:
-        filterSequence.remove( hltHighLevel )
+        process.filterSequence.remove( process.hltHighLevel )
 
 
 
@@ -161,7 +161,8 @@ def runTreeMaker(
         process.calibjets 
         )
     if not isData:
-        process.products.append(        
+        process.products = cms.Sequence(
+            process.calibjets *
             process.genPhotons *
             process.goodGenPhotons *
             process.myPartons *
