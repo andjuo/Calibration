@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.2 2012/04/20 17:09:47 mschrode Exp $
+# $Id: runTreeMaker_cff.py,v 1.3 2012/04/26 12:20:16 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -86,8 +86,8 @@ def runTreeMaker(
         ) 
 
     # Dead ECAL cell filters
-    from JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi import EcalDeadCellEventFilter
-    process.ecalDeadCellTPFilter = EcalDeadCellEventFilter.clone(
+    from RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi import EcalDeadCellTriggerPrimitiveFilter
+    process.ecalDeadCellTPFilter = EcalDeadCellTriggerPrimitiveFilter.clone(
         taggingMode               = cms.bool(True),
         tpDigiCollection          = cms.InputTag("ecalTPSkim"),
         etValToBeFlagged          = cms.double(63.75),
@@ -97,10 +97,9 @@ def runTreeMaker(
         doEEfilter                = cms.untracked.bool( True ),
         makeProfileRoot           = cms.untracked.bool( False ),
         )
-
-    from PhysicsTools.EcalAnomalousEventFilter.ecalanomalouseventfilter_cfi import EcalAnomalousEventFilter
-    process.ecalDeadCellBEFilter = EcalAnomalousEventFilter.clone(
-	FilterAlgo                     = cms.untracked.string("TaggingMode"),
+    from RecoMET.METFilters.EcalDeadCellBoundaryEnergyFilter_cfi import EcalDeadCellBoundaryEnergyFilter
+    process.ecalDeadCellBEFilter = EcalDeadCellBoundaryEnergyFilter.clone(
+        taggingMode                    = cms.bool(True),
         recHitsEB                      = cms.InputTag("reducedEcalRecHitsEB"),
         recHitsEE                      = cms.InputTag("reducedEcalRecHitsEE"),
 	cutBoundEnergyGapEE            = cms.untracked.double(100),
