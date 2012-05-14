@@ -18,6 +18,7 @@ ak5PFJets.doAreaFastjet = True
 ak7PFJets.doAreaFastjet = True
 
 #CHS
+
 selectedPrimaryVertexQuality = cms.EDFilter("VertexSelector",
    	src = cms.InputTag('offlinePrimaryVertices'),
 	cut = cms.string("isValid & ndof >= 4 & chi2 > 0 & tracksSize > 0 & abs(z) < 24 & abs(position.Rho) < 2."),
@@ -32,6 +33,7 @@ Tracks2VertexAM = Tracks2Vertex.clone(
 	VertexAssOneDim = cms.untracked.bool(False),
 	VertexAssUseAbsDistance = cms.untracked.bool(True),
 	UseBeamSpotCompatibility = cms.untracked.bool(True),
+        ignoreMissingCollection = cms.bool(True)
 )
 		
 ### PFCandidate AssociationMap-specific includes
@@ -40,6 +42,7 @@ from CommonTools.RecoUtils.pfcand_assomap_cfi import PFCandAssoMap
 PFCand2VertexAM = PFCandAssoMap.clone(
           VertexCollection = cms.InputTag('selectedPrimaryVertexQuality'),
           VertexTrackAssociationMap = cms.InputTag('Tracks2VertexAM'),
+          ignoreMissingCollection = cms.bool(True)
 )
 		
 ### PFCandidateCollection-specific includes
@@ -78,7 +81,7 @@ kt6PFCHSJets = kt6PFJets.clone(
 
 
 calibjetsnew = cms.Sequence(recoJets * recoPFJets * goodOfflinePrimaryVertices 
-                            * pfNoPileUpSequence * ak5PFCHSJets *
+                            * pfNoPileUpSequence * ak5PFCHSJets * 
                             selectedPrimaryVertexQuality * Tracks2VertexAM * 
                             PFCand2VertexAM * PFCand * ak5PFCHSNewJets)
  
