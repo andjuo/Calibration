@@ -16,7 +16,7 @@
 const int PhotonJet::NMax_ = 10;
 
 PhotonJet::PhotonJet() : nphotons_(0),  ngenphotons_(0), hltPhoton20_(false),
-			 hltPhoton30_(false),hltPhoton50_(false),hltPhoton75_(false),hltPhoton90_(false)
+			 hltPhoton30_(false),hltPhoton50_(false),hltPhoton75_(false),hltPhoton90_(false),hltPhoton135_(false),hltPhoton150_(false),hltPhoton160_(false)
 {
   photonpt_ = new float[NMax_];
   photonphi_ = new float[NMax_];
@@ -63,6 +63,10 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch("HltPhoton50",&hltPhoton50_,"HltPhoton50/O");
   CalibTree->Branch("HltPhoton75",&hltPhoton75_,"HltPhoton75/O");
   CalibTree->Branch("HltPhoton90",&hltPhoton90_,"HltPhoton90/O");
+  CalibTree->Branch("HltPhoton135",&hltPhoton135_,"HltPhoton135/O");
+  CalibTree->Branch("HltPhoton150",&hltPhoton150_,"HltPhoton150/O");
+  CalibTree->Branch("HltPhoton160",&hltPhoton160_,"HltPhoton160/O");
+
   // Photons branches
   CalibTree->Branch( "NobjPhoton",&nphotons_,"NobjPhoton/I");
   CalibTree->Branch( "PhotonPt",  photonpt_,  "PhotonPt[NobjPhoton]/F"  );
@@ -114,6 +118,21 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon90_CaloIdVL_IsoL");
     if( id != trigNames.size() ) {
       if( triggerResults->accept(id) ) hltPhoton90_ = true;
+    }
+    hltPhoton135_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon135");
+    if( id != trigNames.size() ) {
+      if( triggerResults->accept(id) ) hltPhoton135_ = true;
+    }
+    hltPhoton150_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon150");
+    if( id != trigNames.size() ) {
+      if( triggerResults->accept(id) ) hltPhoton150_ = true;
+    }
+    hltPhoton160_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Photon160");
+    if( id != trigNames.size() ) {
+      if( triggerResults->accept(id) ) hltPhoton160_ = true;
     }
   }
 
