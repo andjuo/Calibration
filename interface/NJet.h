@@ -169,6 +169,20 @@ private:
   bool hltJet240_;
   bool hltJet300_;
   bool hltJet370_;
+  bool hltDiPFJetAve40_;
+  bool hltDiPFJetAve80_;
+  bool hltDiPFJetAve140_;
+  bool hltDiPFJetAve200_;
+  bool hltDiPFJetAve260_;
+  bool hltDiPFJetAve320_;
+  bool hltDiPFJetAve400_;
+  bool hltPFJet40_;
+  bool hltPFJet80_;
+  bool hltPFJet140_;
+  bool hltPFJet200_;
+  bool hltPFJet260_;
+  bool hltPFJet320_;
+  bool hltPFJet400_;
   bool hltQuadJet40_;
   bool hltQuadJet45DiJet40_;
   bool hltQuadJet50DiJet40_;
@@ -311,6 +325,22 @@ template <typename T> NJet<T>::NJet()
   hltJet240_ = false;
   hltJet300_ = false;
   hltJet370_ = false;
+
+  hltDiPFJetAve40_  = false;
+  hltDiPFJetAve80_  = false;
+  hltDiPFJetAve140_  = false;
+  hltDiPFJetAve200_  = false;
+  hltDiPFJetAve260_  = false;
+  hltDiPFJetAve320_  = false;
+  hltDiPFJetAve400_  = false;
+
+  hltPFJet40_  = false;
+  hltPFJet80_  = false;
+  hltPFJet140_  = false;
+  hltPFJet200_  = false;
+  hltPFJet260_  = false;
+  hltPFJet320_  = false;
+  hltPFJet400_  = false;
 
   hltQuadJet40_ = false;
   hltQuadJet45DiJet40_ = false;
@@ -809,6 +839,22 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("HltJet300", &hltJet300_, "HltJet300/O");
   CalibTree->Branch("HltJet370", &hltJet370_, "HltJet370/O");
 
+  CalibTree->Branch("HltDiPFJetAve40" ,  &hltDiPFJetAve40_  ,"HltDiPFJetAve40/O");  
+  CalibTree->Branch("HltDiPFJetAve80" ,  &hltDiPFJetAve80_  ,"HltDiPFJetAve80/O");  
+  CalibTree->Branch("HltDiPFJetAve140",  &hltDiPFJetAve140_ ,"HltDiPFJetAve140/O"); 
+  CalibTree->Branch("HltDiPFJetAve200",  &hltDiPFJetAve200_ ,"HltDiPFJetAve200/O"); 
+  CalibTree->Branch("HltDiPFJetAve260",  &hltDiPFJetAve260_ ,"HltDiPFJetAve260/O"); 
+  CalibTree->Branch("HltDiPFJetAve320",  &hltDiPFJetAve320_ ,"HltDiPFJetAve320/O"); 
+  CalibTree->Branch("HltDiPFJetAve400",  &hltDiPFJetAve400_ ,"HltDiPFJetAve400/O"); 
+
+  CalibTree->Branch("HltPFJet40"      ,  &hltPFJet40_       ,"HltPFJet40/O");       
+  CalibTree->Branch("HltPFJet80"      ,  &hltPFJet80_       ,"HltPFJet80/O");       
+  CalibTree->Branch("HltPFJet140"     ,  &hltPFJet140_      ,"HltPFJet140/O");      
+  CalibTree->Branch("HltPFJet200"     ,  &hltPFJet200_      ,"HltPFJet200/O");      
+  CalibTree->Branch("HltPFJet260"     ,  &hltPFJet260_      ,"HltPFJet260/O");      
+  CalibTree->Branch("HltPFJet320"     ,  &hltPFJet320_      ,"HltPFJet320/O");      
+  CalibTree->Branch("HltPFJet400"     ,  &hltPFJet400_      ,"HltPFJet400/O");      
+
   CalibTree->Branch("HltQuadJet40",&hltQuadJet40_, "HltQuadJet40/O");
   CalibTree->Branch("HltQuadJet45DiJet40",&hltQuadJet45DiJet40_, "HltQuadJet45DiJet40/O");
   CalibTree->Branch("HltQuadJet50DiJet40",&hltQuadJet50DiJet40_, "HltQuadJet50DiJet40/O");
@@ -1159,6 +1205,79 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     if( id != trigNames.size() )
       if( triggerResults->accept(id) ) hltJet370_ = true;
 
+    //PF
+    // The DiPFJetAve trigger decisions for corrected jet pt
+    hltDiPFJetAve40_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve40");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiPFJetAve40_ = true;
+
+    hltDiPFJetAve80_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve80");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiPFJetAve80_ = true;
+
+    hltDiPFJetAve140_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve140");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiPFJetAve140_ = true;
+
+    hltDiPFJetAve200_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve200");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiPFJetAve200_ = true;
+
+    hltDiPFJetAve260_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve260");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiPFJetAve260_ = true;
+
+    hltDiPFJetAve320_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve320");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiPFJetAve320_ = true;
+
+    hltDiPFJetAve400_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve400");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltDiPFJetAve400_ = true;
+
+    //single jet triggers
+    hltPFJet40_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet40");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltPFJet40_ = true;
+    
+    hltPFJet80_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet80");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltPFJet80_ = true;
+
+    hltPFJet140_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet140");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltPFJet140_ = true;
+    
+    hltPFJet200_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet200");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltPFJet200_ = true;
+    
+    hltPFJet260_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet260");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltPFJet260_ = true;
+    
+    hltPFJet320_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet320");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltPFJet320_ = true;
+    
+    hltPFJet400_ = false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet400");
+    if( id != trigNames.size() )
+      if( triggerResults->accept(id) ) hltPFJet400_ = true;
+ 
     //multi-jet trigger
     hltQuadJet40_ = false;
     id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet40");
