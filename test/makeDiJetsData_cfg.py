@@ -57,25 +57,8 @@ process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 #process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve30U')
 process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve*','HLT_Jet*','HLT_DiPFJetAve*','HLT_PFJet*')
 process.hltHighLevel.HLTPaths = cms.vstring('*')
-process.hltHighLevel.andOr = cms.bool(True)
+eprocess.hltHighLevel.andOr = cms.bool(True)
 process.hltHighLevel.throw = cms.bool(False)
-
-# Vertex filter
-process.primaryVertexFilter = cms.EDFilter("VertexSelector",
-   src = cms.InputTag("offlinePrimaryVertices"),
-   cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"), # tracksSize() > 3 for the older cut
-   filter = cms.bool(True),   # otherwise it won't filter the events, just produce an empty vertex collection.
-)
-
-# Monster Event filter
-process.noscraping = cms.EDFilter("FilterOutScraping",
-applyfilter = cms.untracked.bool(True),
-debugOn = cms.untracked.bool(False),
-numtrack = cms.untracked.uint32(10),
-thresh = cms.untracked.double(0.25)
-)
-
-
 
 
 
@@ -91,10 +74,11 @@ process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 process.pDump = cms.Path( process.dump )
 
 process.load("Calibration.CalibTreeMaker.calibjets_cff")
+process.load("Calibration.CalibTreeMaker.cleaningSequences_cff")
 
 process.pData = cms.Path( #process.hltLevel1GTSeed*
-                          process.hltHighLevel 
-                          * process.primaryVertexFilter
+                          process.hltHighLevel*
+                          process.standardCleaningSequence
                           #* process.noscraping
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5
