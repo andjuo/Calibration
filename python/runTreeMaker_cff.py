@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.3 2012/04/26 12:20:16 mschrode Exp $
+# $Id: runTreeMaker_cff.py,v 1.4 2012/05/10 12:08:22 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -68,56 +68,17 @@ def runTreeMaker(
     process.hltHighLevel.andOr = cms.bool(True)
     process.hltHighLevel.throw = cms.bool(False)
 
-    # vertex filter
-    process.vertexFilter = cms.EDFilter(
-        "VertexSelector",
-        src = cms.InputTag("offlinePrimaryVertices"),
-        cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
-        filter = cms.bool(True),
-        )
+    # standard filter sequence + beamHalo filter
+    process.load('Calibration.CalibTreeMaker.cleaningSequences_cff')
 
-    # monster event filter
-    process.trackFilter = cms.EDFilter(
-        "FilterOutScraping",
-        applyfilter = cms.untracked.bool(True),
-        debugOn     = cms.untracked.bool(False),
-        numtrack    = cms.untracked.uint32(10),
-        thresh      = cms.untracked.double(0.25)
-        ) 
-
-    # Dead ECAL cell filters
-    from RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi import EcalDeadCellTriggerPrimitiveFilter
-    process.ecalDeadCellTPFilter = EcalDeadCellTriggerPrimitiveFilter.clone(
-        taggingMode               = cms.bool(True),
-        tpDigiCollection          = cms.InputTag("ecalTPSkim"),
-        etValToBeFlagged          = cms.double(63.75),
-        ebReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEB"),
-        eeReducedRecHitCollection = cms.InputTag("reducedEcalRecHitsEE"),
-        maskedEcalChannelStatusThreshold = cms.int32( 1 ),
-        doEEfilter                = cms.untracked.bool( True ),
-        makeProfileRoot           = cms.untracked.bool( False ),
-        )
-    from RecoMET.METFilters.EcalDeadCellBoundaryEnergyFilter_cfi import EcalDeadCellBoundaryEnergyFilter
-    process.ecalDeadCellBEFilter = EcalDeadCellBoundaryEnergyFilter.clone(
-        taggingMode                    = cms.bool(True),
-        recHitsEB                      = cms.InputTag("reducedEcalRecHitsEB"),
-        recHitsEE                      = cms.InputTag("reducedEcalRecHitsEE"),
-	cutBoundEnergyGapEE            = cms.untracked.double(100),
-	cutBoundEnergyGapEB            = cms.untracked.double(100),
-	cutBoundEnergyDeadCellsEB      = cms.untracked.double(10),
-	cutBoundEnergyDeadCellsEE      = cms.untracked.double(10),
-	limitDeadCellToChannelStatusEB = cms.vint32(12,14),
-	limitDeadCellToChannelStatusEE = cms.vint32(12,14),
-        enableGap                      = cms.untracked.bool(False)
-        )
+    # ECAL dead cell cleaning filter
+    process.load('Calibration.CalibTreeMaker.ecalDeadCellFilter_cff')
 
     # sequence with filters
     process.filterSequence = cms.Sequence(
         process.hltHighLevel *
-        process.vertexFilter *
-        process.trackFilter *
-        process.ecalDeadCellBEFilter *
-        process.ecalDeadCellTPFilter
+        process.standardCleaningPlusBeamHaloSequence *
+        process.ecalDeadCellCleaningSequence
         )
 
     if not isData:
