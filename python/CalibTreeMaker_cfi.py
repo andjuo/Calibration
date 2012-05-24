@@ -1,3 +1,5 @@
+## $Id: $
+
 import FWCore.ParameterSet.Config as cms
 
 from TrackingTools.TrackAssociator.default_cfi import *
@@ -28,8 +30,8 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     NJetRecMuons      = cms.InputTag("muons"),
     NJet_Weight       = cms.double(1),
     NJet_Weight_Tag   = cms.InputTag("genEventScale"),
-    ECALDeadCellTPFilterModuleName = cms.InputTag(""),
-    ECALDeadCellBEFilterModuleName = cms.InputTag(""),
+    ECALDeadCellTPFilterModuleName = cms.InputTag(""), # Ignored if empty
+    ECALDeadCellBEFilterModuleName = cms.InputTag(""), # Ignored if empty
     NJet_GenJets      = cms.InputTag("ak5GenJets"),
     NJet_GenParticles = cms.InputTag("genParticles"),
     NJetConeSize      = cms.double(0.5),
@@ -83,8 +85,8 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     NJetRecMuons      = cms.InputTag("muons"),
     NJet_Weight       = cms.double(1),
     NJet_Weight_Tag   = cms.InputTag("genEventWeight"),
-    ECALDeadCellTPFilterModuleName = cms.InputTag(""),
-    ECALDeadCellBEFilterModuleName = cms.InputTag(""),
+    ECALDeadCellTPFilterModuleName = cms.InputTag(""), # Ignored if empty
+    ECALDeadCellBEFilterModuleName = cms.InputTag(""), # Ignored if empty
     NJet_GenJets      = cms.InputTag("ak5GenJets"),
     NJet_GenParticles = cms.InputTag("genParticles"),
     NJetConeSize      = cms.double(0.5),
@@ -134,8 +136,8 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     NJetRecMuons      = cms.InputTag("muons"),
     NJet_Weight       = cms.double(1),
     NJet_Weight_Tag   = cms.InputTag("genEventWeight"),
-    ECALDeadCellTPFilterModuleName = cms.InputTag(""),
-    ECALDeadCellBEFilterModuleName = cms.InputTag(""),
+    ECALDeadCellTPFilterModuleName = cms.InputTag(""), # Ignored if empty
+    ECALDeadCellBEFilterModuleName = cms.InputTag(""), # Ignored if empty
     NJet_GenJets      = cms.InputTag("ak5GenJets"),
     NJet_GenParticles = cms.InputTag("genParticles"),
     NJetConeSize      = cms.double(0.5),
@@ -185,8 +187,8 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     NJet_Rho          = cms.InputTag('kt6PFJets','rho'),
     NJet_Weight       = cms.double(1),
     NJet_Weight_Tag   = cms.InputTag("genEventWeight"),
-    ECALDeadCellTPFilterModuleName = cms.InputTag(""),
-    ECALDeadCellBEFilterModuleName = cms.InputTag(""),
+    ECALDeadCellTPFilterModuleName = cms.InputTag(""), # Ignored if empty
+    ECALDeadCellBEFilterModuleName = cms.InputTag(""), # Ignored if empty
     NJet_GenJets      = cms.InputTag("ak5GenJets"),
     NJet_GenParticles = cms.InputTag("genParticles"),
     NJetConeSize      = cms.double(0.5),
@@ -236,8 +238,8 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
     NJetRecMuons      = cms.InputTag("muons"),
     NJet_Weight       = cms.double(1),
     NJet_Weight_Tag   = cms.InputTag("genEventWeight"),
-    ECALDeadCellTPFilterModuleName = cms.InputTag(""),
-    ECALDeadCellBEFilterModuleName = cms.InputTag(""),
+    ECALDeadCellTPFilterModuleName = cms.InputTag(""), # Ignored if empty
+    ECALDeadCellBEFilterModuleName = cms.InputTag(""), # Ignored if empty
     NJet_GenJets      = cms.InputTag("ak5GenJets"),
     NJet_GenParticles = cms.InputTag("genParticles"),
     NJetConeSize      = cms.double(0.5),
@@ -259,3 +261,5 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
     WritePhotons  = cms.bool(False),
     WriteMuons    = cms.bool(False)  
 )
+
+
