@@ -85,7 +85,10 @@ calibjetsnew = cms.Sequence(recoJets * recoPFJets * goodOfflinePrimaryVertices
                             selectedPrimaryVertexQuality * Tracks2VertexAM * 
                             PFCand2VertexAM * PFCand * ak5PFCHSNewJets)
  
-calibjetsnew.remove(kt6PFJetsCentralChargedPileUp)
-calibjetsnew.remove(kt6PFJetsCentralNeutral)
-calibjetsnew.remove(kt6PFJetsCentralNeutralTight)
+try:
+    calibjetsnew.remove(kt6PFJetsCentralChargedPileUp)
+    calibjetsnew.remove(kt6PFJetsCentralNeutral)
+    calibjetsnew.remove(kt6PFJetsCentralNeutralTight)
+except NameError:
+    print 'Ignoring NameError (CMSSW 44X)'
 
