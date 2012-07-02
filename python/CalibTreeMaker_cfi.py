@@ -1,4 +1,4 @@
-## $Id: $
+## $Id: CalibTreeMaker_cfi.py,v 1.39 2012/05/24 11:39:22 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -17,6 +17,9 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
 
     DimuonJetMuons       = cms.InputTag("muons"),
     DimuonJetGenMuons    = cms.InputTag("goodGenMuons"),
+
+    TauAnaProducer       = cms.InputTag("hpsPFTauProducer"),
+    TauAnaDiscriminator    = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),
        
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
@@ -51,7 +54,8 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     WriteStableGenParticles = cms.bool(False),                             
                                   
     WritePhotons  = cms.bool(False),
-    WriteMuons    = cms.bool(False)                                
+    WriteMuons    = cms.bool(False),
+    WriteTaus    = cms.bool(False)                                 
 )
 
 calibTreeMaker = calibTreeMakerCalo.clone(
@@ -72,7 +76,10 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
  
     DimuonJetMuons       = cms.InputTag("muons"),
     DimuonJetGenMuons    = cms.InputTag("goodGenMuons"),
-       
+ 
+    TauAnaProducer       = cms.InputTag("hpsPFTauProducer"),
+    TauAnaDiscriminator    = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),    
+  
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
     NJet_Jets         = cms.InputTag("ak5PFJets"),
@@ -106,7 +113,8 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     WriteStableGenParticles = cms.bool(False),                             
                                   
     WritePhotons  = cms.bool(False),
-    WriteMuons    = cms.bool(False)  
+    WriteMuons    = cms.bool(False),
+    WriteTaus    = cms.bool(False)   
 )
 
 calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
@@ -123,7 +131,10 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
 
     DimuonJetMuons       = cms.InputTag("muons"),
     DimuonJetGenMuons    = cms.InputTag("goodGenMuons"),
-       
+ 
+    TauAnaProducer       = cms.InputTag("hpsPFTauProducer"),
+    TauAnaDiscriminator    = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),    
+         
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
     NJet_Jets         = cms.InputTag("ak5TrackJets"),
@@ -157,7 +168,8 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     WriteStableGenParticles = cms.bool(False),                             
                                    
     WritePhotons  = cms.bool(False),
-    WriteMuons    = cms.bool(False)  
+    WriteMuons    = cms.bool(False),
+    WriteTaus    = cms.bool(False)   
 )
  
 calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
@@ -174,7 +186,10 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
  
     DimuonJetMuons       = cms.InputTag("muons"),
     DimuonJetGenMuons    = cms.InputTag("goodGenMuons"),
-       
+ 
+    TauAnaProducer       = cms.InputTag("hpsPFTauProducer"),
+    TauAnaDiscriminator    = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),    
+         
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                                
     NJet_Jets         = cms.InputTag("JetPlusTrackZSPCorJetAntiKt5"),
@@ -208,7 +223,8 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     WriteStableGenParticles = cms.bool(False),                             
                                   
     WritePhotons  = cms.bool(False),
-    WriteMuons  = cms.bool(False)
+    WriteMuons  = cms.bool(False),
+    WriteTaus    = cms.bool(False) 
 )
 
 calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
@@ -225,7 +241,10 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
 
     DimuonJetMuons       = cms.InputTag("muons"),
     DimuonJetGenMuons    = cms.InputTag("goodGenMuons"),
-       
+  
+    TauAnaProducer       = cms.InputTag("hpsPFTauProducer"),
+    TauAnaDiscriminator    = cms.InputTag("hpsPFTauDiscriminationByDecayModeFinding"),    
+        
     BeamSpot = cms.InputTag("offlineBeamSpot"),
                               
     NJet_Jets         = cms.InputTag("ak5PFClusterJets"),
@@ -259,7 +278,8 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
     WriteStableGenParticles = cms.bool(False),                             
                                   
     WritePhotons  = cms.bool(False),
-    WriteMuons    = cms.bool(False)  
+    WriteMuons    = cms.bool(False),
+    WriteTaus    = cms.bool(False) 
 )
 
 
