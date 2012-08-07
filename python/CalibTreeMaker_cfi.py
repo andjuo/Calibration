@@ -1,4 +1,4 @@
-## $Id: CalibTreeMaker_cfi.py,v 1.39 2012/05/24 11:39:22 mschrode Exp $
+## $Id: CalibTreeMaker_cfi.py,v 1.40 2012/07/02 19:51:58 rathjd Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -25,6 +25,7 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
                               
     NJet_Jets         = cms.InputTag("ak5CaloJets"),
     NJet_MinNumJets   = cms.int32(1),                             
+    NJet_MaxNumJets   = cms.int32(50),
     NJet_JetIDs       = cms.InputTag("ak5JetID"),
     NJet_PartonMatch  = cms.InputTag("CaloJetPartonMatching"),
     NJet_MET          = cms.InputTag("corMetGlobalMuons"),
@@ -84,6 +85,7 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
                               
     NJet_Jets         = cms.InputTag("ak5PFJets"),
     NJet_MinNumJets   = cms.int32(1),                             
+    NJet_MaxNumJets   = cms.int32(50),
     NJet_JetIDs       = cms.InputTag(""), 
     NJet_PartonMatch  = cms.InputTag("PFJetPartonMatching"),
     NJet_MET          = cms.InputTag("pfMet"),
@@ -139,6 +141,7 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
                               
     NJet_Jets         = cms.InputTag("ak5TrackJets"),
     NJet_MinNumJets   = cms.int32(1),                             
+    NJet_MaxNumJets   = cms.int32(50),
     NJet_JetIDs       = cms.InputTag(""),
     NJet_PartonMatch  = cms.InputTag("TrackJetPartonMatching"),
     NJet_MET          = cms.InputTag("pfMet"),
@@ -194,6 +197,7 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
                                
     NJet_Jets         = cms.InputTag("JetPlusTrackZSPCorJetAntiKt5"),
     NJet_MinNumJets   = cms.int32(1),                             
+    NJet_MaxNumJets   = cms.int32(50),
     NJet_JetIDs       = cms.InputTag("ak5JetID"),
     NJet_PartonMatch  = cms.InputTag("JPTJetPartonMatching"),
     NJet_MET          = cms.InputTag("tcMet"),
@@ -249,6 +253,7 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
                               
     NJet_Jets         = cms.InputTag("ak5PFClusterJets"),
     NJet_MinNumJets   = cms.int32(0),                             
+    NJet_MaxNumJets   = cms.int32(50),
     NJet_JetIDs       = cms.InputTag(""), 
     NJet_PartonMatch  = cms.InputTag("PFClusterJetPartonMatching"),
     NJet_MET          = cms.InputTag("pfClusterMet"),

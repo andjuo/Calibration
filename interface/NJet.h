@@ -208,6 +208,7 @@ private:
   PFJetIDSelectionFunctor jetIDPFFunctorTight_;
 
   int    minNumJets_;
+  int    maxNumJets_;
   int    NobjJet;
   bool *jetIDLoose_, *jetIDTight_;
   float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR, *jetbtag; //added simple secondary vertex b-tag
@@ -768,6 +769,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 {
   // Read parameters
   minNumJets_         = cfg.getParameter<int>("NJet_MinNumJets");
+  maxNumJets_         = cfg.getParameter<int>("NJet_MaxNumJets");
   jets_               = cfg.getParameter<edm::InputTag>("NJet_Jets");
   jetIDs_             = cfg.getParameter<edm::InputTag>("NJet_JetIDs");
   partMatch_          = cfg.getParameter<edm::InputTag>("NJet_PartonMatch");
@@ -1448,7 +1450,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   NobjETowCal = 0;
   NobjJet = pJets->size();
   if( NobjJet >= minNumJets_ ) {
-    if(NobjJet > kjMAX) NobjJet = kjMAX;
+    if(NobjJet > maxNumJets_) NobjJet = maxNumJets_;
     //unsigned int towno = 0;   // Calo tower counting index
     unsigned int icell = 0;   // Ecal cell counting index
 
@@ -1743,7 +1745,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       // Loop over genjets
       NobjGenJet = genJets->size();
       int gjpidx = 0;
-      if(NobjGenJet > kjMAX) NobjGenJet = kjMAX;
+      if(NobjGenJet > maxNumJets_) NobjGenJet = maxNumJets_;
      
       for(int gjidx = 0; gjidx < NobjGenJet; gjidx++) {
 	const reco::GenJet& genJet =  (*genJets)[gjidx];
@@ -1758,7 +1760,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	genjetcolinve[   gjidx ] = genJet.invisibleEnergy();
 	genjetcolauxe[   gjidx ] = genJet.auxiliaryEnergy();
 	// Find closest calojet to this genjet
-	// Note: NobjJet was set above to min( pJets->size(), kjMAX )
+	// Note: NobjJet was set above to min( pJets->size(), maxNumJets_ )
 	double closestDeltaR = 1000;
 	int    closestJetIdx = 0;
 	for(int cjidx = 0; cjidx < NobjJet; cjidx++) {
