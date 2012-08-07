@@ -35,6 +35,9 @@ DimuonJet::DimuonJet() : nmuons_(0),  ngenmuons_(0), hltDoubleMu3_(false),
   muonisor05trk_ = new float[NMax_];
   muonisor05em_ = new float[NMax_];
   muonisor05had_ = new float[NMax_];
+  muonpfisor04ch_ = new float[NMax_];
+  muonpfisor04nh_ = new float[NMax_];
+  muonpfisor04g_ = new float[NMax_];
   muonglobal_ = new bool[NMax_];
   muontracker_ = new bool[NMax_];
   muonstandalone_ = new bool[NMax_];
@@ -65,6 +68,9 @@ DimuonJet::~DimuonJet() {
   delete [] muonisor05trk_;
   delete [] muonisor05em_;
   delete [] muonisor05had_;
+  delete [] muonpfisor04ch_;
+  delete [] muonpfisor04nh_;
+  delete [] muonpfisor04g_;
   delete [] muonglobal_;
   delete [] muontracker_;
   delete [] muonstandalone_;
@@ -112,6 +118,9 @@ void DimuonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch("MuonIsoR05Trk",    muonisor05trk_,    "MuonIsoR05Trk[NobjMuon]/F");
   CalibTree->Branch("MuonIsoR05Em",    muonisor05em_,    "MuonIsoR05Em[NobjMuon]/F");
   CalibTree->Branch("MuonIsoR05Had",    muonisor05had_,    "MuonIsoR05Had[NobjMuon]/F");
+  CalibTree->Branch("MuonPFIsoR04CH",    muonpfisor04ch_,    "MuonPFIsoR04CH[NobjMuon]/F");
+  CalibTree->Branch("MuonPFIsoR04NH",    muonpfisor04nh_,    "MuonPFIsoR04NH[NobjMuon]/F");
+  CalibTree->Branch("MuonPFIsoR04G",    muonpfisor04g_,    "MuonPFIsoR04G[NobjMuon]/F");
   CalibTree->Branch("MuonGlobal",    muonglobal_,    "MuonGlobal[NobjMuon]/O");
   CalibTree->Branch("MuonTracker",   muontracker_,   "MuonTracker[NobjMuon]/O");
   CalibTree->Branch("MuonStandalone",muonstandalone_,"MuonStandalone[NobjMuon]/O");
@@ -216,6 +225,9 @@ void DimuonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     muonisor05trk_[nmuons_] = muo->isolationR05().sumPt/muo->pt();
     muonisor05em_[nmuons_]  = muo->isolationR05().emEt/muo->pt();
     muonisor05had_[nmuons_] = muo->isolationR05().hadEt/muo->pt();
+    muonpfisor04ch_[nmuons_] = muo->pfIsolationR04().sumChargedHadronPt/muo->pt();
+    muonpfisor04nh_[nmuons_] = muo->pfIsolationR04().sumNeutralHadronEt/muo->pt();
+    muonpfisor04g_[nmuons_]  = muo->pfIsolationR04().sumPhotonEt/muo->pt();
     muonglobal_[nmuons_] = muo->isGlobalMuon();
     muontracker_[nmuons_] = muo->isTrackerMuon();
     muonstandalone_[nmuons_] = muo->isStandAloneMuon();
