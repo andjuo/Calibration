@@ -100,6 +100,11 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 
+#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+
+
 template <typename T> class NJet {
 public:
   NJet(); 
@@ -125,6 +130,8 @@ private:
   std::string l1l2l3name_;
   std::string l1l2l3l4JWname_;
   std::string l2l3JPTname_;
+
+  JetCorrectionUncertainty* jecUnc_;  // From https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetCorUncertainties
 
   double conesize_;
   float weight_;
@@ -216,7 +223,7 @@ private:
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
   float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_, *fHFEm_, *fHFHad_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_,*jetarea_;
-  float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW;
+  float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW, *jscaleUncert;
   int *nChargedHadrons_,*jetieta_, *jetiphi_;
 
   // Gen jets matched to calo jets
@@ -464,6 +471,7 @@ template <typename T> NJet<T>::NJet()
   jscalel2l3      = new float [ kjMAX ];
   jscalel2l3JPT   = new float [ kjMAX ];
   jscalel4JW      = new float [ kjMAX ];
+  jscaleUncert    = new float [ kjMAX ];
   for(int i = 0; i < kjMAX; i++) {
     jscaleZSP[i]      = 1.;
     jscalel1[i]       = 1.;
@@ -473,6 +481,7 @@ template <typename T> NJet<T>::NJet()
     jscalel2l3[i]     = 1.;
     jscalel2l3JPT[i]  = 1.;
     jscalel4JW[i]     = 1.;
+    jscaleUncert[i]   = 1.;
   }
   jetieta_       = new int [ kjMAX ];
   jetiphi_       = new int [ kjMAX ];
@@ -700,6 +709,7 @@ template <typename T> NJet<T>::~NJet() {
   delete [] jscalel2l3;   
   delete [] jscalel2l3JPT;
   delete [] jscalel4JW;
+  delete [] jscaleUncert;
 
   delete [] jetieta_;   
   delete [] jetiphi_;
@@ -801,6 +811,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   edm::ParameterSet parameters = cfg.getParameter<edm::ParameterSet>("TrackAssociatorParameters");
   parameters_.loadParameters( parameters );
   trackAssociator_.useDefaultPropagator();
+  jecUnc_ = 0;
 
 
   // Set up branches
@@ -963,6 +974,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetCorrL2L3",         jscalel2l3,      "JetCorrL2L3[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL2L3JPT",      jscalel2l3JPT,   "JetCorrL2L3JPT[NobjJet]/F" );
   CalibTree->Branch( "JetCorrL4JW",         jscalel4JW,      "JetCorrL4JW[NobjJet]/F" );
+  CalibTree->Branch( "JetCorrUncert",       jscaleUncert,    "JetCorrUncert[NobjJet]/F" );
   CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
   CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
   CalibTree->Branch( "JetNChargedHadrons",nChargedHadrons_,"JetNChargedHadrons[NobjJet]/I"); 
@@ -1445,6 +1457,14 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   const JetCorrector* correctorL1L2L3L4JW  = JetCorrector::getJetCorrector(l1l2l3l4JWname_, setup); //Define the jet corrector
   //const JetCorrector* correctorJPT   = JetCorrector::getJetCorrector (JPTname_,setup);   //Define the jet corrector
   //const JetCorrector* correctorL2L3JPT   = JetCorrector::getJetCorrector (l2l3JPTname_,setup);   //Define the jet corrector
+  if( jecUnc_ == 0 ) {
+    edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
+    std::string jetid = "AK5PF";
+    if( jets_.label().find("ak5CaloJets") != std::string::npos ) jetid = "AK5Calo";
+    setup.get<JetCorrectionsRecord>().get(jetid,JetCorParColl); 
+    JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+    jecUnc_ = new JetCorrectionUncertainty(JetCorPar);
+  }
 
   NobjTow=0;
   NobjETowCal = 0;
@@ -1500,6 +1520,13 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       jscalel3[jtno]   = correctorL3->correction( jscalel1[jtno] * jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel2l3[jtno] = correctorL1L2L3->correction( (*pJets)[jtno],evt,setup);  //calculate the correction
       jscalel4JW[jtno] = correctorL1L2L3L4JW->correction((*pJets)[jtno],evt,setup) / jscalel2l3[jtno];  //calculate the correction
+      jecUnc_->setJetEta(jeteta[jtno]); // Give rapidity of jet you want uncertainty on
+      jecUnc_->setJetPt(jscalel2l3[jtno]*jetpt[jtno]);// Also give the corrected pt of the jet you want the uncertainty on
+      // The following function gives the relative uncertainty in the jet Pt.
+      // i.e. ptCorSmeared = (1 +- uncer) * ptCor  
+      jscaleUncert[jtno] = 0.;
+      double uncert = jecUnc_->getUncertainty(true);
+      if( uncert == uncert ) jscaleUncert[jtno] = uncert;
       jscalel2l3[jtno] /= jscalel1[jtno]; //was L1L2L3
       //jscaleJPT[jtno]     = correctorJPT->correction((*zspJet),jetRef,evt,setup);
       //jscalel2l3JPT[jtno] = correctorL2L3JPT ->correction((*pJets)[jtno].p4() * jscaleJPT[jtno] );  //calculate the correction

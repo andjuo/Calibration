@@ -23,6 +23,7 @@
 <use   name="TrackingTools/TrackAssociator"/>
 <use   name="JetMETCorrections/Objects"/>
 <use   name="JetMETCorrections/MCJet"/>
+<use   name="CondFormats/JetMETObjects"/>
 <use   name="SimDataFormats/JetMatching"/>
 <use   name="SimDataFormats/PileupSummaryInfo"/>
 <use   name="DataFormats/L1GlobalTrigger"/>
