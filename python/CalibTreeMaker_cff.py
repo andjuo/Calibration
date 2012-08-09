@@ -3,6 +3,11 @@ from Calibration.CalibTreeMaker.bTag_cfi import *
 from TrackingTools.TrackAssociator.default_cfi import *
 from PhysicsTools.HepMCCandAlgos.genParticles_cfi import *
 from Calibration.CalibTreeMaker.calibjets_cff import *
+from JetMETCorrections.Configuration.DefaultJEC_cff import *
+
+ak5PFchsL1Fastjet           = ak5PFL1Fastjet.clone( correctors = cms.vstring('ak5PFchsL1Fastjet') )
+ak5PFchsL1FastL2L3          = ak5PFL1FastL2L3.clone( correctors = cms.vstring('ak5PFchsL1Fastjet', 'ak5PFL2Relative', 'ak5PFL3Absolute') )
+ak5PFchsL1FastL2L3Residual  = ak5PFL1FastL2L3Residual.clone( correctors = cms.vstring('ak5PFchsL1Fastjet', 'ak5PFL2Relative', 'ak5PFL3Absolute', 'ak5PFResidual') )
 
 genPhotons = cms.EDFilter("PdgIdAndStatusCandViewSelector",
     src = cms.InputTag("genParticles"),
@@ -142,9 +147,9 @@ calibTreeMakerAK5PFCHS = calibTreeMakerPF.clone(
     NJet_PartonMatch = 'AK5PFCHSJetPartonMatching',
     NJet_Rho         = cms.InputTag('kt6PFJets','rho'),    
     NJetSecondVx = 'ak5PFCHSCombinedSecondaryVertexBJetTags',
-    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
-    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3'
+    NJet_L1JetCorrector = 'ak5PFchsL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3'
 )
 
 calibTreeMakerAK5FastCalo = calibTreeMakerCalo.clone(
@@ -284,8 +289,8 @@ calibTreeMakerAK5FastPFData = calibTreeMakerAK5FastPF.clone(
 
 calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
     NJet_PartonMatch = '',
-    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3Residual',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3Residual'
+    NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3Residual'
 )
 
 calibTreeMakersData = cms.Sequence(   
