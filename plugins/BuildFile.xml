@@ -1,9 +1,0 @@
-<library   name="CalibrationCalibTreeMaker_plugins" file="*.cc">
-  <use   name="FWCore/Framework"/>
-  <use   name="FWCore/PluginManager"/>
-  <use   name="FWCore/ParameterSet"/>
-  <use   name="DataFormats/METReco"/>
-  <flags   EDM_PLUGIN="1"/>
-</library>
-<export>
-</export>
