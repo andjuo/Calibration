@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.4 2012/05/10 12:08:22 mschrode Exp $
+# $Id: runTreeMaker_cff.py,v 1.5 2012/05/24 11:39:41 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -68,17 +68,14 @@ def runTreeMaker(
     process.hltHighLevel.andOr = cms.bool(True)
     process.hltHighLevel.throw = cms.bool(False)
 
-    # standard filter sequence + beamHalo filter
+    # standard filter sequence + ecal dead-cell tagger
     process.load('Calibration.CalibTreeMaker.cleaningSequences_cff')
-
-    # ECAL dead cell cleaning filter
-    process.load('Calibration.CalibTreeMaker.ecalDeadCellFilter_cff')
 
     # sequence with filters
     process.filterSequence = cms.Sequence(
         process.hltHighLevel *
-        process.standardCleaningPlusBeamHaloSequence *
-        process.ecalDeadCellCleaningSequence
+        process.stdCleaningSequence *
+        process.ecalDeadCellTaggingSequence
         )
 
     if not isData:
@@ -92,8 +89,8 @@ def runTreeMaker(
     process.tmAK5CaloL1Offset = process.calibTreeMakerCaloData.clone(
         TreeName                       = treeName,
         WritePhotons                   = writePhotons,
-        ECALDeadCellBEFilterModuleName = cms.InputTag("ecalDeadCellBEFilter"),
-        ECALDeadCellTPFilterModuleName = cms.InputTag("ecalDeadCellTPFilter")
+        ECALDeadCellBEFilterModuleName = cms.InputTag("EcalDeadCellBoundaryEnergyFilter"),
+        ECALDeadCellTPFilterModuleName = cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
         )
 
     process.tmAK5CaloL1FastJet = process.calibTreeMakerAK5FastCaloData.clone(
@@ -118,11 +115,15 @@ def runTreeMaker(
         )
 
     process.products = cms.Sequence(
-        process.calibjets 
+        process.calibjets *
+        process.produceCaloMETCorrections *
+        process.producePFMETCorrections
         )
     if not isData:
         process.products = cms.Sequence(
             process.calibjets *
+            process.produceCaloMETCorrections *
+            process.producePFMETCorrections *
             process.genPhotons *
             process.goodGenPhotons *
             process.myPartons *
@@ -133,8 +134,10 @@ def runTreeMaker(
 
 
     # ---- Path -------------------------------------------------------------------
+    process.dump = cms.EDAnalyzer("EventContentAnalyzer")
     process.makeTrees = cms.Path(
         process.filterSequence *
+#        process.dump *
         process.products *
         process.ak5CaloJetsBtag *
         process.tmAK5CaloL1Offset *

@@ -1,4 +1,4 @@
-# $Id: resPhotonJetData_cfg.py,v 1.2 2012/05/14 17:29:07 mschrode Exp $
+# $Id: resPhotonJetData_cfg.py,v 1.3 2012/05/24 11:41:17 mschrode Exp $
 #
 # Write Photon+Jet-Trees in data
 
@@ -9,7 +9,7 @@ from Calibration.CalibTreeMaker.runTreeMakerPhotonJets_cff import runTreeMakerPh
 runTreeMakerPhotonJets(
     process,
     isData=True,
-    globalTag="GR_R_52_V7::All", # Run2012A-PromptReco-v1
+    globalTag="FT_53_V6_AN2::All", #Run2012A+B Jul13 ReReco
     hltSelection=[
     'HLT_Photon20_CaloIdVL_IsoL_v*',
     'HLT_Photon30_CaloIdVL_IsoL_v*',
@@ -21,6 +21,6 @@ runTreeMakerPhotonJets(
     'HLT_Photon160_v*'
     ],
     reportEveryEvt=5000,
-    testFileName="/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/193/575/E83BCD15-F499-E111-B51C-003048D2BC52.root",
-    numProcessedEvt=-1000
+    testFileName="/store/data/Run2012A/Photon/AOD/13Jul2012-v1/00000/FCDDD6B1-30CF-E111-88D0-002481E75ED0.root",
+    numProcessedEvt=100
     )
