@@ -3,10 +3,7 @@ from Calibration.CalibTreeMaker.bTag_cfi import *
 from TrackingTools.TrackAssociator.default_cfi import *
 from PhysicsTools.HepMCCandAlgos.genParticles_cfi import *
 from Calibration.CalibTreeMaker.calibjets_cff import *
-from JetMETCorrections.Configuration.DefaultJEC_cff import *
-from JetMETCorrections.Type1MET.pfMETCorrections_cff import *
-from JetMETCorrections.Configuration.JetCorrectionServices_cff import *
-from JetMETCorrections.Type1MET.caloMETCorrections_cff import *
+from Calibration.CalibTreeMaker.MET_cff import *
 
 ak5PFchsL1Fastjet           = ak5PFL1Fastjet.clone( correctors = cms.vstring('ak5PFchsL1Fastjet') )
 ak5PFchsL1FastL2L3          = ak5PFL1FastL2L3.clone( correctors = cms.vstring('ak5PFchsL1Fastjet', 'ak5PFL2Relative', 'ak5PFL3Absolute') )
@@ -233,13 +230,17 @@ calibTreeMakersMC = cms.Sequence( #calibjets *
                                   * CaloJetPartonMatching
                                   * PFJetPartonMatching
                                   * JPTJetPartonMatching
-				  * produceCaloMETCorrections
+                                  * AK7CaloJetPartonMatching
+                                  * AK7PFJetPartonMatching
+                                  * AK5PFCHSJetPartonMatching
+				  * produceAllCaloMETCorrections
+				  * produceAllPFMETCorrections
+				  * produceAllPFCHSMETCorrections
 				  * ak5CaloJetsBtag
                                   * calibTreeMakerCalo                                  
 				  * calibTreeMakerAK5FastCalo
 				  * ak7CaloJetsBtag
 				  * calibTreeMakerAK7Calo
-				  * producePFMETCorrections
 				  * ak5PFJetsBtag
                                   * calibTreeMakerPF
                                   * calibTreeMakerAK5FastPF
@@ -247,9 +248,6 @@ calibTreeMakersMC = cms.Sequence( #calibjets *
                                   * calibTreeMakerAK7PF
 				  * ak5JPTJetsBtag
                                   * calibTreeMakerJPT
-                                  * AK7CaloJetPartonMatching
-                                  * AK7PFJetPartonMatching
-                                  * AK5PFCHSJetPartonMatching
 				  * ak5PFCHSJetsBtag
                                   * calibTreeMakerAK5PFCHS)
 
@@ -301,10 +299,11 @@ calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
 calibTreeMakersData = cms.Sequence(   
 				   #calibjets *
  				   ak5CaloJetsBtag *
-				   produceCaloMETCorrections *
+				   produceAllCaloMETCorrections *
+				   produceAllPFMETCorrections *
+				   produceAllPFCHSMETCorrections *
 				   calibTreeMakerCaloData *
-                                   calibTreeMakerAK5FastCaloData *
-				   producePFMETCorrections *				   
+                                   calibTreeMakerAK5FastCaloData *				   
 				   ak5PFJetsBtag *
                                    calibTreeMakerPFData *
                                    calibTreeMakerAK5FastPFData *

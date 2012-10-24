@@ -119,7 +119,7 @@ private:
   void fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap);
   void fillMET(const edm::Event& evt);
 
-  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, rho_tag_, weight_tag, ecalDeadCellTPFilterInputTag_, ecalDeadCellBEFilterInputTag_;
+  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, met_t1_, met_t2_, met_t1R_, met_t2R_, rho_tag_, weight_tag, ecalDeadCellTPFilterInputTag_, ecalDeadCellBEFilterInputTag_;
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   edm::InputTag secVx_;
@@ -250,6 +250,8 @@ private:
   float *towet, *toweta, *towphi, *towen, *towem, *towhd, *towoe;
   int   *towid_phi, *towid_eta, *towid, *tow_jetidx;
   float mmet, mphi, msum, weight, xsec;
+  float mmet_t1, mphi_t1, msum_t1, mmet_t2, mphi_t2, msum_t2;
+  float mmet_t1R, mphi_t1R, msum_t1R, mmet_t2R, mphi_t2R, msum_t2R;
   unsigned int *numBadEcalCells_, *numBadHcalCells_;
   unsigned int *numProblematicEcalCells_, *numProblematicHcalCells_;
   unsigned int *numRecoveredEcalCells_, *numRecoveredHcalCells_;
@@ -581,6 +583,18 @@ template <typename T> NJet<T>::NJet()
   mmet = 0;
   mphi = 0;
   msum = 0;
+  mmet_t1 = 0;
+  mphi_t1 = 0;
+  msum_t1 = 0; 
+  mmet_t2 = 0;
+  mphi_t2 = 0;
+  msum_t2 = 0;   
+  mmet_t1R = 0;
+  mphi_t1R = 0;
+  msum_t1R = 0;   
+  mmet_t2R = 0;
+  mphi_t2R = 0;
+  msum_t2R = 0;   
 
   // GenEventScale (pthat)
   genEvtScale = 0.;
@@ -786,6 +800,10 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   genjets_            = cfg.getParameter<edm::InputTag>("NJet_GenJets");
   genparticles_       = cfg.getParameter<edm::InputTag>("NJet_GenParticles");
   met_                = cfg.getParameter<edm::InputTag>("NJet_MET");
+  met_t1_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T1");
+  met_t2_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T2");
+  met_t1R_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T1R");
+  met_t2R_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T2R");
   rho_tag_            = cfg.getParameter<edm::InputTag>("NJet_Rho");
   weight_             = (float)(cfg.getParameter<double> ("NJet_Weight"));
   weight_tag          = cfg.getParameter<edm::InputTag> ("NJet_Weight_Tag");
@@ -1037,6 +1055,18 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "Met",   &mmet,"Met/F"   );
   CalibTree->Branch( "MetPhi",&mphi,"MetPhi/F");
   CalibTree->Branch( "MetSum",&msum,"MetSum/F");
+  CalibTree->Branch( "Met_T1",   &mmet_t1,"Met_T1/F"   );
+  CalibTree->Branch( "MetPhi_T1",&mphi_t1,"MetPhi_T1/F");
+  CalibTree->Branch( "MetSum_T1",&msum_t1,"MetSum_T1/F");  
+  CalibTree->Branch( "Met_T2",   &mmet_t2,"Met_T2/F"   );
+  CalibTree->Branch( "MetPhi_T2",&mphi_t2,"MetPhi_T2/F");
+  CalibTree->Branch( "MetSum_T2",&msum_t2,"MetSum_T2/F");  
+  CalibTree->Branch( "Met_T1R",   &mmet_t1R,"Met_T1R/F"   );
+  CalibTree->Branch( "MetPhi_T1R",&mphi_t1R,"MetPhi_T1R/F");
+  CalibTree->Branch( "MetSum_T1R",&msum_t1R,"MetSum_T1R/F");  
+  CalibTree->Branch( "Met_T2R",   &mmet_t2R,"Met_T2R/F"   );
+  CalibTree->Branch( "MetPhi_T2R",&mphi_t2R,"MetPhi_T2R/F");
+  CalibTree->Branch( "MetSum_T2R",&msum_t2R,"MetSum_T2R/F");  
 
   //EventWeight
   CalibTree->Branch( "Weight",&weight,"Weight/F"   );
@@ -1966,6 +1996,26 @@ template <> void NJet<reco::CaloJet>::fillMET(const edm::Event& evt)
   mmet = recmets->front().pt();
   mphi = recmets->front().phi();
   msum = recmets->front().sumEt();
+  edm::Handle<reco::CaloMETCollection> recmets_t1;
+  evt.getByLabel(met_t1_, recmets_t1);
+  mmet_t1 = recmets_t1->front().pt();
+  mphi_t1 = recmets_t1->front().phi();
+  msum_t1 = recmets_t1->front().sumEt(); 
+  edm::Handle<reco::CaloMETCollection> recmets_t2;
+  evt.getByLabel(met_t2_, recmets_t2);
+  mmet_t2 = recmets_t2->front().pt();
+  mphi_t2 = recmets_t2->front().phi();
+  msum_t2 = recmets_t2->front().sumEt();   
+  edm::Handle<reco::CaloMETCollection> recmets_t1R;
+  evt.getByLabel(met_t1R_, recmets_t1R);
+  mmet_t1R = recmets_t1R->front().pt();
+  mphi_t1R = recmets_t1R->front().phi();
+  msum_t1R = recmets_t1R->front().sumEt();  
+  edm::Handle<reco::CaloMETCollection> recmets_t2R;
+  evt.getByLabel(met_t2R_, recmets_t2R);
+  mmet_t2R = recmets_t2R->front().pt();
+  mphi_t2R = recmets_t2R->front().phi();
+  msum_t2R = recmets_t2R->front().sumEt();  
 }
 
 template <> void NJet<reco::JPTJet>::fillMET(const edm::Event& evt) 
@@ -1984,6 +2034,26 @@ template <typename T> void NJet<T>::fillMET(const edm::Event& evt)
   mmet = recmets->front().pt();
   mphi = recmets->front().phi();
   msum = recmets->front().sumEt();
+  edm::Handle<edm::View<reco::PFMET> > recmets_t1;
+  evt.getByLabel(met_t1_, recmets_t1);
+  mmet_t1 = recmets_t1->front().pt();
+  mphi_t1 = recmets_t1->front().phi();
+  msum_t1 = recmets_t1->front().sumEt(); 
+  edm::Handle<edm::View<reco::PFMET> > recmets_t2;
+  evt.getByLabel(met_t2_, recmets_t2);
+  mmet_t2 = recmets_t2->front().pt();
+  mphi_t2 = recmets_t2->front().phi();
+  msum_t2 = recmets_t2->front().sumEt();   
+  edm::Handle<edm::View<reco::PFMET> > recmets_t1R;
+  evt.getByLabel(met_t1R_, recmets_t1R);
+  mmet_t1R = recmets_t1R->front().pt();
+  mphi_t1R = recmets_t1R->front().phi();
+  msum_t1R = recmets_t1R->front().sumEt();  
+  edm::Handle<edm::View<reco::PFMET> > recmets_t2R;
+  evt.getByLabel(met_t2R_, recmets_t2R);
+  mmet_t2R = recmets_t2R->front().pt();
+  mphi_t2R = recmets_t2R->front().phi();
+  msum_t2R = recmets_t2R->front().sumEt();  
 }
 
 #endif
