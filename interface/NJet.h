@@ -105,6 +105,22 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 
+//still need to reduce to minimal working includes here...
+//#include "RecoBTau/JetTagComputer/interface/GenericMVAJetTagComputer.h"
+//#include "RecoBTau/JetTagComputer/interface/GenericMVAJetTagComputerWrapper.h"
+#include "RecoBTau/JetTagComputer/interface/JetTagComputer.h"
+//#include "RecoBTau/JetTagComputer/interface/JetTagComputerRecord.h"
+#include "RecoBTag/SecondaryVertex/interface/CombinedSVComputer.h"
+
+namespace{
+  struct JetRefCompare : public std::binary_function < edm::RefToBase<reco::Jet>, edm::RefToBase<reco::Jet>, Bool_t> {
+    inline Bool_t operator () (const edm::RefToBase<reco::Jet> &j1,
+			       const edm::RefToBase<reco::Jet> &j2) const
+    { return j1.id() < j2.id() || (j1.id() == j2.id() && j1.key() < j2.key()); }
+  };
+}
+
+
 template <typename T> class NJet {
 public:
   NJet(); 
@@ -119,10 +135,10 @@ private:
   void fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap);
   void fillMET(const edm::Event& evt);
 
-  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, met_t1_, met_t2_, met_t1R_, met_t2R_, rho_tag_, weight_tag, ecalDeadCellTPFilterInputTag_, ecalDeadCellBEFilterInputTag_;
+  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, met_t1_, met_t2_, met_t1R_, met_t2R_, rho_tag_, rho25_tag_, weight_tag, ecalDeadCellTPFilterInputTag_, ecalDeadCellBEFilterInputTag_;
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
-  edm::InputTag secVx_;
+  edm::InputTag secVx_, secVxTagInfo_, ipTagInfo_;
   std::string l1name_;
   std::string l2name_;
   std::string l3name_;
@@ -206,7 +222,7 @@ private:
   bool vtxIsFake_;
   int puMCNumVtx_,puMCNumVtxOOT_;
   float puMCNumTruth_;
-  float rho_;
+  float rho_,rho25_;
 
   // Calo jets and jet ID
   JetIDSelectionFunctor jetIDCaloFunctorLoose_;
@@ -218,13 +234,18 @@ private:
   int    maxNumJets_;
   int    NobjJet;
   bool *jetIDLoose_, *jetIDTight_;
-  float *jetpt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR, *jetbtag; //added simple secondary vertex b-tag
+  float *jetpt, *jetmt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR, *jetbtag; //added simple secondary vertex b-tag
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
   float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_, *fHFEm_, *fHFHad_;
+  float *leadingChargedConstPt_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_,*jetarea_;
   float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW, *jscaleUncert;
-  int *nChargedHadrons_,*jetieta_, *jetiphi_;
+  int *nChargedHadrons_,*nPFConstituents_,*jetieta_, *jetiphi_;
+  float *sV3dDistance_, *sVChi2_, *sV3dDistanceError_;
+  float *sVx_;
+
+
 
   // Gen jets matched to calo jets
   float *genjetpt, *genjetphi, *genjeteta, *genjetet, *genjete;
@@ -371,6 +392,7 @@ template <typename T> NJet<T>::NJet()
   puMCNumVtxOOT_ = 0;
   puMCNumTruth_ = 0;
   rho_ = 0;
+  rho25_ = 0;
 
   // ecal dead-cell filter results
   passesECALDeadCellBEFilter_ = true;
@@ -432,12 +454,21 @@ template <typename T> NJet<T>::NJet()
   minNumJets_     = 0;
   NobjJet         = 0;
   jetpt           = new float [ kjMAX ];
+  jetmt           = new float [ kjMAX ];
   jetphi          = new float [ kjMAX ];
   jeteta          = new float [ kjMAX ];
   jetet           = new float [ kjMAX ];
   jete            = new float [ kjMAX ];
   jetgenjetDeltaR = new float [ kjMAX ];
-  jetbtag         = new float [ kjMAX ]; //to be filled with simple secondary vertex
+
+
+
+  //btag/secondary vertex info
+  //  sVx_               = new float [ kjMAX ];
+  sV3dDistance_      = new float [ kjMAX ];
+  sVChi2_            = new float [ kjMAX ];
+  sV3dDistanceError_ = new float [ kjMAX ];
+  jetbtag            = new float [ kjMAX ]; //to be filled with simple secondary vertex
 
   // Jet IDs
   n90Hits_ = new int[kjMAX];
@@ -451,7 +482,9 @@ template <typename T> NJet<T>::NJet()
   fElectrons_ = new float[kjMAX];
   fHFEm_ = new float[kjMAX];
   fHFHad_ = new float[kjMAX];
+  leadingChargedConstPt_ = new float[kjMAX];
   nChargedHadrons_ = new int[kjMAX];
+  nPFConstituents_ = new int[kjMAX];
   jetIDLoose_ = new bool[kjMAX];
   jetIDTight_ = new bool[kjMAX];
   for(int i = 0; i < kjMAX; i++) {
@@ -689,12 +722,17 @@ template <typename T> NJet<T>::~NJet() {
   delete [] trackz0;          
 
   delete [] jetpt;          
+  delete [] jetmt;          
   delete [] jetphi;         
   delete [] jeteta;         
   delete [] jetet;          
   delete [] jete;        
   delete [] jetgenjetDeltaR;
   delete [] jetbtag;
+  //  delete [] sVx_;
+  delete [] sV3dDistance_;
+  delete [] sVChi2_;
+  delete [] sV3dDistanceError_;
 
   delete [] n90Hits_;
   delete [] fHad_;
@@ -707,7 +745,9 @@ template <typename T> NJet<T>::~NJet() {
   delete [] fElectrons_;
   delete [] fHFEm_;
   delete [] fHFHad_;
+  delete [] leadingChargedConstPt_;
   delete [] nChargedHadrons_;
+  delete [] nPFConstituents_;
   delete [] jetIDLoose_;
   delete [] jetIDTight_;
   
@@ -805,6 +845,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   met_t1R_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T1R");
   met_t2R_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T2R");
   rho_tag_            = cfg.getParameter<edm::InputTag>("NJet_Rho");
+  rho25_tag_          = cfg.getParameter<edm::InputTag>("NJet_Rho25");
   weight_             = (float)(cfg.getParameter<double> ("NJet_Weight"));
   weight_tag          = cfg.getParameter<edm::InputTag> ("NJet_Weight_Tag");
   ecalDeadCellTPFilterInputTag_ = cfg.getParameter<edm::InputTag> ("ECALDeadCellTPFilterModuleName");
@@ -814,6 +855,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   conesize_           = cfg.getParameter<double>("NJetConeSize");
   zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
   secVx_              = cfg.getParameter<edm::InputTag>("NJetSecondVx");
+  secVxTagInfo_       = cfg.getParameter<edm::InputTag>("NJetSecondVxTagInfo");
+  ipTagInfo_          = cfg.getParameter<edm::InputTag>("NJetTrackIPTagInfos");
   writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
   writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
@@ -909,6 +952,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("PUMCNumVtxOOT",&puMCNumVtxOOT_,"PUMCNumVtxOOT/I");
   CalibTree->Branch("PUMCNumTruth",&puMCNumTruth_,"PUMCNumTruth/F");
   CalibTree->Branch("Rho",&rho_,"Rho/F");
+  CalibTree->Branch("Rho25",&rho25_,"Rho25/F");
 
   // CaloTower branches for all jets
   CalibTree->Branch( "NobjTow",&NobjTow,"NobjTow/I"             );
@@ -964,6 +1008,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   //All calo jets
   CalibTree->Branch( "NobjJet",            &NobjJet,         "NobjJet/I"             );
   CalibTree->Branch( "JetPt",               jetpt,           "JetPt[NobjJet]/F" );
+  CalibTree->Branch( "JetMt",               jetmt,           "JetMt[NobjJet]/F" );
   CalibTree->Branch( "JetPhi",              jetphi,          "JetPhi[NobjJet]/F");
   CalibTree->Branch( "JetEta",              jeteta,          "JetEta[NobjJet]/F");
   CalibTree->Branch( "JetEt",               jetet,           "JetEt[NobjJet]/F" );
@@ -979,6 +1024,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetFElectrons",fElectrons_,"JetFElectrons[NobjJet]/F");  
   CalibTree->Branch( "JetFHFEm",fHFEm_,"JetFHFEm[NobjJet]/F");  
   CalibTree->Branch( "JetFHFHad",fHFHad_,"JetFHFHad[NobjJet]/F");  
+  CalibTree->Branch( "JetLeadingCargedConstPt",leadingChargedConstPt_,"JetLeadingCargedConstPt[NobjJet]/F");  
   CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
   CalibTree->Branch( "JetIDTight",jetIDTight_,"JetIDTight[NobjJet]/O");
   CalibTree->Branch( "JetEtWeightedSigmaPhi",jetEtWeightedSigmaPhi_,"JetEtWeightedSigmaPhi[NobjJet]/F" );
@@ -996,7 +1042,14 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
   CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
   CalibTree->Branch( "JetNChargedHadrons",nChargedHadrons_,"JetNChargedHadrons[NobjJet]/I"); 
-  CalibTree->Branch( "JetBtag",         jetbtag,      "JetBtag[NobjJet]/F" );
+  CalibTree->Branch( "JetNPFConstituents",nPFConstituents_,"JetNPFConstituents[NobjJet]/I"); 
+
+
+  //Btag and secondary vertex info
+  CalibTree->Branch( "JetBtag",                 jetbtag,            "JetBtag[NobjJet]/F" );
+  CalibTree->Branch( "JetSV3dDistance",         sV3dDistance_,      "JetSV3dDistance[NobjJet]/F" );
+  CalibTree->Branch( "JetSVChi2",               sVChi2_,            "JetSVChi2[NobjJet]/F" );
+  CalibTree->Branch( "JetSV3dDistanceError",    sV3dDistanceError_, "JetSV3dDistanceError[NobjJet]/F" );
 
   // Gen jets (matched to calo jets)
   CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
@@ -1383,6 +1436,33 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     vtxIsFake_ = true;
   }
 
+
+  //Secondary vertex info for btags.
+  //Following snippets inspired by UserCode/bTag/CommissioningCommonSetup/plugins/TagNtupleProducer.cc?revision=1.14
+  typedef edm::RefToBase<reco::Jet> JetRef;
+  typedef std::map< JetRef, const reco::SecondaryVertexTagInfo*, JetRefCompare > svTagInfoMap;
+  svTagInfoMap svTagInfo;
+  
+  edm::Handle< edm::View < reco::SecondaryVertexTagInfo > > svTagInfoVector;
+  evt.getByLabel(secVxTagInfo_,svTagInfoVector);
+  
+  for(edm::View< reco::SecondaryVertexTagInfo >::const_iterator iTagInfo =
+	svTagInfoVector->begin(); iTagInfo != svTagInfoVector->end(); iTagInfo++)
+    {
+      svTagInfo[iTagInfo->jet()] = &*iTagInfo;
+    }
+  
+  typedef std::map<JetRef, const reco::TrackIPTagInfo*, JetRefCompare> ipTagInfoMap;
+  ipTagInfoMap ipTagInfo;
+  edm::Handle< edm::View < reco::TrackIPTagInfo > > ipTagInfoVector;
+
+  evt.getByLabel(ipTagInfo_,ipTagInfoVector);  
+  for(edm::View< reco::TrackIPTagInfo >::const_iterator iTagInfo = ipTagInfoVector->begin(); iTagInfo != ipTagInfoVector->end(); iTagInfo++) 
+    {
+      ipTagInfo[iTagInfo->jet()] = &*iTagInfo;
+    }
+
+
   edm::Handle<double> pRho;
   evt.getByLabel(rho_tag_,pRho);
   //if( pRho.isValid() ) {
@@ -1392,6 +1472,14 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   //} else {
   //  rho_ = 0;
   //}
+
+  edm::Handle<double> pRho25;
+  evt.getByLabel(rho25_tag_,pRho25);
+  //if( pRho25.isValid() ) {
+  rho25_ = *pRho25;
+  if(*pRho25 < 0) edm::LogError("BadRho25") << "Rho25 negative!";
+  if(*pRho25 != *pRho25) edm::LogError("BadRho25") << "Rho25 is NaN!";
+
 
   edm::Handle< edm::View<T> > pJets;
   evt.getByLabel(jets_, pJets);
@@ -1508,6 +1596,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno) {
       // Write jet kinematics
       jetpt[  jtno ] = (*pJets)[jtno].pt();
+      jetmt[  jtno ] = (*pJets)[jtno].mt();
       jetphi[ jtno ] = (*pJets)[jtno].phi();
       jeteta[ jtno ] = (*pJets)[jtno].eta();
       jetet[  jtno ] = (*pJets)[jtno].et();
@@ -1543,13 +1632,39 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
        }
       else jetbtag[jtno]=-1;
 
+
+      
+      JetRef thisJetRef = edm::RefToBase<reco::Jet>(pJets->refAt(jtno));
+      if(svTagInfo.find(thisJetRef)==svTagInfo.end())edm::LogError("NoTagInfo") << "No secondary vertex tag info found for this jet!";
+      
+      //Following snippets inspired by UserCode/bTag/CommissioningCommonSetup/plugins/TagNtupleProducer.cc?revision=1.14
+      if(svTagInfo[thisJetRef]->nVertices() > 0 ){
+	LogDebug("GreatBTagInfo") << "retrieving sondary vertex info";
+	std::vector<const reco::BaseTagInfo*>  baseTagInfos;
+	baseTagInfos.push_back( &(*svTagInfo[thisJetRef]) );
+	baseTagInfos.push_back( &(*ipTagInfo[thisJetRef]) ); 
+	JetTagComputer::TagInfoHelper helper(baseTagInfos);
+
+
+	//	sVx_ [ jtno ]             = svTagInfo[thisJetRef]->secondaryVertex(0).x();
+	sV3dDistance_ [jtno]      = (svTagInfo[thisJetRef]->flightDistance(0).value());
+	sVChi2_ [jtno]            =(svTagInfo[thisJetRef]->secondaryVertex(0).chi2());         
+	sV3dDistanceError_ [jtno] = (svTagInfo[thisJetRef]->flightDistance(0).error());                     
+      }
+      else{
+	//	sVx_ [ jtno ]             = -1;
+	sV3dDistance_ [jtno]      = -1;
+	sVChi2_ [jtno]            = -1;
+	sV3dDistanceError_ [jtno] = -1;
+      }
+      
       // L2L3 correction
       edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
       jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],evt,setup);  //calculate the correction
       jscalel2[jtno]   = correctorL2->correction( jscalel1[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel3[jtno]   = correctorL3->correction( jscalel1[jtno] * jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
-      jscalel2l3[jtno] = correctorL1L2L3->correction( (*pJets)[jtno],evt,setup);  //calculate the correction
-      jscalel4JW[jtno] = correctorL1L2L3L4JW->correction((*pJets)[jtno],evt,setup) / jscalel2l3[jtno];  //calculate the correction
+      jscalel2l3[jtno] = correctorL1L2L3->correction( (*pJets)[jtno],evt,setup);  //calculate the correction; is corrected back to pure L2L3 later
+      jscalel4JW[jtno] = correctorL1L2L3L4JW->correction((*pJets)[jtno],evt,setup) / jscalel2l3[jtno];  //calculate the correction; is corrected back to pure L2L3 later
       jecUnc_->setJetEta(jeteta[jtno]); // Give rapidity of jet you want uncertainty on
       jecUnc_->setJetPt(jscalel2l3[jtno]*jetpt[jtno]);// Also give the corrected pt of the jet you want the uncertainty on
       // The following function gives the relative uncertainty in the jet Pt.
@@ -1887,7 +2002,9 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
   fElectrons_[ jtno ]      = -1;
   fHFEm_[ jtno ]           = -1;
   fHFHad_[ jtno ]          = -1;
-  nChargedHadrons_[ jtno ]  = -1;
+  leadingChargedConstPt_[ jtno ] = -1;
+  nChargedHadrons_[ jtno ] = -1;
+  nPFConstituents_[ jtno ] = -1;
   if(! writeTowers_) return;
   std::vector<CaloTowerPtr> j_towers = pJets[jtno].getCaloConstituents();
   int towno = NobjTow;
@@ -1926,7 +2043,25 @@ template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJet
   fElectrons_[ jtno ]      = pJets[jtno].electronEnergyFraction();
   fHFEm_[ jtno ]           = pJets[jtno].HFEMEnergyFraction ();
   fHFHad_[ jtno ]          = pJets[jtno].HFHadronEnergyFraction () ;
-  nChargedHadrons_[ jtno ]  = pJets[jtno].chargedHadronMultiplicity();
+  nChargedHadrons_[ jtno ] = pJets[jtno].chargedHadronMultiplicity();
+  nPFConstituents_[ jtno ] = (pJets[jtno].chargedHadronMultiplicity () +pJets[jtno].neutralHadronMultiplicity () +pJets[jtno].photonMultiplicity ()  +pJets[jtno].electronMultiplicity () +pJets[jtno].muonMultiplicity ()  +pJets[jtno].HFHadronMultiplicity ()  +pJets[jtno].HFEMMultiplicity () );
+
+  //  pJets[jtno].
+
+    //virtual std::vector
+    //< reco::PFCandidatePtr > 	getPFConstituents () const 
+
+
+    const std::vector < reco::PFCandidatePtr > PFConstituents = pJets[jtno].getPFConstituents ();
+    //    std::cout << "starting to list PF constituents:" <<std::endl; 
+    leadingChargedConstPt_ [ jtno ] = -1;
+    for (std::vector<reco::PFCandidatePtr>::const_iterator constituent = PFConstituents.begin(); constituent!=PFConstituents.end(); ++constituent){
+      //      std::cout << (*constituent)->pt() << " " << (*constituent)->charge() <<std::endl; 
+      if(TMath::Abs((*constituent)->charge())>0){
+	leadingChargedConstPt_ [ jtno ] =  (*constituent)->pt();
+	break;
+      }
+    }
 
 }  
 
@@ -1940,7 +2075,9 @@ template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtn
   fElectrons_[ jtno ]      = -1;
   fHFEm_[ jtno ]           = -1;
   fHFHad_[ jtno ]          = -1;
-  nChargedHadrons_[ jtno ]  = -1;
+  leadingChargedConstPt_[ jtno ] = -1;
+  nChargedHadrons_[ jtno ] = -1;
+  nPFConstituents_[ jtno ] = -1;
 }
 
 

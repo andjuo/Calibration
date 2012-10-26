@@ -17,6 +17,18 @@ kt6PFJets.doAreaFastjet = True
 ak5PFJets.doAreaFastjet = True
 ak7PFJets.doAreaFastjet = True
 
+rho25kt6PFJets = kt6PFJets.clone(
+    rParam = cms.double(0.6),
+    Rho_EtaMax = cms.double(2.5),
+    doRhoFastjet = cms.bool(True)
+    )
+rho25kt6CaloJets = kt6CaloJets.clone(
+    rParam = cms.double(0.6),
+    Rho_EtaMax = cms.double(2.5),
+    doRhoFastjet = cms.bool(True)
+    )
+
+
 #CHS
 goodOfflinePrimaryVertices = cms.EDFilter(
     "PrimaryVertexObjectFilter",
@@ -38,7 +50,7 @@ kt6PFCHSJets = kt6PFJets.clone(
 
 
 calibjets = cms.Sequence(recoJets * recoPFJets * goodOfflinePrimaryVertices 
-                         * pfNoPileUpSequence * ak5PFCHSJets)
+                         * pfNoPileUpSequence * ak5PFCHSJets * rho25kt6PFJets * rho25kt6CaloJets)
  
 try:
     calibjets.remove(kt6PFJetsCentralChargedPileUp)
