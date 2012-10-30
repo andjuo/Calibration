@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.5 2012/05/24 11:39:41 mschrode Exp $
+# $Id: runTreeMaker_cff.py,v 1.6 2012/10/11 18:47:19 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -74,8 +74,7 @@ def runTreeMaker(
     # sequence with filters
     process.filterSequence = cms.Sequence(
         process.hltHighLevel *
-        process.stdCleaningSequence *
-        process.ecalDeadCellTaggingSequence
+        process.stdCleaningSequence
         )
 
     if not isData:
@@ -88,9 +87,7 @@ def runTreeMaker(
 
     process.tmAK5CaloL1Offset = process.calibTreeMakerCaloData.clone(
         TreeName                       = treeName,
-        WritePhotons                   = writePhotons,
-        ECALDeadCellBEFilterModuleName = cms.InputTag("EcalDeadCellBoundaryEnergyFilter"),
-        ECALDeadCellTPFilterModuleName = cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
+        WritePhotons                   = writePhotons
         )
 
     process.tmAK5CaloL1FastJet = process.calibTreeMakerAK5FastCaloData.clone(
@@ -140,7 +137,6 @@ def runTreeMaker(
 #        process.dump *
         process.products *
         process.ak5CaloJetsBtag *
-        process.tmAK5CaloL1Offset *
         process.tmAK5CaloL1FastJet *
         process.ak5PFJetsBtag *
         process.tmAK5PFL1FastJet *

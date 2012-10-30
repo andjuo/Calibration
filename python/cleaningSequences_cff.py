@@ -1,4 +1,4 @@
-## $Id: cleaningSequences_cff.py,v 1.1 2012/05/24 11:38:11 mschrode Exp $
+## $Id: cleaningSequences_cff.py,v 1.2 2012/10/11 18:47:19 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -53,9 +53,9 @@ trackingFailureFilter.VertexSource = cms.InputTag('goodPrimaryVertices')
 ## Filter is set up in tagging mode; decision can be written
 ## to the ntuple if specified in calibTreeMaker...
 from RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi import EcalDeadCellTriggerPrimitiveFilter
-EcalDeadCellTriggerPrimitiveFilter.taggingMode = cms.bool(True)
+EcalDeadCellTriggerPrimitiveFilter.taggingMode = cms.bool(False)
 from RecoMET.METFilters.EcalDeadCellBoundaryEnergyFilter_cfi import EcalDeadCellBoundaryEnergyFilter
-EcalDeadCellBoundaryEnergyFilter.taggingMode = cms.bool(True)
+EcalDeadCellBoundaryEnergyFilter.taggingMode = cms.bool(False)
 
 
 ##
@@ -71,11 +71,7 @@ stdCleaningSequence = cms.Sequence(
    hcalLaserEventFilter *
    eeBadScFilter *
    ecalLaserCorrFilter *
-   goodPrimaryVertices * trackingFailureFilter
+   goodPrimaryVertices * trackingFailureFilter *
+   EcalDeadCellTriggerPrimitiveFilter *
+   EcalDeadCellBoundaryEnergyFilter
 )
-
-## Run in tag mode - writes decision into the event
-ecalDeadCellTaggingSequence = cms.Sequence(
-    EcalDeadCellTriggerPrimitiveFilter *
-    EcalDeadCellBoundaryEnergyFilter
-    )
