@@ -31,6 +31,7 @@ template <typename T> class CalibTreeMaker : public edm::EDAnalyzer {
   
  private:
   virtual void beginJob() ;
+  virtual void beginRun(const edm::Run&, const edm::EventSetup&) ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   
@@ -99,6 +100,11 @@ template <typename T> void CalibTreeMaker<T>::analyze(const edm::Event& evt, con
     tau_analysis_.analyze(evt, setup);
   }
   tree_->Fill();
+}
+
+template <typename T> void CalibTreeMaker<T>::beginRun(edm::Run const & iRun, edm::EventSetup const& setup) 
+{
+  jet_analysis_.beginRun(iRun, setup);
 }
 
 template <typename T> void CalibTreeMaker<T>::beginJob()

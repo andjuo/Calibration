@@ -98,7 +98,9 @@
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+
 
 #include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
@@ -106,10 +108,10 @@
 
 
 //still need to reduce to minimal working includes here...
-//#include "RecoBTau/JetTagComputer/interface/GenericMVAJetTagComputer.h"
-//#include "RecoBTau/JetTagComputer/interface/GenericMVAJetTagComputerWrapper.h"
+#include "RecoBTau/JetTagComputer/interface/GenericMVAJetTagComputer.h"
+#include "RecoBTau/JetTagComputer/interface/GenericMVAJetTagComputerWrapper.h"
 #include "RecoBTau/JetTagComputer/interface/JetTagComputer.h"
-//#include "RecoBTau/JetTagComputer/interface/JetTagComputerRecord.h"
+#include "RecoBTau/JetTagComputer/interface/JetTagComputerRecord.h"
 #include "RecoBTag/SecondaryVertex/interface/CombinedSVComputer.h"
 
 namespace{
@@ -127,6 +129,7 @@ public:
   ~NJet(); 
 
   void setup(const edm::ParameterSet&, TTree*);
+  void beginRun(const edm::Run&, const edm::EventSetup&) ;
   void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
@@ -165,6 +168,7 @@ private:
   unsigned int luminosityBlockNumber_;
   unsigned int eventNumber_;
   bool hltPhysicsDeclared_;
+  std::vector<CalibTreeMakerHelper::AllTriggerInfo> TriggerInfo_;
   bool hltL1Jet6U_;
   bool hltDiJetAve15U_;
   bool hltDiJetAve30U_;
@@ -212,6 +216,8 @@ private:
   bool hltQuadJet50DiJet40L1_;
   bool hltSixJet45_;
   bool hltSixJet45L1_;
+  std::string processName_; // process name of (HLT) process for which to get HLT configuration
+  HLTConfigProvider hltConfig_;
 
   bool passesECALDeadCellBEFilter_;
   bool passesECALDeadCellTPFilter_;
@@ -326,6 +332,64 @@ template <typename T> NJet<T>::NJet()
   eventNumber_ = 0;
 
   hltPhysicsDeclared_ = false;
+
+
+  //  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve260","HLT_DiPFJetAve260",false));
+//  CalibTree->Branch("HltDiPFJetAve260",  &hltDiPFJetAve260_ ,"HltDiPFJetAve260/O"); 
+//    hltDiPFJetAve260_ = false;
+//    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve260");
+//    if( id != trigNames.size() )
+//      if( triggerResults->accept(id) ) hltDiPFJetAve260_ = true;
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve15U","HLT_DiJetAve15U",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve30U","HLT_DiJetAve30U",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve50U","HLT_DiJetAve50U",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve70U","HLT_DiJetAve70U",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve100U","HLT_DiJetAve100U",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve140U","HLT_DiJetAve140U",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve180U","HLT_DiJetAve180U",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve300U","HLT_DiJetAve300U",false,1));
+
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve30","HLT_DiJetAve30",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve60","HLT_DiJetAve60",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve80","HLT_DiJetAve80",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve110","HLT_DiJetAve110",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve150","HLT_DiJetAve150",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve190","HLT_DiJetAve190",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve240","HLT_DiJetAve240",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve300","HLT_DiJetAve300",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve370","HLT_DiJetAve370",false,1));
+
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet30","HLT_Jet30",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet60","HLT_Jet60",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet80","HLT_Jet80",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet110","HLT_Jet110",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet150","HLT_Jet150",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet190","HLT_Jet190",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet240","HLT_Jet240",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet300","HLT_Jet300",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet370","HLT_Jet370",false,1));
+
+
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve40","HLT_DiPFJetAve40",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve80","HLT_DiPFJetAve80",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve140","HLT_DiPFJetAve140",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve200","HLT_DiPFJetAve200",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve260","HLT_DiPFJetAve260",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve320","HLT_DiPFJetAve320",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve400","HLT_DiPFJetAve400",false,1));
+
+
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet40","HLT_PFJet40",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet80","HLT_PFJet80",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet140","HLT_PFJet140",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet200","HLT_PFJet200",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet260","HLT_PFJet260",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet320","HLT_PFJet320",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet400","HLT_PFJet400",false,1));
+
+
+
+
 
   hltL1Jet6U_ = false;
   hltDiJetAve15U_ = false;
@@ -862,6 +926,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
   writeTowers_        = cfg.getParameter<bool>("NJet_writeTowers");
   beamSpot_           = cfg.getParameter<edm::InputTag>("BeamSpot");
+  processName_        = cfg.getParameter<std::string>("NJet_ProcessName");
   l1name_ = cfg.getParameter<std::string>("NJet_L1JetCorrector");
   l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
   l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
@@ -883,51 +948,13 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("EventNumber",&eventNumber_,"EventNumber/i");
 
   CalibTree->Branch("HltPhysicsDelcared",&hltPhysicsDeclared_,"HltPhysicsDelcared/O");
+
   CalibTree->Branch("HltL1Jet6U",&hltL1Jet6U_,"HltL1Jet6U/O");
-  CalibTree->Branch("HltDiJetAve15U",&hltDiJetAve15U_,"HltDiJetAve15U/O");
-  CalibTree->Branch("HltDiJetAve30U",&hltDiJetAve30U_,"HltDiJetAve30U/O");
-  CalibTree->Branch("HltDiJetAve50U",&hltDiJetAve50U_,"HltDiJetAve50U/O");
-  CalibTree->Branch("HltDiJetAve70U",&hltDiJetAve70U_,"HltDiJetAve70U/O");
-  CalibTree->Branch("HltDiJetAve100U",&hltDiJetAve100U_,"HltDiJetAve100U/O");
-  CalibTree->Branch("HltDiJetAve140U",&hltDiJetAve140U_,"HltDiJetAve140U/O");
-  CalibTree->Branch("HltDiJetAve180U",&hltDiJetAve180U_,"HltDiJetAve180U/O");
-  CalibTree->Branch("HltDiJetAve300U",&hltDiJetAve300U_,"HltDiJetAve300U/O");
 
-  CalibTree->Branch("HltDiJetAve30", &hltDiJetAve30_, "HltDiJetAve30/O");
-  CalibTree->Branch("HltDiJetAve60", &hltDiJetAve60_, "HltDiJetAve60/O");
-  CalibTree->Branch("HltDiJetAve80", &hltDiJetAve80_, "HltDiJetAve80/O");
-  CalibTree->Branch("HltDiJetAve110",&hltDiJetAve110_,"HltDiJetAve110/O");
-  CalibTree->Branch("HltDiJetAve150",&hltDiJetAve150_,"HltDiJetAve150/O");
-  CalibTree->Branch("HltDiJetAve190",&hltDiJetAve190_,"HltDiJetAve190/O");
-  CalibTree->Branch("HltDiJetAve240",&hltDiJetAve240_,"HltDiJetAve240/O");
-  CalibTree->Branch("HltDiJetAve300",&hltDiJetAve300_,"HltDiJetAve300/O");
-  CalibTree->Branch("HltDiJetAve370",&hltDiJetAve370_,"HltDiJetAve370/O");
-
-  CalibTree->Branch("HltJet30", &hltJet30_, "HltJet30/O");
-  CalibTree->Branch("HltJet60", &hltJet60_, "HltJet60/O");
-  CalibTree->Branch("HltJet80", &hltJet80_, "HltJet80/O");
-  CalibTree->Branch("HltJet110", &hltJet110_, "HltJet110/O");
-  CalibTree->Branch("HltJet150", &hltJet150_, "HltJet150/O");
-  CalibTree->Branch("HltJet190", &hltJet190_, "HltJet190/O");
-  CalibTree->Branch("HltJet240", &hltJet240_, "HltJet240/O");
-  CalibTree->Branch("HltJet300", &hltJet300_, "HltJet300/O");
-  CalibTree->Branch("HltJet370", &hltJet370_, "HltJet370/O");
-
-  CalibTree->Branch("HltDiPFJetAve40" ,  &hltDiPFJetAve40_  ,"HltDiPFJetAve40/O");  
-  CalibTree->Branch("HltDiPFJetAve80" ,  &hltDiPFJetAve80_  ,"HltDiPFJetAve80/O");  
-  CalibTree->Branch("HltDiPFJetAve140",  &hltDiPFJetAve140_ ,"HltDiPFJetAve140/O"); 
-  CalibTree->Branch("HltDiPFJetAve200",  &hltDiPFJetAve200_ ,"HltDiPFJetAve200/O"); 
-  CalibTree->Branch("HltDiPFJetAve260",  &hltDiPFJetAve260_ ,"HltDiPFJetAve260/O"); 
-  CalibTree->Branch("HltDiPFJetAve320",  &hltDiPFJetAve320_ ,"HltDiPFJetAve320/O"); 
-  CalibTree->Branch("HltDiPFJetAve400",  &hltDiPFJetAve400_ ,"HltDiPFJetAve400/O"); 
-
-  CalibTree->Branch("HltPFJet40"      ,  &hltPFJet40_       ,"HltPFJet40/O");       
-  CalibTree->Branch("HltPFJet80"      ,  &hltPFJet80_       ,"HltPFJet80/O");       
-  CalibTree->Branch("HltPFJet140"     ,  &hltPFJet140_      ,"HltPFJet140/O");      
-  CalibTree->Branch("HltPFJet200"     ,  &hltPFJet200_      ,"HltPFJet200/O");      
-  CalibTree->Branch("HltPFJet260"     ,  &hltPFJet260_      ,"HltPFJet260/O");      
-  CalibTree->Branch("HltPFJet320"     ,  &hltPFJet320_      ,"HltPFJet320/O");      
-  CalibTree->Branch("HltPFJet400"     ,  &hltPFJet400_      ,"HltPFJet400/O");      
+  for(size_t i = 0; i<TriggerInfo_.size(); i++){
+    CalibTree->Branch((TriggerInfo_.at(i).name_).c_str(),&TriggerInfo_.at(i).fired_,(TriggerInfo_.at(i).name_+"/O").c_str());
+    CalibTree->Branch(("PS_"+TriggerInfo_.at(i).name_).c_str(),&TriggerInfo_.at(i).prescale_,("PS_"+TriggerInfo_.at(i).name_+"/I").c_str());
+  }
 
   CalibTree->Branch("HltQuadJet40",&hltQuadJet40_, "HltQuadJet40/O");
   CalibTree->Branch("HltQuadJet45DiJet40",&hltQuadJet45DiJet40_, "HltQuadJet45DiJet40/O");
@@ -1140,6 +1167,27 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   }
 }
 
+template <typename T> void NJet<T>::beginRun(edm::Run const & iRun, edm::EventSetup const& setup) 
+{
+  //  std::cout <<"Initializing trigger information for individual run"<<std::endl;
+  bool changed(true);
+  if (hltConfig_.init(iRun,setup,processName_,changed)) {
+    // if init returns TRUE, initialisation has succeeded!
+    if (changed) {
+     // The HLT config has actually changed wrt the previous Run, hence rebook your
+     // histograms or do anything else dependent on the revised HLT config
+
+    }
+  } else {
+    // if init returns FALSE, initialisation has NOT succeeded, which indicates a problem
+    // with the file and/or code and needs to be investigated!
+    edm::LogError("NJet") << " HLT config extraction failure with process name " << processName_;
+    // In this case, all access methods will return empty values!
+  }
+
+}
+
+
 template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::EventSetup& setup)
 {
   // Event
@@ -1157,6 +1205,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   if( fdlWord.physicsDeclared() == 1 ) hltPhysicsDeclared_ = true;
 
 
+
+
   // HLT Trigger
   edm::Handle<edm::TriggerResults> triggerResults;
   
@@ -1169,211 +1219,19 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 /*     if( id != trigNames.size() ) */
 /*       if( triggerResults->accept(id) ) hltL1Jet6U_ = true; */
    
-    hltDiJetAve15U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve15U");
-    if( id != trigNames.size() ) {
-      if( triggerResults->accept(id) ) hltDiJetAve15U_ = true;
+  for(size_t i = 0; i<TriggerInfo_.size(); i++){
+    TriggerInfo_.at(i).fired_=false;
+    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),TriggerInfo_.at(i).HLTname_);
+    if( id != trigNames.size() ){
+      if( triggerResults->accept(id) ) TriggerInfo_.at(i).fired_ = true;
+      std::pair<int,int> prescaleValues = hltConfig_.prescaleValues(evt, setup, trigNames.triggerName(id));
+      TriggerInfo_.at(i).prescale_=prescaleValues.first*prescaleValues.second;
+
+
+
     }
-    hltDiJetAve30U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30U");
-    if( id != trigNames.size()  )
-      if( triggerResults->accept(id) ) hltDiJetAve30U_ = true;
+  }
 
-    hltDiJetAve50U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve50U");
-    if( id != trigNames.size()  )
-      if( triggerResults->accept(id) ) hltDiJetAve50U_ = true;
-
-    hltDiJetAve70U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve70U");
-    if( id != trigNames.size()  )
-      if( triggerResults->accept(id) ) hltDiJetAve70U_ = true;
-    
-    hltDiJetAve100U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve100U");
-    if( id != trigNames.size()  )
-      if( triggerResults->accept(id) ) hltDiJetAve100U_ = true;
-
-    hltDiJetAve140U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve140U");
-    if( id != trigNames.size()  )
-      if( triggerResults->accept(id) ) hltDiJetAve140U_ = true;
-
-    hltDiJetAve180U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve180U");
-    if( id != trigNames.size()  )
-      if( triggerResults->accept(id) ) hltDiJetAve180U_ = true;
-
-    hltDiJetAve300U_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300U");
-    if( id != trigNames.size()  )
-      if( triggerResults->accept(id) ) hltDiJetAve300U_ = true;
-
-
-    // The DiJetAve trigger decisions for corrected jet pt
-    hltDiJetAve30_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve30");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve30_ = true;
-
-    hltDiJetAve60_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve60");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve60_ = true;
-
-    hltDiJetAve80_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve80");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve80_ = true;
-
-    hltDiJetAve110_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve110");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve110_ = true;
-
-    hltDiJetAve150_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve150");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve150_ = true;
-
-    hltDiJetAve190_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve190");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve190_ = true;
-
-    hltDiJetAve240_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve240");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve240_ = true;
-
-    hltDiJetAve300_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve300");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve300_ = true;
-
-    hltDiJetAve370_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiJetAve370");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiJetAve370_ = true;
-
-    //single jet triggers
-    hltJet30_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet30");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet30_ = true;
-    
-    hltJet60_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet60");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet60_ = true;
-
-    hltJet80_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet80");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet80_ = true;
-    
-    hltJet110_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet110");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet110_ = true;
-    
-    hltJet150_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet150");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet150_ = true;
-    
-    hltJet190_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet190");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet190_ = true;
-    
-    hltJet240_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet240");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet240_ = true;
-    
-    hltJet300_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet300");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet300_ = true;
-    
-    hltJet370_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_Jet370");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltJet370_ = true;
-
-    //PF
-    // The DiPFJetAve trigger decisions for corrected jet pt
-    hltDiPFJetAve40_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve40");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiPFJetAve40_ = true;
-
-    hltDiPFJetAve80_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve80");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiPFJetAve80_ = true;
-
-    hltDiPFJetAve140_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve140");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiPFJetAve140_ = true;
-
-    hltDiPFJetAve200_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve200");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiPFJetAve200_ = true;
-
-    hltDiPFJetAve260_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve260");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiPFJetAve260_ = true;
-
-    hltDiPFJetAve320_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve320");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiPFJetAve320_ = true;
-
-    hltDiPFJetAve400_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve400");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltDiPFJetAve400_ = true;
-
-    //single jet triggers
-    hltPFJet40_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet40");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltPFJet40_ = true;
-    
-    hltPFJet80_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet80");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltPFJet80_ = true;
-
-    hltPFJet140_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet140");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltPFJet140_ = true;
-    
-    hltPFJet200_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet200");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltPFJet200_ = true;
-    
-    hltPFJet260_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet260");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltPFJet260_ = true;
-    
-    hltPFJet320_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet320");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltPFJet320_ = true;
-    
-    hltPFJet400_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_PFJet400");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltPFJet400_ = true;
  
     //multi-jet trigger
     hltQuadJet40_ = false;

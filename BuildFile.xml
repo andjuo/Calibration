@@ -27,5 +27,6 @@
 <use   name="SimDataFormats/JetMatching"/>
 <use   name="SimDataFormats/PileupSummaryInfo"/>
 <use   name="DataFormats/L1GlobalTrigger"/>
+<use   name="HLTrigger/HLTcore"/>
 <use   name="DataFormats/Common"/>
 <flags   EDM_PLUGIN="1"/>

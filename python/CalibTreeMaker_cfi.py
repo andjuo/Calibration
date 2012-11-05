@@ -1,4 +1,4 @@
-## $Id: CalibTreeMaker_cfi.py,v 1.43 2012/10/24 14:51:52 rathjd Exp $
+## $Id: CalibTreeMaker_cfi.py,v 1.44 2012/10/26 15:19:15 kirschen Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -49,6 +49,7 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     NJetSecondVx      = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
+    NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -117,6 +118,7 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
+    NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -181,6 +183,7 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     NJetSecondVx      = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
+    NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -245,6 +248,7 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     NJetSecondVx      = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
+    NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -309,6 +313,7 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
     NJetSecondVx      = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
+    NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string('ak5CaloL1Offset'),
     NJet_L2JetCorrector       = cms.string('ak5CaloL2Relative'),
     NJet_L3JetCorrector       = cms.string('ak5CaloL3Absolute'),
