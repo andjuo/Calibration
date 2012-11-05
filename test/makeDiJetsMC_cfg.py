@@ -14,7 +14,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 
-process.GlobalTag.globaltag = 'START52_V9::All'
+process.GlobalTag.globaltag = 'START53_V13::All'
 
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -35,7 +35,7 @@ process.source = cms.Source("PoolSource",
 #    '/store/mc/Fall11/QCD_Pt-15to3000_TuneZ2_Flat_7TeV_pythia6/AODSIM/PU_S6_START44_V9B-v1/0000/4A9F238C-CB3F-E111-ADAF-003048678B76.root'
 #    '/store/mc/Summer12/QCD_Pt-15to3000_TuneZ2star_Flat_8TeV_pythia6/AODSIM/PU_S7_START52_V5-v1/0000/104B87EF-927B-E111-9E8E-00266CFFA204.root'
 #    '/store/mc/Summer12/QCD_Pt-15to3000_TuneZ2star_Flat_8TeV_pythia6/AODSIM/NoPU_START52_V5-v1/0000/46646478-797B-E111-91CB-0025901D490C.root'
-    '/store/mc/Summer12/QCD_Pt-15to3000_TuneZ2star_Flat_8TeV_pythia6/AODSIM/NoPileUp_START52_V9-v5/0000/02E18FFA-B698-E111-9AA9-0030487FA4C5.root'
+    '/store/mc/Summer12_DR53X/QCD_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/0000/96C761A5-16CE-E111-8AED-003048D4DEAC.root'
             )
 )
 
@@ -68,9 +68,12 @@ process.pDump = cms.Path( process.dump )
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
 process.load("Calibration.CalibTreeMaker.calibjets_cff")
+process.load("Calibration.CalibTreeMaker.cleaningSequences_cff")
 
 process.pMC = cms.Path( #process.dump *
                         #process.recoJPTJets * 
+                        #process.hltHighLevel*
+                        process.stdCleaningSequence *
                         process.calibjets *
                         process.calibTreeMakersMC
                         )

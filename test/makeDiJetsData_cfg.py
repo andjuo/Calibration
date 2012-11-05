@@ -12,7 +12,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 #process.GlobalTag.globaltag = 'GR_R_44_V14::All'
-process.GlobalTag.globaltag = 'GR_R_52_V8::All'
+process.GlobalTag.globaltag = 'GR_R_53_V15::All'
 
 
 process.MessageLogger.cerr.threshold             = 'INFO'
@@ -57,7 +57,7 @@ process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 #process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve30U')
 process.hltHighLevel.HLTPaths = cms.vstring('HLT_DiJetAve*','HLT_Jet*','HLT_DiPFJetAve*','HLT_PFJet*')
 process.hltHighLevel.HLTPaths = cms.vstring('*')
-eprocess.hltHighLevel.andOr = cms.bool(True)
+process.hltHighLevel.andOr = cms.bool(True)
 process.hltHighLevel.throw = cms.bool(False)
 
 
@@ -78,7 +78,7 @@ process.load("Calibration.CalibTreeMaker.cleaningSequences_cff")
 
 process.pData = cms.Path( #process.hltLevel1GTSeed*
                           process.hltHighLevel*
-                          process.standardCleaningSequence
+                          process.stdCleaningSequence
                           #* process.noscraping
                           #* process.dump
                           #* process.ZSPJetCorrectionsAntiKt5
