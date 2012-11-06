@@ -138,7 +138,7 @@ private:
   void fillJetID(const edm::RefToBase<T>& jetref, int jtno,const edm::Handle<reco::JetIDValueMap>& idmap);
   void fillMET(const edm::Event& evt);
 
-  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, met_t1_, met_t2_, met_t1R_, met_t2R_, rho_tag_, rho25_tag_, weight_tag, ecalDeadCellTPFilterInputTag_, ecalDeadCellBEFilterInputTag_;
+  edm::InputTag jets_, jetIDs_, partMatch_, genjets_, genparticles_, met_, met_t1_, met_t2_, met_t1R_, met_t2R_, rho_tag_, rho25_tag_, sVComputer_tag_, weight_tag, ecalDeadCellTPFilterInputTag_, ecalDeadCellBEFilterInputTag_;
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   edm::InputTag secVx_, secVxTagInfo_, ipTagInfo_;
@@ -170,52 +170,6 @@ private:
   bool hltPhysicsDeclared_;
   std::vector<CalibTreeMakerHelper::AllTriggerInfo> TriggerInfo_;
   bool hltL1Jet6U_;
-  bool hltDiJetAve15U_;
-  bool hltDiJetAve30U_;
-  bool hltDiJetAve50U_;
-  bool hltDiJetAve70U_;
-  bool hltDiJetAve100U_;
-  bool hltDiJetAve140U_;
-  bool hltDiJetAve180U_;
-  bool hltDiJetAve300U_;
-  bool hltDiJetAve30_;
-  bool hltDiJetAve60_;
-  bool hltDiJetAve80_;
-  bool hltDiJetAve110_;
-  bool hltDiJetAve150_;
-  bool hltDiJetAve190_;
-  bool hltDiJetAve240_;
-  bool hltDiJetAve300_;
-  bool hltDiJetAve370_;
-  bool hltJet30_;
-  bool hltJet60_;
-  bool hltJet80_;
-  bool hltJet110_;
-  bool hltJet150_;
-  bool hltJet190_;
-  bool hltJet240_;
-  bool hltJet300_;
-  bool hltJet370_;
-  bool hltDiPFJetAve40_;
-  bool hltDiPFJetAve80_;
-  bool hltDiPFJetAve140_;
-  bool hltDiPFJetAve200_;
-  bool hltDiPFJetAve260_;
-  bool hltDiPFJetAve320_;
-  bool hltDiPFJetAve400_;
-  bool hltPFJet40_;
-  bool hltPFJet80_;
-  bool hltPFJet140_;
-  bool hltPFJet200_;
-  bool hltPFJet260_;
-  bool hltPFJet320_;
-  bool hltPFJet400_;
-  bool hltQuadJet40_;
-  bool hltQuadJet45DiJet40_;
-  bool hltQuadJet50DiJet40_;
-  bool hltQuadJet50DiJet40L1_;
-  bool hltSixJet45_;
-  bool hltSixJet45L1_;
   std::string processName_; // process name of (HLT) process for which to get HLT configuration
   HLTConfigProvider hltConfig_;
 
@@ -243,12 +197,12 @@ private:
   float *jetpt, *jetmt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR, *jetbtag; //added simple secondary vertex b-tag
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
-  float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_, *fHFEm_, *fHFHad_;
+  float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_, *fMuons_, *fHFEm_, *fHFHad_;
   float *leadingChargedConstPt_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_,*jetarea_;
   float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW, *jscaleUncert;
-  int *nChargedHadrons_,*nPFConstituents_,*jetieta_, *jetiphi_;
-  float *sV3dDistance_, *sVChi2_, *sV3dDistanceError_;
+  int *nChargedHadrons_,*nChargedPFConstituents_,*nPFConstituents_,*jetieta_, *jetiphi_;
+  float *sV3dDistance_, *sVChi2_, *sV3dDistanceError_,*sVMass_,*sVPt_;
   float *sVx_;
 
 
@@ -334,12 +288,8 @@ template <typename T> NJet<T>::NJet()
   hltPhysicsDeclared_ = false;
 
 
-  //  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve260","HLT_DiPFJetAve260",false));
-//  CalibTree->Branch("HltDiPFJetAve260",  &hltDiPFJetAve260_ ,"HltDiPFJetAve260/O"); 
-//    hltDiPFJetAve260_ = false;
-//    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_DiPFJetAve260");
-//    if( id != trigNames.size() )
-//      if( triggerResults->accept(id) ) hltDiPFJetAve260_ = true;
+  //trigger setup
+  hltL1Jet6U_ = false;
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve15U","HLT_DiJetAve15U",false,1));
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve30U","HLT_DiJetAve30U",false,1));
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiJetAve50U","HLT_DiJetAve50U",false,1));
@@ -370,80 +320,32 @@ template <typename T> NJet<T>::NJet()
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltJet370","HLT_Jet370",false,1));
 
 
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve40","HLT_DiPFJetAve40",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve80","HLT_DiPFJetAve80",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve140","HLT_DiPFJetAve140",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve200","HLT_DiPFJetAve200",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve260","HLT_DiPFJetAve260",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve320","HLT_DiPFJetAve320",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve400","HLT_DiPFJetAve400",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve40","HLT_DiPFJetAve40",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve80","HLT_DiPFJetAve80",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve140","HLT_DiPFJetAve140",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve200","HLT_DiPFJetAve200",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve260","HLT_DiPFJetAve260",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve320","HLT_DiPFJetAve320",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltDiPFJetAve400","HLT_DiPFJetAve400",false,1,true));
 
 
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet40","HLT_PFJet40",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet80","HLT_PFJet80",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet140","HLT_PFJet140",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet200","HLT_PFJet200",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet260","HLT_PFJet260",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet320","HLT_PFJet320",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet400","HLT_PFJet400",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet40","HLT_PFJet40",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet80","HLT_PFJet80",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet140","HLT_PFJet140",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet200","HLT_PFJet200",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet260","HLT_PFJet260",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet320","HLT_PFJet320",false,1,true));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltPFJet400","HLT_PFJet400",false,1,true));
 
 
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet40","HLT_QuadJet40",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet45DiJet40","HLT_QuadJet45_DiJet40",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet50DiJet40","HLT_QuadJet50_DiJet40",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet50DiJet40L1","HLT_QuadJet50_DiJet40_L1FastJet",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltSixJet45","HLT_SixJet45",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltSixJet45L1","HLT_SixJet45_L1FastJet",false,1));
 
 
-
-  hltL1Jet6U_ = false;
-  hltDiJetAve15U_ = false;
-  hltDiJetAve30U_ = false;
-  hltDiJetAve50U_ = false;
-  hltDiJetAve70U_ = false;
-  hltDiJetAve100U_ = false;
-  hltDiJetAve140U_ = false;
-  hltDiJetAve180U_ = false;
-  hltDiJetAve300U_ = false;
-
-  hltDiJetAve30_ = false;
-  hltDiJetAve60_ = false;
-  hltDiJetAve80_ = false;
-  hltDiJetAve110_ = false;
-  hltDiJetAve150_ = false;
-  hltDiJetAve190_ = false;
-  hltDiJetAve240_ = false;
-  hltDiJetAve300_ = false;
-  hltDiJetAve370_ = false; 
-
-  hltJet30_ = false;
-  hltJet60_ = false;
-  hltJet80_ = false;
-  hltJet110_ = false;
-  hltJet150_ = false;
-  hltJet190_ = false;
-  hltJet240_ = false;
-  hltJet300_ = false;
-  hltJet370_ = false;
-
-  hltDiPFJetAve40_  = false;
-  hltDiPFJetAve80_  = false;
-  hltDiPFJetAve140_  = false;
-  hltDiPFJetAve200_  = false;
-  hltDiPFJetAve260_  = false;
-  hltDiPFJetAve320_  = false;
-  hltDiPFJetAve400_  = false;
-
-  hltPFJet40_  = false;
-  hltPFJet80_  = false;
-  hltPFJet140_  = false;
-  hltPFJet200_  = false;
-  hltPFJet260_  = false;
-  hltPFJet320_  = false;
-  hltPFJet400_  = false;
-
-  hltQuadJet40_ = false;
-  hltQuadJet45DiJet40_ = false;
-  hltQuadJet50DiJet40_ = false;
-  hltQuadJet50DiJet40L1_ = false;
-  hltSixJet45_ = false;
-  hltSixJet45L1_ = false;
-  
   vtxN_ = 0;
   vtxNTracks_ = 0;
   vtxPosX_ = 0.;
@@ -532,6 +434,8 @@ template <typename T> NJet<T>::NJet()
   sV3dDistance_      = new float [ kjMAX ];
   sVChi2_            = new float [ kjMAX ];
   sV3dDistanceError_ = new float [ kjMAX ];
+  sVMass_            = new float [ kjMAX ];
+  sVPt_              = new float [ kjMAX ];
   jetbtag            = new float [ kjMAX ]; //to be filled with simple secondary vertex
 
   // Jet IDs
@@ -544,10 +448,12 @@ template <typename T> NJet<T>::NJet()
   fNeutralHadrons_ = new float[kjMAX];
   fPhotons_ = new float[kjMAX];
   fElectrons_ = new float[kjMAX];
+  fMuons_ = new float[kjMAX];
   fHFEm_ = new float[kjMAX];
   fHFHad_ = new float[kjMAX];
   leadingChargedConstPt_ = new float[kjMAX];
   nChargedHadrons_ = new int[kjMAX];
+  nChargedPFConstituents_ = new int[kjMAX];
   nPFConstituents_ = new int[kjMAX];
   jetIDLoose_ = new bool[kjMAX];
   jetIDTight_ = new bool[kjMAX];
@@ -797,6 +703,8 @@ template <typename T> NJet<T>::~NJet() {
   delete [] sV3dDistance_;
   delete [] sVChi2_;
   delete [] sV3dDistanceError_;
+  delete [] sVMass_;
+  delete [] sVPt_;
 
   delete [] n90Hits_;
   delete [] fHad_;
@@ -811,6 +719,7 @@ template <typename T> NJet<T>::~NJet() {
   delete [] fHFHad_;
   delete [] leadingChargedConstPt_;
   delete [] nChargedHadrons_;
+  delete [] nChargedPFConstituents_;
   delete [] nPFConstituents_;
   delete [] jetIDLoose_;
   delete [] jetIDTight_;
@@ -921,6 +830,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   secVx_              = cfg.getParameter<edm::InputTag>("NJetSecondVx");
   secVxTagInfo_       = cfg.getParameter<edm::InputTag>("NJetSecondVxTagInfo");
   ipTagInfo_          = cfg.getParameter<edm::InputTag>("NJetTrackIPTagInfos");
+  sVComputer_tag_     = cfg.getParameter<edm::InputTag>("NJet_svComputer"),
   writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
   writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
@@ -951,17 +861,12 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 
   CalibTree->Branch("HltL1Jet6U",&hltL1Jet6U_,"HltL1Jet6U/O");
 
+  //create branches for trigger information
   for(size_t i = 0; i<TriggerInfo_.size(); i++){
     CalibTree->Branch((TriggerInfo_.at(i).name_).c_str(),&TriggerInfo_.at(i).fired_,(TriggerInfo_.at(i).name_+"/O").c_str());
-    CalibTree->Branch(("PS_"+TriggerInfo_.at(i).name_).c_str(),&TriggerInfo_.at(i).prescale_,("PS_"+TriggerInfo_.at(i).name_+"/I").c_str());
+    if(TriggerInfo_.at(i).writePrescale_)CalibTree->Branch(("PS_"+TriggerInfo_.at(i).name_).c_str(),&TriggerInfo_.at(i).prescale_,("PS_"+TriggerInfo_.at(i).name_+"/I").c_str());
   }
 
-  CalibTree->Branch("HltQuadJet40",&hltQuadJet40_, "HltQuadJet40/O");
-  CalibTree->Branch("HltQuadJet45DiJet40",&hltQuadJet45DiJet40_, "HltQuadJet45DiJet40/O");
-  CalibTree->Branch("HltQuadJet50DiJet40",&hltQuadJet50DiJet40_, "HltQuadJet50DiJet40/O");
-  CalibTree->Branch("HltQuadJet50DiJet40L1",&hltQuadJet50DiJet40L1_, "HltQuadJet50DiJet40L1/O");
-  CalibTree->Branch("HltSixJet45",&hltSixJet45_, "HltSixJet45/O");
-  CalibTree->Branch("HltSixJet45L1",&hltSixJet45L1_, "HltSixJet45L1/O");
 
   CalibTree->Branch("PassesECALDeadCellBEFilter",&passesECALDeadCellBEFilter_,"PassesECALDeadCellBEFilter/O");
   CalibTree->Branch("PassesECALDeadCellTPFilter",&passesECALDeadCellTPFilter_,"PassesECALDeadCellTPFilter/O");
@@ -1049,9 +954,10 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetFNeutralHadrons",fNeutralHadrons_,"JetFNeutralHadrons[NobjJet]/F");  
   CalibTree->Branch( "JetFPhotons",fPhotons_,"JetFPhotons[NobjJet]/F");  
   CalibTree->Branch( "JetFElectrons",fElectrons_,"JetFElectrons[NobjJet]/F");  
+  CalibTree->Branch( "JetFMuons",fMuons_,"JetFMuons[NobjJet]/F");  
   CalibTree->Branch( "JetFHFEm",fHFEm_,"JetFHFEm[NobjJet]/F");  
   CalibTree->Branch( "JetFHFHad",fHFHad_,"JetFHFHad[NobjJet]/F");  
-  CalibTree->Branch( "JetLeadingCargedConstPt",leadingChargedConstPt_,"JetLeadingCargedConstPt[NobjJet]/F");  
+  CalibTree->Branch( "JetLeadingChargedConstPt",leadingChargedConstPt_,"JetLeadingChargedConstPt[NobjJet]/F");  
   CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
   CalibTree->Branch( "JetIDTight",jetIDTight_,"JetIDTight[NobjJet]/O");
   CalibTree->Branch( "JetEtWeightedSigmaPhi",jetEtWeightedSigmaPhi_,"JetEtWeightedSigmaPhi[NobjJet]/F" );
@@ -1069,6 +975,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
   CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
   CalibTree->Branch( "JetNChargedHadrons",nChargedHadrons_,"JetNChargedHadrons[NobjJet]/I"); 
+  CalibTree->Branch( "JetNChargedPFConstituents",nChargedPFConstituents_,"JetNChargedPFConstituents[NobjJet]/I"); 
   CalibTree->Branch( "JetNPFConstituents",nPFConstituents_,"JetNPFConstituents[NobjJet]/I"); 
 
 
@@ -1077,6 +984,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetSV3dDistance",         sV3dDistance_,      "JetSV3dDistance[NobjJet]/F" );
   CalibTree->Branch( "JetSVChi2",               sVChi2_,            "JetSVChi2[NobjJet]/F" );
   CalibTree->Branch( "JetSV3dDistanceError",    sV3dDistanceError_, "JetSV3dDistanceError[NobjJet]/F" );
+  CalibTree->Branch( "JetSVMass",               sVMass_,            "JetSVMass[NobjJet]/F" );
+  CalibTree->Branch( "JetSVPt",                 sVPt_,              "JetSVPt[NobjJet]/F" );
 
   // Gen jets (matched to calo jets)
   CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
@@ -1219,50 +1128,19 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 /*     if( id != trigNames.size() ) */
 /*       if( triggerResults->accept(id) ) hltL1Jet6U_ = true; */
    
-  for(size_t i = 0; i<TriggerInfo_.size(); i++){
-    TriggerInfo_.at(i).fired_=false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),TriggerInfo_.at(i).HLTname_);
-    if( id != trigNames.size() ){
-      if( triggerResults->accept(id) ) TriggerInfo_.at(i).fired_ = true;
-      std::pair<int,int> prescaleValues = hltConfig_.prescaleValues(evt, setup, trigNames.triggerName(id));
-      TriggerInfo_.at(i).prescale_=prescaleValues.first*prescaleValues.second;
 
-
-
+    //fill triggerinfo-vector with trigger results (and if needed) prescale values
+    for(size_t i = 0; i<TriggerInfo_.size(); i++){
+      TriggerInfo_.at(i).fired_=false;
+      id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),TriggerInfo_.at(i).HLTname_);
+      if( id != trigNames.size() ){
+	if( triggerResults->accept(id) ) TriggerInfo_.at(i).fired_ = true;
+	if(TriggerInfo_.at(i).writePrescale_){
+	  std::pair<int,int> prescaleValues = hltConfig_.prescaleValues(evt, setup, trigNames.triggerName(id));
+	  TriggerInfo_.at(i).prescale_=prescaleValues.first*prescaleValues.second;
+	}
+      }
     }
-  }
-
- 
-    //multi-jet trigger
-    hltQuadJet40_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet40");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltQuadJet40_ = true;
-    
-    hltQuadJet45DiJet40_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet45_DiJet40");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltQuadJet45DiJet40_ = true;
-     
-    hltQuadJet50DiJet40_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet50_DiJet40");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltQuadJet50DiJet40_ = true; 
-    
-    hltQuadJet50DiJet40L1_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_QuadJet50_DiJet40_L1FastJet");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltQuadJet50DiJet40L1_ = true;
-     
-    hltSixJet45_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_SixJet45");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltSixJet45_ = true;  
-    
-    hltSixJet45L1_ = false;
-    id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),"HLT_SixJet45_L1FastJet");
-    if( id != trigNames.size() )
-      if( triggerResults->accept(id) ) hltSixJet45L1_ = true;
  
   }
   // Vertex info
@@ -1319,6 +1197,20 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     {
       ipTagInfo[iTagInfo->jet()] = &*iTagInfo;
     }
+
+
+  //instantiate a tagging variable computer for unification of some calculations like vertex mass corrections
+  edm::ESHandle<JetTagComputer> computerHandle;;
+  setup.get<JetTagComputerRecord>().get( sVComputer_tag_.label(), computerHandle );
+  const GenericMVAJetTagComputer *computer =
+    dynamic_cast<const GenericMVAJetTagComputer*>( computerHandle.product() );
+  if (!computer){
+    edm::LogError("DataLost")<<"computer missing !!!"<<std::endl;
+    exit(1);
+  }
+  computer->passEventSetup(setup);
+  
+
 
 
   edm::Handle<double> pRho;
@@ -1499,21 +1391,32 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       if(svTagInfo[thisJetRef]->nVertices() > 0 ){
 	LogDebug("GreatBTagInfo") << "retrieving sondary vertex info";
 	std::vector<const reco::BaseTagInfo*>  baseTagInfos;
-	baseTagInfos.push_back( &(*svTagInfo[thisJetRef]) );
 	baseTagInfos.push_back( &(*ipTagInfo[thisJetRef]) ); 
+	baseTagInfos.push_back( &(*svTagInfo[thisJetRef]) );
+	
 	JetTagComputer::TagInfoHelper helper(baseTagInfos);
+	reco::TaggingVariableList vars = computer->taggingVariables(helper);
+	
 
 
-	//	sVx_ [ jtno ]             = svTagInfo[thisJetRef]->secondaryVertex(0).x();
 	sV3dDistance_ [jtno]      = (svTagInfo[thisJetRef]->flightDistance(0).value());
 	sVChi2_ [jtno]            =(svTagInfo[thisJetRef]->secondaryVertex(0).chi2());         
-	sV3dDistanceError_ [jtno] = (svTagInfo[thisJetRef]->flightDistance(0).error());                     
+	sV3dDistanceError_ [jtno] = (svTagInfo[thisJetRef]->flightDistance(0).error());       
+
+	if(vars.checkTag(reco::btau::vertexMass)) sVMass_[jtno] = ( vars.get(reco::btau::vertexMass));
+	else  sVMass_[jtno] = ( -9999 );
+
+	const reco::Vertex &vertex = svTagInfo[thisJetRef]->secondaryVertex(0);
+	sVPt_ [jtno]               = vertex.p4().pt();
+
       }
       else{
 	//	sVx_ [ jtno ]             = -1;
 	sV3dDistance_ [jtno]      = -1;
 	sVChi2_ [jtno]            = -1;
 	sV3dDistanceError_ [jtno] = -1;
+	sVMass_[jtno]             = -1;
+	sVPt_[jtno]             = -1;
       }
       
       // L2L3 correction
@@ -1858,10 +1761,12 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
   fNeutralHadrons_[ jtno ] = -1;
   fPhotons_[ jtno ]        = -1;
   fElectrons_[ jtno ]      = -1;
+  fMuons_[ jtno ]          = -1;
   fHFEm_[ jtno ]           = -1;
   fHFHad_[ jtno ]          = -1;
   leadingChargedConstPt_[ jtno ] = -1;
   nChargedHadrons_[ jtno ] = -1;
+  nChargedPFConstituents_[ jtno ] = -1;
   nPFConstituents_[ jtno ] = -1;
   if(! writeTowers_) return;
   std::vector<CaloTowerPtr> j_towers = pJets[jtno].getCaloConstituents();
@@ -1894,33 +1799,30 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
 template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJets, int jtno)
 {
   fEMF_[ jtno ] = pJets[jtno].chargedEmEnergyFraction() + pJets[jtno].neutralEmEnergyFraction();// +  pJets[jtno].HFEMEnergyFraction ();
-  fHad_[ jtno ] = 1 - fEMF_[ jtno ];
+  fHad_[ jtno ] = 1 - fEMF_[ jtno ]; 
   fChargedHadrons_[ jtno ] = pJets[jtno].chargedHadronEnergyFraction();
   fNeutralHadrons_[ jtno ] = pJets[jtno].neutralHadronEnergyFraction();
   fPhotons_[ jtno ]      = pJets[jtno].photonEnergyFraction();
   fElectrons_[ jtno ]      = pJets[jtno].electronEnergyFraction();
+  fMuons_[ jtno ]          = pJets[jtno].muonEnergyFraction();
   fHFEm_[ jtno ]           = pJets[jtno].HFEMEnergyFraction ();
   fHFHad_[ jtno ]          = pJets[jtno].HFHadronEnergyFraction () ;
   nChargedHadrons_[ jtno ] = pJets[jtno].chargedHadronMultiplicity();
+  nChargedPFConstituents_[ jtno ] = (pJets[jtno].chargedHadronMultiplicity () + pJets[jtno].electronMultiplicity () +pJets[jtno].muonMultiplicity () );
   nPFConstituents_[ jtno ] = (pJets[jtno].chargedHadronMultiplicity () +pJets[jtno].neutralHadronMultiplicity () +pJets[jtno].photonMultiplicity ()  +pJets[jtno].electronMultiplicity () +pJets[jtno].muonMultiplicity ()  +pJets[jtno].HFHadronMultiplicity ()  +pJets[jtno].HFEMMultiplicity () );
 
-  //  pJets[jtno].
 
-    //virtual std::vector
-    //< reco::PFCandidatePtr > 	getPFConstituents () const 
-
-
-    const std::vector < reco::PFCandidatePtr > PFConstituents = pJets[jtno].getPFConstituents ();
-    //    std::cout << "starting to list PF constituents:" <<std::endl; 
-    leadingChargedConstPt_ [ jtno ] = -1;
-    for (std::vector<reco::PFCandidatePtr>::const_iterator constituent = PFConstituents.begin(); constituent!=PFConstituents.end(); ++constituent){
-      //      std::cout << (*constituent)->pt() << " " << (*constituent)->charge() <<std::endl; 
-      if(TMath::Abs((*constituent)->charge())>0){
-	leadingChargedConstPt_ [ jtno ] =  (*constituent)->pt();
-	break;
-      }
+  const std::vector < reco::PFCandidatePtr > PFConstituents = pJets[jtno].getPFConstituents ();
+  //    std::cout << "starting to list PF constituents:" <<std::endl; 
+  leadingChargedConstPt_ [ jtno ] = -1;
+  for (std::vector<reco::PFCandidatePtr>::const_iterator constituent = PFConstituents.begin(); constituent!=PFConstituents.end(); ++constituent){
+    //      std::cout << (*constituent)->pt() << " " << (*constituent)->charge() <<std::endl; 
+    if(TMath::Abs((*constituent)->charge())>0){
+      leadingChargedConstPt_ [ jtno ] =  (*constituent)->pt();
+      break;
     }
-
+  }
+  
 }  
 
 template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtno)
@@ -1931,10 +1833,12 @@ template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtn
   fNeutralHadrons_[ jtno ] = -1;
   fPhotons_[ jtno ]        = -1;
   fElectrons_[ jtno ]      = -1;
+  fMuons_[ jtno ]          = -1;
   fHFEm_[ jtno ]           = -1;
   fHFHad_[ jtno ]          = -1;
   leadingChargedConstPt_[ jtno ] = -1;
   nChargedHadrons_[ jtno ] = -1;
+  nChargedPFConstituents_[ jtno ] = -1;
   nPFConstituents_[ jtno ] = -1;
 }
 

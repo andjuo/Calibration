@@ -29,4 +29,6 @@
 <use   name="DataFormats/L1GlobalTrigger"/>
 <use   name="HLTrigger/HLTcore"/>
 <use   name="DataFormats/Common"/>
+<use   name="RecoBTau/JetTagComputer"/>
 <flags   EDM_PLUGIN="1"/>
+<flags CXXFLAGS="-g"/>
