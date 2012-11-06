@@ -31,4 +31,3 @@
 <use   name="DataFormats/Common"/>
 <use   name="RecoBTau/JetTagComputer"/>
 <flags   EDM_PLUGIN="1"/>
-<flags CXXFLAGS="-g"/>
