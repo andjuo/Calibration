@@ -135,6 +135,31 @@ ak7PFJetsBtag = cms.Sequence(
                                ak7PFJetTracksAssociatorAtVertex *
                                ak7PFJetBtaggingSV
                               )
+			      
+#ak7PFCHS
+ak7PFCHSJetTracksAssociatorAtVertex = ic5JetTracksAssociatorAtVertex.clone()
+ak7PFCHSJetTracksAssociatorAtVertex.jets = "ak7PFCHSJets"
+ak7PFCHSJetTracksAssociatorAtVertex.tracks = "generalTracks"
+ak7PFCHSImpactParameterTagInfos = impactParameterTagInfos.clone()
+ak7PFCHSImpactParameterTagInfos.jetTracks = "ak7PFCHSJetTracksAssociatorAtVertex"
+ak7PFCHSSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
+ak7PFCHSSecondaryVertexTagInfos.trackIPTagInfos = "ak7PFCHSImpactParameterTagInfos"
+#ak7PFCHSSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak7PFCHSSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7PFCHSSecondaryVertexTagInfos") )
+ak7PFCHSCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak7PFCHSStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
+ak7PFCHSCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak7PFCHSStandardCombinedSecondaryVertex')
+ak7PFCHSCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7PFCHSImpactParameterTagInfos"), cms.InputTag("ak7PFCHSSecondaryVertexTagInfos") )
+ak7PFCHSJetBtaggingSV = cms.Sequence(
+                                    ak7PFCHSImpactParameterTagInfos *
+                                    ak7PFCHSSecondaryVertexTagInfos *
+#                                    ak7PFCHSStandardCombinedSecondaryVertex * 
+                                    ak7PFCHSCombinedSecondaryVertexBJetTags
+                                   )
+ak7PFCHSJetsBtag = cms.Sequence(
+                               ak7PFCHSJetTracksAssociatorAtVertex *
+                               ak7PFCHSJetBtaggingSV
+                              )			      
 
 #ak5PFCHS
 ak5PFCHSJetTracksAssociatorAtVertex = ic5JetTracksAssociatorAtVertex.clone()

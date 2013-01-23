@@ -44,13 +44,16 @@ pfNoPileUp.bottomCollection = 'particleFlow'
 ak5PFCHSJets = ak5PFJets.clone(
     src = 'pfNoPileUp'
 )
+ak7PFCHSJets = ak7PFJets.clone(
+    src = 'pfNoPileUp'
+)
 kt6PFCHSJets = kt6PFJets.clone(
     src = 'pfNoPileUp'
 )
 
 
 calibjets = cms.Sequence(recoJets * recoPFJets * goodOfflinePrimaryVertices 
-                         * pfNoPileUpSequence * ak5PFCHSJets * rho25kt6PFJets * rho25kt6CaloJets)
+                         * pfNoPileUpSequence * ak5PFCHSJets * ak7PFCHSJets * rho25kt6PFJets * rho25kt6CaloJets)
  
 try:
     calibjets.remove(kt6PFJetsCentralChargedPileUp)
