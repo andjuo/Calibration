@@ -1426,7 +1426,13 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       jscalel3[jtno]   = correctorL3->correction( jscalel1[jtno] * jscalel2[jtno] * (*pJets)[jtno].p4());  //calculate the correction
       jscalel2l3[jtno] = correctorL1L2L3->correction( (*pJets)[jtno],evt,setup);  //calculate the correction; is corrected back to pure L2L3 later
       jscalel4JW[jtno] = correctorL1L2L3L4JW->correction((*pJets)[jtno],evt,setup) / jscalel2l3[jtno];  //calculate the correction; is corrected back to pure L2L3 later
-      jecUnc_->setJetEta(jeteta[jtno]); // Give rapidity of jet you want uncertainty on
+          
+      float myEta = jeteta[jtno];
+      if(TMath::Abs(myEta) >= 5.2){
+	edm::LogWarning("JetEta") << "Jet Eta too large!! Set to 5.199 for JEC calculation!";
+	myEta = 5.199;
+      }
+      jecUnc_->setJetEta(myEta); // Give rapidity of jet you want uncertainty on 
       jecUnc_->setJetPt(jscalel2l3[jtno]*jetpt[jtno]);// Also give the corrected pt of the jet you want the uncertainty on
       // The following function gives the relative uncertainty in the jet Pt.
       // i.e. ptCorSmeared = (1 +- uncer) * ptCor  
