@@ -1,4 +1,4 @@
-## $Id: cleaningSequences_cff.py,v 1.2 2012/10/11 18:47:19 mschrode Exp $
+## $Id: cleaningSequences_cff.py,v 1.3 2012/10/30 21:07:00 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -57,6 +57,8 @@ EcalDeadCellTriggerPrimitiveFilter.taggingMode = cms.bool(False)
 from RecoMET.METFilters.EcalDeadCellBoundaryEnergyFilter_cfi import EcalDeadCellBoundaryEnergyFilter
 EcalDeadCellBoundaryEnergyFilter.taggingMode = cms.bool(False)
 
+## The tracking POG filters __________________________________________________||
+from RecoMET.METFilters.trackingPOGFilters_cff import *
 
 ##
 ##  Cleaning sequence to be used before ntupling
@@ -73,5 +75,8 @@ stdCleaningSequence = cms.Sequence(
    ecalLaserCorrFilter *
    goodPrimaryVertices * trackingFailureFilter *
    EcalDeadCellTriggerPrimitiveFilter *
-   EcalDeadCellBoundaryEnergyFilter
+   EcalDeadCellBoundaryEnergyFilter *
+   trkPOGFilters
 )
+
+
