@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.6 2012/10/11 18:47:19 mschrode Exp $
+# $Id: runTreeMaker_cff.py,v 1.7 2012/10/30 21:07:00 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -71,14 +71,24 @@ def runTreeMaker(
     # standard filter sequence + ecal dead-cell tagger
     process.load('Calibration.CalibTreeMaker.cleaningSequences_cff')
 
+    
+    ## Additional event list for Hcal Laser Filter _______________________________||
+    from RecoMET.METFilters.multiEventFilter_cfi import multiEventFilter
+    process.HCALLaserEvtFilterList_20Nov2012 = multiEventFilter.clone(
+        file        = cms.FileInPath('Calibration/CalibTreeMaker/data/HCALLaserEventList_20Nov2012-v2_Jet_JetHT_JetMon.txt'),
+        taggingMode = cms.bool(False)
+        )
+
     # sequence with filters
     process.filterSequence = cms.Sequence(
         process.hltHighLevel *
-        process.stdCleaningSequence
+        process.stdCleaningSequence *
+        process.HCALLaserEvtFilterList_20Nov2012
         )
 
     if not isData:
         process.filterSequence.remove( process.hltHighLevel )
+        process.filterSequence.remove( process.HCALLaserEvtFilterList_20Nov2012 )
 
 
 
