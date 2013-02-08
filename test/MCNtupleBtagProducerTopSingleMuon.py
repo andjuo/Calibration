@@ -23,16 +23,16 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoBTag/Configuration/RecoBTag_cff')
 
-process.GlobalTag.globaltag = 'START44_V13::All' # 'START44_V13::All' # 'START42_V17::All' #'START42_V17::All' 'START52_V9::All'
+process.GlobalTag.globaltag = 'START53_V18::All'
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(
-                            '/store/mc/Fall11/TTJets_TuneZ2_7TeV-madgraph-tauola/AODSIM/PU_S6-START44_V5-v1/0000/FEF6B833-C304-E111-B523-003048678FFA.root'
+                            '/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7C-v1/00000/FE7C71D8-DB25-E211-A93B-0025901D4C74.root'
                             )
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100) )
+    input = cms.untracked.int32(-1) )
 
 process.options = cms.untracked.PSet(
     SkipEvent = cms.untracked.vstring('ProductNotFound'),
@@ -84,7 +84,21 @@ for calibTreeMaker in (process.calibTreeMakerCalo,
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 process.pDump = cms.Path( process.dump )
-process.pData = cms.Path(process.hltHighLevel * process.calibjets * process.genMuons * process.goodGenMuons * process.myPartons * process.PFJetPartonMatching * process.ak5PFJetsBtag * process.calibTreeMakerAK5FastPF * process.AK5PFCHSJetPartonMatching * process.ak5PFCHSJetsBtag * process.calibTreeMakerAK5PFCHS)
+process.pData = cms.Path(process.filterSequence *
+                         process.calibjets *
+                         process.produceAllCaloMETCorrections *
+                         process.produceAllPFMETCorrections *
+                         process.produceAllPFCHSMETCorrections *
+                         process.genPhotons *
+                         process.goodGenPhotons *
+                         process.myPartons *
+                         process.PFJetPartonMatching *
+                         process.AK5PFCHSJetPartonMatching *
+                         process.ak5PFJetsBtag *
+                         process.calibTreeMakerAK5FastPF *
+                         process.ak5PFCHSJetsBtag *
+                         process.calibTreeMakerAK5PFCHS
+                         )
 process.schedule = cms.Schedule(process.pData)
 
 process.pData.remove(process.kt4CaloJets)
