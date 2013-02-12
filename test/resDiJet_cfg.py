@@ -1,4 +1,4 @@
-# $Id: resPhotonJetData_cfg.py,v 1.4 2012/10/11 18:47:20 mschrode Exp $
+# $Id: resDiJet_cfg.py,v 1.1 2013/02/08 13:50:18 kheine Exp $
 #
 # Write Kalibri DiJet Tree
 
@@ -28,7 +28,7 @@ runTreeMaker(
     writePhotons=False,
     hltSelection=[],
     reportEveryEvt=5000,
-    testFileName="file:///scratch/hh/dust/naf/cms/user/mschrode/SMS-AOD/store/mc/Summer12/SMS-T1tttt_Mgluino-350to2000_mLSP-0to1650_8TeV-Pythia6Z/AODSIM/START52_V9_FSIM-v3/0000/28988716-97EF-E111-A1A8-18A90570ABE0.root",
+    testFileName="/store/data/Run2012B/JetHT/AOD/13Jul2012-v1/00001/FCC8A4E0-BDD2-E111-9E79-003048FFCBFC.root",
     numProcessedEvt=100
     )
 
