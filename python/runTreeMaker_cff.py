@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.7 2012/10/30 21:07:00 mschrode Exp $
+# $Id: runTreeMaker_cff.py,v 1.8 2013/02/08 13:49:24 kheine Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -74,7 +74,7 @@ def runTreeMaker(
     
     ## Additional event list for Hcal Laser Filter _______________________________||
     from RecoMET.METFilters.multiEventFilter_cfi import multiEventFilter
-    process.HCALLaserEvtFilterList_20Nov2012 = multiEventFilter.clone(
+    process.HCALLaserEvtFilterList2012 = multiEventFilter.clone(
         file        = cms.FileInPath('Calibration/CalibTreeMaker/data/HCALLaserEventList_20Nov2012-v2_Jet_JetHT_JetMon.txt'),
         taggingMode = cms.bool(False)
         )
@@ -83,12 +83,12 @@ def runTreeMaker(
     process.filterSequence = cms.Sequence(
         process.hltHighLevel *
         process.stdCleaningSequence *
-        process.HCALLaserEvtFilterList_20Nov2012
+        process.HCALLaserEvtFilterList2012
         )
 
     if not isData:
         process.filterSequence.remove( process.hltHighLevel )
-        process.filterSequence.remove( process.HCALLaserEvtFilterList_20Nov2012 )
+        process.filterSequence.remove( process.HCALLaserEvtFilterList2012 )
 
 
 
@@ -123,14 +123,16 @@ def runTreeMaker(
 
     process.products = cms.Sequence(
         process.calibjets *
-        process.produceCaloMETCorrections *
-        process.producePFMETCorrections
+        process.produceAllCaloMETCorrections *
+        process.produceAllPFMETCorrections *
+        process.produceAllPFCHSMETCorrections
         )
     if not isData:
         process.products = cms.Sequence(
             process.calibjets *
-            process.produceCaloMETCorrections *
-            process.producePFMETCorrections *
+            process.produceAllCaloMETCorrections *
+            process.produceAllPFMETCorrections *
+            process.produceAllPFCHSMETCorrections *
             process.genPhotons *
             process.goodGenPhotons *
             process.myPartons *
