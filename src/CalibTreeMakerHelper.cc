@@ -10,3 +10,5 @@ unsigned int CalibTreeMakerHelper::findTrigger(const std::vector<std::string>& l
   }
   return list.size();
 }
+
+CalibTreeMakerHelper::AllTriggerInfo::AllTriggerInfo(std::string name, std::string HLTname, bool fired, int prescale, bool writePrescale) : name_(name), HLTname_(HLTname), fired_(fired), prescale_(prescale), writePrescale_(writePrescale) {}

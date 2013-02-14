@@ -182,6 +182,7 @@ private:
   bool vtxIsFake_;
   int puMCNumVtx_,puMCNumVtxOOT_;
   float puMCNumTruth_;
+  float puMCHighestSumPt_;
   float rho_,rho25_;
 
   // Calo jets and jet ID
@@ -213,7 +214,7 @@ private:
   // Gen jet collection
   int    NobjGenJet;
   float *genjetcolpt, *genjetcolphi, *genjetcoleta, *genjetcolet, *genjetcole;
-  float *genjetcoleme,*genjetcolhade,*genjetcolinve,*genjetcolauxe;
+  float *genjetcoleme,*genjetcolhade,*genjetcolinve,*genjetcolauxe, *genjetcol_jet_DeltaR;
   int   *genjetcol_jet_idx;
 
   // Get jet particles
@@ -357,6 +358,7 @@ template <typename T> NJet<T>::NJet()
   puMCNumVtx_ = 0;
   puMCNumVtxOOT_ = 0;
   puMCNumTruth_ = 0;
+  puMCHighestSumPt_ = 0;
   rho_ = 0;
   rho25_ = 0;
 
@@ -506,28 +508,30 @@ template <typename T> NJet<T>::NJet()
   }
 
   // Gen jet collection
-  NobjGenJet        = 0;
-  genjetcolpt       = new float [ kjMAX ];
-  genjetcolphi      = new float [ kjMAX ];
-  genjetcoleta      = new float [ kjMAX ];
-  genjetcolet       = new float [ kjMAX ];
-  genjetcole        = new float [ kjMAX ];
-  genjetcoleme      = new float [ kjMAX ];
-  genjetcolhade     = new float [ kjMAX ];
-  genjetcolinve     = new float [ kjMAX ];
-  genjetcolauxe     = new float [ kjMAX ];
-  genjetcol_jet_idx = new int   [ kjMAX ];
+  NobjGenJet            = 0;
+  genjetcolpt           = new float [ kjMAX ];
+  genjetcolphi          = new float [ kjMAX ];
+  genjetcoleta          = new float [ kjMAX ];
+  genjetcolet           = new float [ kjMAX ];
+  genjetcole            = new float [ kjMAX ];
+  genjetcoleme          = new float [ kjMAX ];
+  genjetcolhade         = new float [ kjMAX ];
+  genjetcolinve         = new float [ kjMAX ];
+  genjetcolauxe         = new float [ kjMAX ];
+  genjetcol_jet_DeltaR  = new float [ kjMAX ];
+  genjetcol_jet_idx     = new int   [ kjMAX ];
   for(int i = 0; i < kjMAX; i++) {
-    genjetcolpt[i]       = 0.;
-    genjetcolphi[i]      = 0.;
-    genjetcoleta[i]      = 0.;
-    genjetcolet[i]       = 0.;
-    genjetcole[i]        = 0.;
-    genjetcoleme[i]      = 0.;
-    genjetcolhade[i]     = 0.;
-    genjetcolinve[i]     = 0.;
-    genjetcolauxe[i]     = 0.;
-    genjetcol_jet_idx[i] = -1;
+    genjetcolpt[i]          = 0.;
+    genjetcolphi[i]         = 0.;
+    genjetcoleta[i]         = 0.;
+    genjetcolet[i]          = 0.;
+    genjetcole[i]           = 0.;
+    genjetcoleme[i]         = 0.;
+    genjetcolhade[i]        = 0.;
+    genjetcolinve[i]        = 0.;
+    genjetcolauxe[i]        = 0.;
+    genjetcol_jet_DeltaR[i] = 1000;
+    genjetcol_jet_idx[i]    = -1;
   }
   // Gen jet particles
   NobjGenJetPart = 0;
@@ -756,6 +760,7 @@ template <typename T> NJet<T>::~NJet() {
   delete [] genjetcolhade;       
   delete [] genjetcolinve;       
   delete [] genjetcolauxe;       
+  delete [] genjetcol_jet_DeltaR;  
   delete [] genjetcol_jet_idx;  
 
   delete [] genjetparte;
@@ -863,8 +868,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 
   //create branches for trigger information
   for(size_t i = 0; i<TriggerInfo_.size(); i++){
-    CalibTree->Branch((TriggerInfo_.at(i).name_).c_str(),&TriggerInfo_.at(i).fired_,(TriggerInfo_.at(i).name_+"/O").c_str());
-    if(TriggerInfo_.at(i).writePrescale_)CalibTree->Branch(("PS_"+TriggerInfo_.at(i).name_).c_str(),&TriggerInfo_.at(i).prescale_,("PS_"+TriggerInfo_.at(i).name_+"/I").c_str());
+    CalibTree->Branch((TriggerInfo_.at(i).name()).c_str(),&TriggerInfo_.at(i).fired_,(TriggerInfo_.at(i).name()+"/O").c_str());
+    if(TriggerInfo_.at(i).writePrescale())CalibTree->Branch(("PS_"+TriggerInfo_.at(i).name()).c_str(),&TriggerInfo_.at(i).prescale_,("PS_"+TriggerInfo_.at(i).name()+"/I").c_str());
   }
 
 
@@ -883,6 +888,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("PUMCNumVtx",&puMCNumVtx_,"PUMCNumVtx/I");
   CalibTree->Branch("PUMCNumVtxOOT",&puMCNumVtxOOT_,"PUMCNumVtxOOT/I");
   CalibTree->Branch("PUMCNumTruth",&puMCNumTruth_,"PUMCNumTruth/F");
+  CalibTree->Branch("PUMCHighestSumPt",&puMCHighestSumPt_,"PUMCHighestSumPt/F");
   CalibTree->Branch("Rho",&rho_,"Rho/F");
   CalibTree->Branch("Rho25",&rho25_,"Rho25/F");
 
@@ -1006,6 +1012,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "GenJetColHadE",   genjetcolhade,     "GenJetColHadE[NobjGenJet]/F"     );
   CalibTree->Branch( "GenJetColInvE",   genjetcolinve,     "GenJetColInvE[NobjGenJet]/F"     );
   CalibTree->Branch( "GenJetColAuxE",   genjetcolauxe,     "GenJetColAuxE[NobjGenJet]/F"     );
+  CalibTree->Branch( "GenJetColJetDeltaR",   genjetcol_jet_DeltaR,     "GenJetColJetDeltaR[NobjGenJet]/F"     );
   CalibTree->Branch( "GenJetColJetIdx", genjetcol_jet_idx, "GenJetColJetIdx[NobjGenJet]/I");
   // Gen Jet constituents(particles)
   if(writeGenJetPart_) {
@@ -1132,10 +1139,10 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     //fill triggerinfo-vector with trigger results (and if needed) prescale values
     for(size_t i = 0; i<TriggerInfo_.size(); i++){
       TriggerInfo_.at(i).fired_=false;
-      id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),TriggerInfo_.at(i).HLTname_);
+      id = CalibTreeMakerHelper::findTrigger(trigNames.triggerNames(),TriggerInfo_.at(i).HLTname());
       if( id != trigNames.size() ){
 	if( triggerResults->accept(id) ) TriggerInfo_.at(i).fired_ = true;
-	if(TriggerInfo_.at(i).writePrescale_){
+	if(TriggerInfo_.at(i).writePrescale()){
 	  std::pair<int,int> prescaleValues = hltConfig_.prescaleValues(evt, setup, trigNames.triggerName(id));
 	  TriggerInfo_.at(i).prescale_=prescaleValues.first*prescaleValues.second;
 	}
@@ -1288,10 +1295,19 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   evt.getByLabel("addPileupInfo",puInfo);
   puMCNumVtxOOT_ = 0;
   puMCNumTruth_ = 0;
+  puMCHighestSumPt_ = 0;
   if( puInfo.isValid() ) {
     for(std::vector<PileupSummaryInfo>::const_iterator puIt = puInfo->begin(); 
 	puIt != puInfo->end(); ++puIt) {
       //std::cout << " Pileup Information: bunchXing, nvtx: " << puIt->getBunchCrossing() << " " << puIt->getPU_NumInteractions() << std::endl;
+      
+      
+      for(unsigned int j=0; j<puIt->getPU_sumpT_highpT().size(); j++) {
+	float sumpthighpttemp = (puIt->getPU_sumpT_highpT())[j];
+	if(sumpthighpttemp>puMCHighestSumPt_)puMCHighestSumPt_=sumpthighpttemp;
+
+      }
+      
       if( puIt->getBunchCrossing() == 0 ) { // Select in-time bunch crossing
 	puMCNumVtx_ = puIt->getPU_NumInteractions();
         puMCNumTruth_ = puIt->getTrueNumInteractions();
@@ -1711,7 +1727,8 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	    closestJetIdx = cjidx;
 	  }
 	}
-	genjetcol_jet_idx[gjidx] = closestJetIdx;
+	genjetcol_jet_DeltaR[gjidx] = closestDeltaR;
+	genjetcol_jet_idx[gjidx]    = closestJetIdx;
 
 	if( writeGenJetPart_ ) {
 	  for(unsigned int igp = 0, ngp = genJet.nConstituents() ;
