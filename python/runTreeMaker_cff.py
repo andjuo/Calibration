@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.8 2013/02/08 13:49:24 kheine Exp $
+# $Id: runTreeMaker_cff.py,v 1.9 2013/02/12 09:18:23 kheine Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -71,6 +71,15 @@ def runTreeMaker(
     # standard filter sequence + ecal dead-cell tagger
     process.load('Calibration.CalibTreeMaker.cleaningSequences_cff')
 
+    ## New HO mis-reco Filter ____________________________________________________||
+    from SandBox.Skims.caloVsPFMetFilter_cfi import caloVsPFMetFilter
+    process.RA2CaloVsPFMETFilter = caloVsPFMetFilter.clone(
+        CaloMetInputTag  = cms.InputTag('met'),
+        PFMetInputTag    = cms.InputTag('pfMet'),
+        MinCaloOverPFMet = cms.double(0.5),
+        SizeOfDeltaPhiWindowInNPi = cms.double(1.),
+        TaggingMode      = cms.bool(True)
+    )
     
     ## Additional event list for Hcal Laser Filter _______________________________||
     from RecoMET.METFilters.multiEventFilter_cfi import multiEventFilter
@@ -83,7 +92,8 @@ def runTreeMaker(
     process.filterSequence = cms.Sequence(
         process.hltHighLevel *
         process.stdCleaningSequence *
-        process.HCALLaserEvtFilterList2012
+        process.HCALLaserEvtFilterList2012 *
+        process.RA2CaloVsPFMETFilter
         )
 
     if not isData:
@@ -97,28 +107,26 @@ def runTreeMaker(
 
     process.tmAK5CaloL1Offset = process.calibTreeMakerCaloData.clone(
         TreeName                       = treeName,
-        WritePhotons                   = writePhotons
+        WritePhotons                   = writePhotons,
+        NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
         )
 
     process.tmAK5CaloL1FastJet = process.calibTreeMakerAK5FastCaloData.clone(
         TreeName                       = process.tmAK5CaloL1Offset.TreeName,
         WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-        ECALDeadCellBEFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellBEFilterModuleName,
-        ECALDeadCellTPFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellTPFilterModuleName
+        NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
         )
 
     process.tmAK5PFL1FastJet = process.calibTreeMakerAK5FastPFData.clone(
         TreeName                       = process.tmAK5CaloL1Offset.TreeName,
         WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-        ECALDeadCellBEFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellBEFilterModuleName,
-        ECALDeadCellTPFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellTPFilterModuleName
+        NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
         )
 
     process.tmAK5PFL1CHS = process.calibTreeMakerAK5PFCHSData.clone(
         TreeName                       = process.tmAK5CaloL1Offset.TreeName,
         WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-        ECALDeadCellBEFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellBEFilterModuleName,
-        ECALDeadCellTPFilterModuleName = process.tmAK5CaloL1Offset.ECALDeadCellTPFilterModuleName
+        NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")          
         )
 
     process.products = cms.Sequence(
