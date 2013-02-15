@@ -1,4 +1,4 @@
-## $Id: cleaningSequences_cff.py,v 1.4 2013/02/03 17:25:20 telenz Exp $
+## $Id: cleaningSequences_cff.py,v 1.5 2013/02/08 13:49:24 kheine Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -60,17 +60,6 @@ EcalDeadCellBoundaryEnergyFilter.taggingMode = cms.bool(False)
 ## The tracking POG filters __________________________________________________||
 from RecoMET.METFilters.trackingPOGFilters_cff import *
 
-## New HO mis-reco Filter ____________________________________________________||
-from SandBox.Skims.caloVsPFMetFilter_cfi import caloVsPFMetFilter
-RA2CaloVsPFMETFilter = caloVsPFMetFilter.clone(
-    CaloMetInputTag  = cms.InputTag('met'),
-    PFMetInputTag    = cms.InputTag('pfMet'),
-    MinCaloOverPFMet = cms.double(0.5),
-    SizeOfDeltaPhiWindowInNPi = cms.double(1.),
-    TaggingMode      = cms.bool(False)
-)
-
-
 ##
 ##  Cleaning sequence to be used before ntupling
 ##
@@ -87,8 +76,7 @@ stdCleaningSequence = cms.Sequence(
    goodPrimaryVertices * trackingFailureFilter *
    EcalDeadCellTriggerPrimitiveFilter *
    EcalDeadCellBoundaryEnergyFilter *
-   trkPOGFilters *
-   RA2CaloVsPFMETFilter
+   trkPOGFilters 
 )
 
 
