@@ -173,9 +173,6 @@ private:
   std::string processName_; // process name of (HLT) process for which to get HLT configuration
   HLTConfigProvider hltConfig_;
 
-  bool passesECALDeadCellBEFilter_;
-  bool passesECALDeadCellTPFilter_;
-
   int vtxN_,vtxNTracks_;
   float vtxPosX_, vtxPosY_, vtxPosZ_;
   float vtxNormalizedChi2_, vtxNDof_;
@@ -268,6 +265,10 @@ private:
   float * stableGenPartEta_;
   float * stableGenPartPhi_;
   int   * stableGenPartPDGId_;
+
+  // Any boolean
+  std::vector<edm::InputTag> boolTags_;
+  std::vector<UChar_t> boolDecisions_;
 };
 
 //implementation
@@ -361,10 +362,6 @@ template <typename T> NJet<T>::NJet()
   puMCHighestSumPt_ = 0;
   rho_ = 0;
   rho25_ = 0;
-
-  // ecal dead-cell filter results
-  passesECALDeadCellBEFilter_ = true;
-  passesECALDeadCellTPFilter_ = true;
 
   // CaloTower branches for all jets
   NobjTow    = 0;
@@ -826,8 +823,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   rho25_tag_          = cfg.getParameter<edm::InputTag>("NJet_Rho25");
   weight_             = (float)(cfg.getParameter<double> ("NJet_Weight"));
   weight_tag          = cfg.getParameter<edm::InputTag> ("NJet_Weight_Tag");
-  ecalDeadCellTPFilterInputTag_ = cfg.getParameter<edm::InputTag> ("ECALDeadCellTPFilterModuleName");
-  ecalDeadCellBEFilterInputTag_ = cfg.getParameter<edm::InputTag> ("ECALDeadCellBEFilterModuleName");
+  boolTags_           = cfg.getParameter< std::vector<edm::InputTag> >("NJet_BoolTags");
   recTracks_          = cfg.getParameter<edm::InputTag>("NJetRecTracks");
   recMuons_           = cfg.getParameter<edm::InputTag>("NJetRecMuons");
   conesize_           = cfg.getParameter<double>("NJetConeSize");
@@ -854,6 +850,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   trackAssociator_.useDefaultPropagator();
   jecUnc_ = 0;
 
+  boolDecisions_ = std::vector<UChar_t>(boolTags_.size(),0);
+
 
   // Set up branches
 
@@ -872,9 +870,10 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
     if(TriggerInfo_.at(i).writePrescale())CalibTree->Branch(("PS_"+TriggerInfo_.at(i).name()).c_str(),&TriggerInfo_.at(i).prescale_,("PS_"+TriggerInfo_.at(i).name()+"/I").c_str());
   }
 
-
-  CalibTree->Branch("PassesECALDeadCellBEFilter",&passesECALDeadCellBEFilter_,"PassesECALDeadCellBEFilter/O");
-  CalibTree->Branch("PassesECALDeadCellTPFilter",&passesECALDeadCellTPFilter_,"PassesECALDeadCellTPFilter/O");
+  for(unsigned int i = 0; i < boolTags_.size(); ++i) {
+    std::string name = boolTags_.at(i).label();
+    CalibTree->Branch(name.c_str(),&(boolDecisions_.at(i)),(name+"/b").c_str());
+  }
 
   CalibTree->Branch("VtxN",&vtxN_,"VtxN/I");
   CalibTree->Branch("VtxNTracks",&vtxNTracks_,"VtxNTracks/I");
@@ -1245,22 +1244,15 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   edm::Handle< edm::View<T> > pJetsReco;
   evt.getByLabel(edm::InputTag(jets_.label(),jets_.instance(),"RECO"),pJetsReco);
   
-  // Dead ECAL cell filter decisions
-  if( ecalDeadCellBEFilterInputTag_.label() != "" ) {
-    edm::Handle<bool> passed;
-    evt.getByLabel(ecalDeadCellBEFilterInputTag_,passed);
-    if( passed.isValid() ) {
-      passesECALDeadCellBEFilter_ = *passed;
+  // Booleans
+  for(unsigned int i = 0; i < boolTags_.size(); ++i) {
+    boolDecisions_.at(i) = 0;
+    edm::Handle<bool> dec;
+    evt.getByLabel(boolTags_.at(i),dec);
+    if( dec.isValid() ) {
+      if( *dec ) boolDecisions_.at(i) = 1;
     }
   }
-  if( ecalDeadCellTPFilterInputTag_.label() != "" ) {
-    edm::Handle<bool> passed;
-    evt.getByLabel(ecalDeadCellTPFilterInputTag_,passed);
-    if( passed.isValid() ) {
-      passesECALDeadCellTPFilter_ = *passed;
-    }
-  }
-
 
   edm::Handle<reco::GenJetCollection> genJets;
   evt.getByLabel(genjets_,genJets);
