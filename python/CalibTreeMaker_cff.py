@@ -206,6 +206,8 @@ calibTreeMakerAK5PFCHS = calibTreeMakerPF.clone(
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
     NJet_L1JetCorrector = 'ak5PFchsL1Fastjet',
+    NJet_L2JetCorrector = 'ak5PFchsL2Relative',
+    NJet_L3JetCorrector = 'ak5PFchsL3Absolute',
     NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3',
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3'
 )
@@ -221,9 +223,11 @@ calibTreeMakerAK7PFCHS = calibTreeMakerPF.clone(
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
-    NJet_L1JetCorrector = 'ak5PFchsL1Fastjet',
-    NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3'
+    NJet_L1JetCorrector = 'ak7PFchsL1Fastjet',
+    NJet_L2JetCorrector = 'ak7PFchsL2Relative',
+    NJet_L3JetCorrector = 'ak7PFchsL3Absolute',
+    NJet_L1L2L3JetCorrector = 'ak7PFchsL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFchsL1FastL2L3'
 )
 
 ShortNameNextJetTypes          = 'ak5FastCalo'
@@ -380,8 +384,8 @@ calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
 
 calibTreeMakerAK7PFCHSData = calibTreeMakerAK7PFCHS.clone(
     NJet_PartonMatch = '',
-    NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3Residual',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3Residual'
+    NJet_L1L2L3JetCorrector = 'ak7PFchsL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFchsL1FastL2L3Residual'
 )
 
 calibTreeMakersData = cms.Sequence(   
