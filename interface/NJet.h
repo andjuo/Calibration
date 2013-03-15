@@ -114,6 +114,17 @@
 #include "RecoBTau/JetTagComputer/interface/JetTagComputerRecord.h"
 #include "RecoBTag/SecondaryVertex/interface/CombinedSVComputer.h"
 
+#include "DataFormats/BTauReco/interface/SoftLeptonTagInfo.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonTrackLinks.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include <DataFormats/EgammaCandidates/interface/GsfElectron.h>
+//#include "DataFormats/EgammaCandidates/interface/ElectronTrackLinks.h"
+#include <DataFormats/EgammaCandidates/interface/GsfElectronFwd.h>
+
+#include <DataFormats/GsfTrackReco/interface/GsfTrack.h>
+
+
 namespace{
   struct JetRefCompare : public std::binary_function < edm::RefToBase<reco::Jet>, edm::RefToBase<reco::Jet>, Bool_t> {
     inline Bool_t operator () (const edm::RefToBase<reco::Jet> &j1,
@@ -142,6 +153,7 @@ private:
   edm::InputTag ebrechits_, beamSpot_;
   edm::InputTag recTracks_, recMuons_, zspJets_;
   edm::InputTag secVx_, secVxTagInfo_, ipTagInfo_;
+  edm::InputTag softElectronTagInfo_, softMuonTagInfo_;
   std::string l1name_;
   std::string l2name_;
   std::string l3name_;
@@ -200,9 +212,17 @@ private:
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_,*jetarea_;
   float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW, *jscaleUncert;
   int *nChargedHadrons_,*nChargedPFConstituents_,*nPFConstituents_,*jetieta_, *jetiphi_;
+  int *nSoftMuons_,*nSoftElectrons_;
   float *sV3dDistance_, *sVChi2_, *sV3dDistanceError_,*sVMass_,*sVPt_;
   float *sVx_;
 
+  //SoftLeptonTagInfo /soft lepton pT, soft lepton pT-rel, soft lepton dR
+  int   NobjSoftElectrons;
+  float *SoftElectronPt, *SoftElectronPtRel, *SoftElectrondR;
+  int   *SoftElectron_jetidx;
+  int   NobjSoftMuons;
+  float *SoftMuonPt, *SoftMuonPtRel, *SoftMuondR;
+  int   *SoftMuon_jetidx;
 
 
   // Gen jets matched to calo jets
@@ -490,6 +510,8 @@ template <typename T> NJet<T>::NJet()
   jetieta_       = new int [ kjMAX ];
   jetiphi_       = new int [ kjMAX ];
 
+  nSoftMuons_    = new int [ kjMAX ];
+  nSoftElectrons_= new int [ kjMAX ];
   // Gen jets (matched to calo jets)
   genjetpt       = new float [ kjMAX ];
   genjetphi      = new float [ kjMAX ];
@@ -546,6 +568,28 @@ template <typename T> NJet<T>::NJet()
     genjetpartpdg[i]           = 0;
     genjetpart_genjetcolidx[i] = -1;
   }
+
+  NobjSoftElectrons =0;
+  SoftElectronPt    = new float [ kMAX ];
+  SoftElectronPtRel = new float [ kMAX ];
+  SoftElectrondR    = new float [ kMAX ];
+  SoftElectron_jetidx  = new int [ kMAX ];
+  NobjSoftMuons =0;
+  SoftMuonPt    = new float [ kMAX ];
+  SoftMuonPtRel = new float [ kMAX ];
+  SoftMuondR    = new float [ kMAX ];
+  SoftMuon_jetidx  = new int [ kMAX ];
+  for(int i = 0; i < kMAX; ++i) {
+  SoftElectronPt       [i] = 0;
+  SoftElectronPtRel    [i] = 0;
+  SoftElectrondR       [i] = 0;
+  SoftElectron_jetidx[i] = -1;
+  SoftMuonPt       [i] = 0;
+  SoftMuonPtRel    [i] = 0;
+  SoftMuondR       [i] = 0;
+  SoftMuon_jetidx[i] = -1;
+  }
+
     
   // Matched gen particles
   // Alogrithmic matching
@@ -707,6 +751,16 @@ template <typename T> NJet<T>::~NJet() {
   delete [] sVMass_;
   delete [] sVPt_;
 
+  delete [] SoftElectronPt    ;
+  delete [] SoftElectronPtRel ;
+  delete [] SoftElectrondR    ;
+  delete [] SoftElectron_jetidx;
+  delete [] SoftMuonPt    ;
+  delete [] SoftMuonPtRel ;
+  delete [] SoftMuondR    ;
+  delete [] SoftMuon_jetidx;
+
+
   delete [] n90Hits_;
   delete [] fHad_;
   delete [] fEMF_;
@@ -741,6 +795,10 @@ template <typename T> NJet<T>::~NJet() {
 
   delete [] jetieta_;   
   delete [] jetiphi_;
+
+  delete [] nSoftMuons_    ;
+  delete [] nSoftElectrons_;
+
 
   delete [] genjetpt; 
   delete [] genjetphi;
@@ -832,6 +890,8 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   secVxTagInfo_       = cfg.getParameter<edm::InputTag>("NJetSecondVxTagInfo");
   ipTagInfo_          = cfg.getParameter<edm::InputTag>("NJetTrackIPTagInfos");
   sVComputer_tag_     = cfg.getParameter<edm::InputTag>("NJet_svComputer"),
+  softElectronTagInfo_= cfg.getParameter<edm::InputTag>("NJet_electronTagInfo"),
+  softMuonTagInfo_    = cfg.getParameter<edm::InputTag>("NJet_muonTagInfo"),
   writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
   writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
   writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
@@ -1023,6 +1083,23 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
     CalibTree->Branch("GenJetPartPDG",genjetpartpdg,"GenJetPartPDG[NobjGenJetPart]/I"); 
     CalibTree->Branch("GenJetPartGenJetColIdx",genjetpart_genjetcolidx,"GenJetPartGenJetColIdx[NobjGenJetPart]/I"); 
   }
+  if(true){//make this configurable
+    CalibTree->Branch("NobjSoftElectrons",&NobjSoftElectrons,"NobjSoftElectrons/I");
+    CalibTree->Branch("BtagSoftElectronPt",SoftElectronPt,"SoftElectronPt[NobjSoftElectrons]/F");
+    CalibTree->Branch("BtagSoftElectronPtRel",SoftElectronPtRel,"SoftElectronPtRel[NobjSoftElectrons]/F");
+    CalibTree->Branch("BtagSoftElectrondR",SoftElectrondR,"SoftElectrondR[NobjSoftElectrons]/F");
+    CalibTree->Branch("BtagSoftElectron_jetidx",SoftElectron_jetidx,"SoftElectron_jetidx[NobjSoftElectrons]/F");
+    CalibTree->Branch("NobjSoftMuons",&NobjSoftMuons,"NobjSoftMuons/I");
+    CalibTree->Branch("BtagSoftMuonPt",SoftMuonPt,"SoftMuonPt[NobjSoftMuons]/F");
+    CalibTree->Branch("BtagSoftMuonPtRel",SoftMuonPtRel,"SoftMuonPtRel[NobjSoftMuons]/F");
+    CalibTree->Branch("BtagSoftMuondR",SoftMuondR,"SoftMuondR[NobjSoftMuons]/F");
+    CalibTree->Branch("BtagSoftMuon_jetidx",SoftMuon_jetidx,"SoftMuon_jetidx[NobjSoftMuons]/F");
+    CalibTree->Branch( "BtagNSoftElectrons",nSoftElectrons_,"NSoftElectrons[NobjJet]/I");
+    CalibTree->Branch( "BtagNSoftMuons",nSoftMuons_,"NSoftMuons[NobjJet]/I");
+
+
+  }
+
   // Matched gen particles
   // Alogrithmic matching
   // GenPart_algo branches        );
@@ -1216,6 +1293,33 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
   }
   computer->passEventSetup(setup);
   
+  //Get the TagInfo stuff and make is accesible with a map to a RefToBase<Jet>, since that's apparently what the JetTags use
+
+  //softElectronTagInfo_, softMuonTagInfo_
+
+
+  typedef edm::RefToBase<reco::Jet> JetRef;
+  typedef std::map<JetRef, const reco::SoftLeptonTagInfo*, JetRefCompare> slTagInfoMap;
+  slTagInfoMap softElectronTagInfo;
+  edm::Handle< edm::View < reco::SoftLeptonTagInfo > > SoftElectronTagInfoVector;
+ 
+  evt.getByLabel(softElectronTagInfo_,SoftElectronTagInfoVector);
+  for(edm::View< reco::SoftLeptonTagInfo >::const_iterator iTagInfo = SoftElectronTagInfoVector->begin(); iTagInfo != SoftElectronTagInfoVector->end(); iTagInfo++) 
+    {
+      softElectronTagInfo[iTagInfo->jet()] = &*iTagInfo;
+    }
+    
+
+  slTagInfoMap softMuonTagInfo;
+  edm::Handle< edm::View < reco::SoftLeptonTagInfo > > SoftMuonTagInfoVector;
+ 
+  evt.getByLabel(softMuonTagInfo_,SoftMuonTagInfoVector);
+  for(edm::View< reco::SoftLeptonTagInfo >::const_iterator iTagInfo = SoftMuonTagInfoVector->begin(); iTagInfo != SoftMuonTagInfoVector->end(); iTagInfo++) 
+    {
+      softMuonTagInfo[iTagInfo->jet()] = &*iTagInfo;
+    }
+
+
 
 
 
@@ -1350,6 +1454,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     //unsigned int towno = 0;   // Calo tower counting index
     unsigned int icell = 0;   // Ecal cell counting index
 
+    //    int SoftElectron_idx = 0;
     // Loop over calo jets
     for (unsigned int jtno = 0; (int)jtno<NobjJet; ++jtno) {
       // Write jet kinematics
@@ -1427,6 +1532,122 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	sVPt_[jtno]             = -1;
       }
       
+
+      if( softElectronTagInfo[thisJetRef]->leptons() > 0 )
+	{
+	  nSoftElectrons_[jtno] = (softElectronTagInfo[thisJetRef]->leptons());
+	  edm::Handle<reco::GsfElectronCollection> allelectrons;
+	  evt.getByLabel("gsfElectrons",allelectrons);
+	  // loop over all electrons in tag info and match them to gsfelectron collection 
+	  // create pt sorted map of electrons
+	  std::map<Double_t, const reco::GsfElectron*> elMap;
+	  std::map<const reco::GsfElectron*, UInt_t> tagInfoMap;
+
+	  for(UInt_t iElectron = 0; iElectron < softElectronTagInfo[thisJetRef]->leptons(); iElectron++)
+	    {
+	      //loop on electron collection
+	      //count electrons
+	      UInt_t iElCounter = 0;
+	      for(size_t i=0; i < allelectrons->size(); ++i){
+		const reco::GsfElectron & el = (*allelectrons)[i];
+		reco::GsfTrackRef gsftrack = el.gsfTrack();
+ 		if(gsftrack.isNull() && !gsftrack.isAvailable()){
+ 		  std::cout<<"track is null"<<std::endl;
+ 		  continue;
+ 		}
+ 		reco::GsfTrackRef softLepTrack =  (softElectronTagInfo[thisJetRef]->lepton(iElectron)).castTo<reco::GsfTrackRef>();
+		if( gsftrack == softLepTrack){
+ 		  iElCounter++;
+		  elMap[gsftrack->pt()] = &el ;
+		  tagInfoMap[&el] = iElectron;
+		}
+	      }
+		
+	      if(iElCounter != 1){
+		std::cout<<"ERROR: iElCounter= "<<iElCounter<<"this should never happen" << std::endl;
+		exit(1);
+	      }	      
+	    }
+
+	
+	  if( elMap.size() != softElectronTagInfo[thisJetRef]->leptons()){
+	    std::cout<<"ERROR: softElectronTagInfo[thisJetRef]->leptons():  this should never happen"<< std::endl;
+	    exit(1);
+	  }
+
+//  float *SoftElectronPt, *SoftElectronPtRel, *SoftElectrondR;
+//  int   *SoftElectron_jetidx;
+
+	  // now loop over el map and fill info
+	  //	  Int_t iElMapCounter = 0;
+	  for(std::map<Double_t, const reco::GsfElectron*>::reverse_iterator it= elMap.rbegin(); it != elMap.rend(); it++){
+	    if(NobjSoftElectrons >= kMAX) break;
+	    const reco::GsfElectron * el =  it->second;
+
+	    SoftElectronPt[NobjSoftElectrons] = (softElectronTagInfo[thisJetRef]->lepton(tagInfoMap[el])->pt());   			       
+	    SoftElectronPtRel[NobjSoftElectrons] = (softElectronTagInfo[thisJetRef]->properties(tagInfoMap[el]).ptRel);   
+	    SoftElectrondR[NobjSoftElectrons] = (softElectronTagInfo[thisJetRef]->properties(tagInfoMap[el]).deltaR);  		       
+	    SoftElectron_jetidx[NobjSoftElectrons] = jtno;
+	    //	    SoftElectron_idx++;
+	    NobjSoftElectrons++;//=(softElectronTagInfo[thisJetRef]->leptons());
+
+	  }
+	}
+
+
+      if ( softMuonTagInfo[thisJetRef]->leptons() > 0 )
+	{
+	  nSoftMuons_[jtno] = (softMuonTagInfo[thisJetRef]->leptons());
+	      
+	  edm::Handle<reco::MuonCollection> allmuons;
+	  evt.getByLabel("muons",allmuons);
+	  // loop over all muons in tag info and match them to muon collection 
+	  // create pt sorted map of muons
+	  std::map<Double_t, const reco::Muon*> muMap;
+	  std::map<const reco::Muon*, UInt_t> tagInfoMap;
+
+	  for(UInt_t iMuon = 0; iMuon < softMuonTagInfo[thisJetRef]->leptons(); iMuon++)
+	    {
+	      //loop on muon collection
+	      //count muons
+	      UInt_t iMuCounter = 0;
+	      for(size_t i=0; i < allmuons->size(); ++i){
+		const reco::Muon & mu = (*allmuons)[i];
+		reco::TrackRef globTrack = mu.globalTrack();
+		reco::TrackRef softLepTrackRef =  (softMuonTagInfo[thisJetRef]->lepton(iMuon)).castTo<reco::TrackRef>();
+		if( globTrack == softLepTrackRef ){   // found a matched muon
+		  iMuCounter++;
+		  muMap[mu.globalTrack()->pt()] = &mu ;
+		  tagInfoMap[&mu] = iMuon;
+		}
+		    
+	      }
+	      if(iMuCounter != 1){
+		std::cout<<"ERROR: iMuCounter != 1 this should never happen" << std::endl;
+		exit(1);
+	      }
+	    }
+
+	  if( muMap.size() != softMuonTagInfo[thisJetRef]->leptons()){
+	    std::cout<<"ERROR: softMuonTagInfo[thisJetRef]->leptons():  this should never happen"<< std::endl;
+	    exit(1);
+	  }
+	  for(std::map<Double_t, const reco::Muon*>::reverse_iterator it= muMap.rbegin(); it != muMap.rend(); it++){
+
+	    const reco::Muon * mu =  it->second;
+
+	    SoftMuonPt[NobjSoftMuons] = (softMuonTagInfo[thisJetRef]->lepton(tagInfoMap[mu])->pt());   			       
+	    SoftMuonPtRel[NobjSoftMuons] = (softMuonTagInfo[thisJetRef]->properties(tagInfoMap[mu]).ptRel);   
+	    SoftMuondR[NobjSoftMuons] = (softMuonTagInfo[thisJetRef]->properties(tagInfoMap[mu]).deltaR);  		       
+	    SoftMuon_jetidx[NobjSoftMuons] = jtno;
+	    NobjSoftMuons++;//=(softElectronTagInfo[thisJetRef]->leptons());
+
+
+	  }
+
+	}
+
+
       // L2L3 correction
       edm::RefToBase<reco::Jet> jetRef(pJets->refAt(jtno));
       jscalel1[jtno]   = correctorL1->correction( (*pJets)[jtno],evt,setup);  //calculate the correction

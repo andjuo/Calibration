@@ -1,4 +1,4 @@
-## $Id: CalibTreeMaker_cfi.py,v 1.47 2013/02/15 14:34:00 mschrode Exp $
+## $Id: CalibTreeMaker_cfi.py,v 1.48 2013/03/15 14:32:11 kirschen Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -49,6 +49,8 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
@@ -118,6 +120,8 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
@@ -183,6 +187,8 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
@@ -248,6 +254,8 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
@@ -313,6 +321,8 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_ProcessName         = cms.string("HLT"), #HLT default process used for processing triggers
     NJet_L1JetCorrector       = cms.string('ak5CaloL1Offset'),
     NJet_L2JetCorrector       = cms.string('ak5CaloL2Relative'),

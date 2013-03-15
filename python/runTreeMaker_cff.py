@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.10 2013/02/15 15:10:16 kheine Exp $
+# $Id: runTreeMaker_cff.py,v 1.11 2013/03/15 14:32:11 kirschen Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -199,7 +199,7 @@ def runTreeMaker(
             process.genPhotons *
             process.goodGenPhotons *
             process.myPartons *
-            process.JPTJetPartonMatching *
+#            process.JPTJetPartonMatching *
             process.CaloJetPartonMatching *
             process.PFJetPartonMatching *
             process.AK5PFCHSJetPartonMatching
@@ -212,8 +212,9 @@ def runTreeMaker(
         process.filterSequence *
 #        process.dump *
         process.products *
-        process.ak5JPTJetsBtag *
-        process.tmAK5JPTL1Offset *
+        process.softElectronCands *
+#        process.ak5JPTJetsBtag *
+#        process.tmAK5JPTL1Offset *
         process.ak5CaloJetsBtag *
         process.tmAK5CaloL1FastJet *
         process.ak5PFJetsBtag *
