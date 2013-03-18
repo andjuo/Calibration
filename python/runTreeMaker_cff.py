@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.11 2013/03/15 14:32:11 kirschen Exp $
+# $Id: runTreeMaker_cff.py,v 1.12 2013/03/15 18:29:47 kirschen Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -12,10 +12,11 @@ def runTreeMaker(
     globalTag="",
     treeName="",
     writePhotons=False,
+    writeAdditionalBJetInfos=True,
     hltSelection=[],
     reportEveryEvt=5000,
     testFileName="",
-    numProcessedEvt=100
+    numProcessedEvt=1000
     ):
 
 
@@ -108,12 +109,14 @@ def runTreeMaker(
     if isData:
         process.tmAK5JPTL1Offset = process.calibTreeMakerJPTData.clone(
             TreeName                       = treeName,
+            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
             WritePhotons                   = writePhotons,
             NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
             )
     
         process.tmAK5CaloL1Offset = process.calibTreeMakerCaloData.clone(
             TreeName                       = treeName,
+            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
             WritePhotons                   = writePhotons,
             NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
             )
@@ -153,12 +156,14 @@ def runTreeMaker(
     if not isData:
         process.tmAK5JPTL1Offset = process.calibTreeMakerJPT.clone(
             TreeName                       = treeName,
+            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
             WritePhotons                   = writePhotons,
             NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
             )
     
         process.tmAK5CaloL1Offset = process.calibTreeMakerCalo.clone(
             TreeName                       = treeName,
+            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
             WritePhotons                   = writePhotons,
             NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
             )
@@ -199,7 +204,7 @@ def runTreeMaker(
             process.genPhotons *
             process.goodGenPhotons *
             process.myPartons *
-#            process.JPTJetPartonMatching *
+            process.JPTJetPartonMatching *
             process.CaloJetPartonMatching *
             process.PFJetPartonMatching *
             process.AK5PFCHSJetPartonMatching
@@ -213,8 +218,8 @@ def runTreeMaker(
 #        process.dump *
         process.products *
         process.softElectronCands *
-#        process.ak5JPTJetsBtag *
-#        process.tmAK5JPTL1Offset *
+        process.ak5JPTJetsBtag *
+        process.tmAK5JPTL1Offset *
         process.ak5CaloJetsBtag *
         process.tmAK5CaloL1FastJet *
         process.ak5PFJetsBtag *

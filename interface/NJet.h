@@ -216,12 +216,13 @@ private:
   float *sV3dDistance_, *sVChi2_, *sV3dDistanceError_,*sVMass_,*sVPt_;
   float *sVx_;
 
-  //SoftLeptonTagInfo /soft lepton pT, soft lepton pT-rel, soft lepton dR
+  //AdditionalBJetInfos /soft lepton pT, soft lepton pT-rel, soft lepton dR
+  bool    writeAdditionalBJetInfos_;
   int   NobjSoftElectrons;
-  float *SoftElectronPt, *SoftElectronPtRel, *SoftElectrondR;
+  float *SoftElectronPt, *SoftElectronPtRel, *SoftElectronDeltaR;
   int   *SoftElectron_jetidx;
   int   NobjSoftMuons;
-  float *SoftMuonPt, *SoftMuonPtRel, *SoftMuondR;
+  float *SoftMuonPt, *SoftMuonPtRel, *SoftMuonDeltaR;
   int   *SoftMuon_jetidx;
 
 
@@ -486,7 +487,7 @@ template <typename T> NJet<T>::NJet()
   jetEtWeightedSigmaEta_ = new float[kjMAX];
   jetarea_               = new float[kjMAX];
 
-  // Correction factors
+ // Correction factors
   jscaleZSP       = new float [ kjMAX ];
   jscalel1        = new float [ kjMAX ];
   jscalel2        = new float [ kjMAX ];
@@ -510,8 +511,6 @@ template <typename T> NJet<T>::NJet()
   jetieta_       = new int [ kjMAX ];
   jetiphi_       = new int [ kjMAX ];
 
-  nSoftMuons_    = new int [ kjMAX ];
-  nSoftElectrons_= new int [ kjMAX ];
   // Gen jets (matched to calo jets)
   genjetpt       = new float [ kjMAX ];
   genjetphi      = new float [ kjMAX ];
@@ -519,11 +518,11 @@ template <typename T> NJet<T>::NJet()
   genjetet       = new float [ kjMAX ];
   genjete        = new float [ kjMAX ];
   for(int i = 0; i < kjMAX; i++) {
-    genjetpt[i]  = 0.;
-    genjetphi[i] = 0.;
-    genjeteta[i] = 0.;
-    genjetet[i]  = 0.;
-    genjete[i]   = 0.;
+    genjetpt[i]       = 0.;
+    genjetphi[i]      = 0.;
+    genjeteta[i]      = 0.;
+    genjetet[i]       = 0.;
+    genjete[i]        = 0.;
   }
 
   // Gen jet collection
@@ -569,26 +568,34 @@ template <typename T> NJet<T>::NJet()
     genjetpart_genjetcolidx[i] = -1;
   }
 
+  nSoftMuons_    = new int [ kjMAX ];
+  nSoftElectrons_= new int [ kjMAX ];
+  for(int i = 0; i < kjMAX; i++) {
+    nSoftMuons_    [i]   = 0 ;
+    nSoftElectrons_[i]   = 0 ;
+  }
+
   NobjSoftElectrons =0;
   SoftElectronPt    = new float [ kMAX ];
   SoftElectronPtRel = new float [ kMAX ];
-  SoftElectrondR    = new float [ kMAX ];
+  SoftElectronDeltaR    = new float [ kMAX ];
   SoftElectron_jetidx  = new int [ kMAX ];
   NobjSoftMuons =0;
   SoftMuonPt    = new float [ kMAX ];
   SoftMuonPtRel = new float [ kMAX ];
-  SoftMuondR    = new float [ kMAX ];
+  SoftMuonDeltaR    = new float [ kMAX ];
   SoftMuon_jetidx  = new int [ kMAX ];
   for(int i = 0; i < kMAX; ++i) {
   SoftElectronPt       [i] = 0;
   SoftElectronPtRel    [i] = 0;
-  SoftElectrondR       [i] = 0;
+  SoftElectronDeltaR       [i] = 0;
   SoftElectron_jetidx[i] = -1;
   SoftMuonPt       [i] = 0;
   SoftMuonPtRel    [i] = 0;
-  SoftMuondR       [i] = 0;
+  SoftMuonDeltaR       [i] = 0;
   SoftMuon_jetidx[i] = -1;
   }
+
 
     
   // Matched gen particles
@@ -753,11 +760,11 @@ template <typename T> NJet<T>::~NJet() {
 
   delete [] SoftElectronPt    ;
   delete [] SoftElectronPtRel ;
-  delete [] SoftElectrondR    ;
+  delete [] SoftElectronDeltaR    ;
   delete [] SoftElectron_jetidx;
   delete [] SoftMuonPt    ;
   delete [] SoftMuonPtRel ;
-  delete [] SoftMuondR    ;
+  delete [] SoftMuonDeltaR    ;
   delete [] SoftMuon_jetidx;
 
 
@@ -865,39 +872,40 @@ template <typename T> NJet<T>::~NJet() {
 template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
   // Read parameters
-  minNumJets_         = cfg.getParameter<int>("NJet_MinNumJets");
-  maxNumJets_         = cfg.getParameter<int>("NJet_MaxNumJets");
-  jets_               = cfg.getParameter<edm::InputTag>("NJet_Jets");
-  jetIDs_             = cfg.getParameter<edm::InputTag>("NJet_JetIDs");
-  partMatch_          = cfg.getParameter<edm::InputTag>("NJet_PartonMatch");
-  genjets_            = cfg.getParameter<edm::InputTag>("NJet_GenJets");
-  genparticles_       = cfg.getParameter<edm::InputTag>("NJet_GenParticles");
-  met_                = cfg.getParameter<edm::InputTag>("NJet_MET");
-  met_t1_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T1");
-  met_t2_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T2");
-  met_t1R_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T1R");
-  met_t2R_	      = cfg.getParameter<edm::InputTag>("NJet_MET_T2R");
-  rho_tag_            = cfg.getParameter<edm::InputTag>("NJet_Rho");
-  rho25_tag_          = cfg.getParameter<edm::InputTag>("NJet_Rho25");
-  weight_             = (float)(cfg.getParameter<double> ("NJet_Weight"));
-  weight_tag          = cfg.getParameter<edm::InputTag> ("NJet_Weight_Tag");
-  boolTags_           = cfg.getParameter< std::vector<edm::InputTag> >("NJet_BoolTags");
-  recTracks_          = cfg.getParameter<edm::InputTag>("NJetRecTracks");
-  recMuons_           = cfg.getParameter<edm::InputTag>("NJetRecMuons");
-  conesize_           = cfg.getParameter<double>("NJetConeSize");
-  zspJets_            = cfg.getParameter<edm::InputTag>("NJetZSPJets");
-  secVx_              = cfg.getParameter<edm::InputTag>("NJetSecondVx");
-  secVxTagInfo_       = cfg.getParameter<edm::InputTag>("NJetSecondVxTagInfo");
-  ipTagInfo_          = cfg.getParameter<edm::InputTag>("NJetTrackIPTagInfos");
-  sVComputer_tag_     = cfg.getParameter<edm::InputTag>("NJet_svComputer"),
-  softElectronTagInfo_= cfg.getParameter<edm::InputTag>("NJet_electronTagInfo"),
-  softMuonTagInfo_    = cfg.getParameter<edm::InputTag>("NJet_muonTagInfo"),
-  writeGenJetPart_    = cfg.getParameter<bool>("WriteGenJetParticles");
-  writeStableGenPart_ = cfg.getParameter<bool>("WriteStableGenParticles");
-  writeTracks_        = cfg.getParameter<bool>("NJet_writeTracks");
-  writeTowers_        = cfg.getParameter<bool>("NJet_writeTowers");
-  beamSpot_           = cfg.getParameter<edm::InputTag>("BeamSpot");
-  processName_        = cfg.getParameter<std::string>("NJet_ProcessName");
+  minNumJets_               = cfg.getParameter<int>("NJet_MinNumJets");
+  maxNumJets_               = cfg.getParameter<int>("NJet_MaxNumJets");
+  jets_                     = cfg.getParameter<edm::InputTag>("NJet_Jets");
+  jetIDs_                   = cfg.getParameter<edm::InputTag>("NJet_JetIDs");
+  partMatch_                = cfg.getParameter<edm::InputTag>("NJet_PartonMatch");
+  genjets_                  = cfg.getParameter<edm::InputTag>("NJet_GenJets");
+  genparticles_             = cfg.getParameter<edm::InputTag>("NJet_GenParticles");
+  met_                      = cfg.getParameter<edm::InputTag>("NJet_MET");
+  met_t1_	            = cfg.getParameter<edm::InputTag>("NJet_MET_T1");
+  met_t2_	            = cfg.getParameter<edm::InputTag>("NJet_MET_T2");
+  met_t1R_	            = cfg.getParameter<edm::InputTag>("NJet_MET_T1R");
+  met_t2R_	            = cfg.getParameter<edm::InputTag>("NJet_MET_T2R");
+  rho_tag_                  = cfg.getParameter<edm::InputTag>("NJet_Rho");
+  rho25_tag_                = cfg.getParameter<edm::InputTag>("NJet_Rho25");
+  weight_                   = (float)(cfg.getParameter<double> ("NJet_Weight"));
+  weight_tag                = cfg.getParameter<edm::InputTag> ("NJet_Weight_Tag");
+  boolTags_                 = cfg.getParameter< std::vector<edm::InputTag> >("NJet_BoolTags");
+  recTracks_                = cfg.getParameter<edm::InputTag>("NJetRecTracks");
+  recMuons_                 = cfg.getParameter<edm::InputTag>("NJetRecMuons");
+  conesize_                 = cfg.getParameter<double>("NJetConeSize");
+  zspJets_                  = cfg.getParameter<edm::InputTag>("NJetZSPJets");
+  secVx_                    = cfg.getParameter<edm::InputTag>("NJetSecondVx");
+  secVxTagInfo_             = cfg.getParameter<edm::InputTag>("NJetSecondVxTagInfo");
+  ipTagInfo_                = cfg.getParameter<edm::InputTag>("NJetTrackIPTagInfos");
+  sVComputer_tag_           = cfg.getParameter<edm::InputTag>("NJet_svComputer"),
+  writeAdditionalBJetInfos_   = cfg.getParameter<bool>("WriteAdditionalBJetInfos");
+  softElectronTagInfo_      = cfg.getParameter<edm::InputTag>("NJet_electronTagInfo"),
+  softMuonTagInfo_          = cfg.getParameter<edm::InputTag>("NJet_muonTagInfo"),
+  writeGenJetPart_          = cfg.getParameter<bool>("WriteGenJetParticles");
+  writeStableGenPart_       = cfg.getParameter<bool>("WriteStableGenParticles");
+  writeTracks_              = cfg.getParameter<bool>("NJet_writeTracks");
+  writeTowers_              = cfg.getParameter<bool>("NJet_writeTowers");
+  beamSpot_                 = cfg.getParameter<edm::InputTag>("BeamSpot");
+  processName_              = cfg.getParameter<std::string>("NJet_ProcessName");
   l1name_ = cfg.getParameter<std::string>("NJet_L1JetCorrector");
   l2name_ = cfg.getParameter<std::string>("NJet_L2JetCorrector");
   l3name_ = cfg.getParameter<std::string>("NJet_L3JetCorrector");
@@ -1046,11 +1054,13 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
 
   //Btag and secondary vertex info
   CalibTree->Branch( "JetBtag",                 jetbtag,            "JetBtag[NobjJet]/F" );
-  CalibTree->Branch( "JetSV3dDistance",         sV3dDistance_,      "JetSV3dDistance[NobjJet]/F" );
-  CalibTree->Branch( "JetSVChi2",               sVChi2_,            "JetSVChi2[NobjJet]/F" );
-  CalibTree->Branch( "JetSV3dDistanceError",    sV3dDistanceError_, "JetSV3dDistanceError[NobjJet]/F" );
-  CalibTree->Branch( "JetSVMass",               sVMass_,            "JetSVMass[NobjJet]/F" );
-  CalibTree->Branch( "JetSVPt",                 sVPt_,              "JetSVPt[NobjJet]/F" );
+  if(writeAdditionalBJetInfos_){//make this configurable
+    CalibTree->Branch( "JetSV3dDistance",         sV3dDistance_,      "JetSV3dDistance[NobjJet]/F" );
+    CalibTree->Branch( "JetSVChi2",               sVChi2_,            "JetSVChi2[NobjJet]/F" );
+    CalibTree->Branch( "JetSV3dDistanceError",    sV3dDistanceError_, "JetSV3dDistanceError[NobjJet]/F" );
+    CalibTree->Branch( "JetSVMass",               sVMass_,            "JetSVMass[NobjJet]/F" );
+    CalibTree->Branch( "JetSVPt",                 sVPt_,              "JetSVPt[NobjJet]/F" );
+  }  
 
   // Gen jets (matched to calo jets)
   CalibTree->Branch( "JetGenJetDeltaR",     jetgenjetDeltaR, "JetGenJetDeltaR[NobjJet]/F"  );
@@ -1083,19 +1093,19 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
     CalibTree->Branch("GenJetPartPDG",genjetpartpdg,"GenJetPartPDG[NobjGenJetPart]/I"); 
     CalibTree->Branch("GenJetPartGenJetColIdx",genjetpart_genjetcolidx,"GenJetPartGenJetColIdx[NobjGenJetPart]/I"); 
   }
-  if(true){//make this configurable
+  if(writeAdditionalBJetInfos_){//make this configurable
     CalibTree->Branch("NobjSoftElectrons",&NobjSoftElectrons,"NobjSoftElectrons/I");
-    CalibTree->Branch("BtagSoftElectronPt",SoftElectronPt,"SoftElectronPt[NobjSoftElectrons]/F");
-    CalibTree->Branch("BtagSoftElectronPtRel",SoftElectronPtRel,"SoftElectronPtRel[NobjSoftElectrons]/F");
-    CalibTree->Branch("BtagSoftElectrondR",SoftElectrondR,"SoftElectrondR[NobjSoftElectrons]/F");
-    CalibTree->Branch("BtagSoftElectron_jetidx",SoftElectron_jetidx,"SoftElectron_jetidx[NobjSoftElectrons]/F");
+    CalibTree->Branch("BtagSoftElectronPt",SoftElectronPt,"BtagSoftElectronPt[NobjSoftElectrons]/F");
+    CalibTree->Branch("BtagSoftElectronPtRel",SoftElectronPtRel,"BtagSoftElectronPtRel[NobjSoftElectrons]/F");
+    CalibTree->Branch("BtagSoftElectronDeltaR",SoftElectronDeltaR,"BtagSoftElectronDeltaR[NobjSoftElectrons]/F");
+    CalibTree->Branch("BtagSoftElectron_jetidx",SoftElectron_jetidx,"BtagSoftElectron_jetidx[NobjSoftElectrons]/F");
     CalibTree->Branch("NobjSoftMuons",&NobjSoftMuons,"NobjSoftMuons/I");
-    CalibTree->Branch("BtagSoftMuonPt",SoftMuonPt,"SoftMuonPt[NobjSoftMuons]/F");
-    CalibTree->Branch("BtagSoftMuonPtRel",SoftMuonPtRel,"SoftMuonPtRel[NobjSoftMuons]/F");
-    CalibTree->Branch("BtagSoftMuondR",SoftMuondR,"SoftMuondR[NobjSoftMuons]/F");
-    CalibTree->Branch("BtagSoftMuon_jetidx",SoftMuon_jetidx,"SoftMuon_jetidx[NobjSoftMuons]/F");
-    CalibTree->Branch( "BtagNSoftElectrons",nSoftElectrons_,"NSoftElectrons[NobjJet]/I");
-    CalibTree->Branch( "BtagNSoftMuons",nSoftMuons_,"NSoftMuons[NobjJet]/I");
+    CalibTree->Branch("BtagSoftMuonPt",SoftMuonPt,"BtagSoftMuonPt[NobjSoftMuons]/F");
+    CalibTree->Branch("BtagSoftMuonPtRel",SoftMuonPtRel,"BtagSoftMuonPtRel[NobjSoftMuons]/F");
+    CalibTree->Branch("BtagSoftMuonDeltaR",SoftMuonDeltaR,"BtagSoftMuonDeltaR[NobjSoftMuons]/F");
+    CalibTree->Branch("BtagSoftMuon_jetidx",SoftMuon_jetidx,"BtagSoftMuon_jetidx[NobjSoftMuons]/F");
+    CalibTree->Branch( "BtagNSoftElectrons",nSoftElectrons_,"BtagNSoftElectrons[NobjJet]/I");
+    CalibTree->Branch( "BtagNSoftMuons",nSoftMuons_,"BtagNSoftMuons[NobjJet]/I");
 
 
   }
@@ -1446,6 +1456,11 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
     jecUnc_ = new JetCorrectionUncertainty(JetCorPar);
   }
 
+  //reset counters for soft leptons every time we loop over the jets
+  //  std::cout << "setting counters to zero: " << std::endl;
+  NobjSoftElectrons = 0 ;
+  NobjSoftMuons     = 0 ;
+
   NobjTow=0;
   NobjETowCal = 0;
   NobjJet = pJets->size();
@@ -1501,7 +1516,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       if(svTagInfo.find(thisJetRef)==svTagInfo.end())edm::LogError("NoTagInfo") << "No secondary vertex tag info found for this jet!";
       
       //Following snippets inspired by UserCode/bTag/CommissioningCommonSetup/plugins/TagNtupleProducer.cc?revision=1.14
-      if(svTagInfo[thisJetRef]->nVertices() > 0 ){
+      if(svTagInfo[thisJetRef]->nVertices() > 0 && writeAdditionalBJetInfos_){
 	LogDebug("GreatBTagInfo") << "retrieving sondary vertex info";
 	std::vector<const reco::BaseTagInfo*>  baseTagInfos;
 	baseTagInfos.push_back( &(*ipTagInfo[thisJetRef]) ); 
@@ -1533,7 +1548,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
       }
       
 
-      if( softElectronTagInfo[thisJetRef]->leptons() > 0 )
+      if( softElectronTagInfo[thisJetRef]->leptons() > 0 && writeAdditionalBJetInfos_)
 	{
 	  nSoftElectrons_[jtno] = (softElectronTagInfo[thisJetRef]->leptons());
 	  edm::Handle<reco::GsfElectronCollection> allelectrons;
@@ -1575,8 +1590,6 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	    exit(1);
 	  }
 
-//  float *SoftElectronPt, *SoftElectronPtRel, *SoftElectrondR;
-//  int   *SoftElectron_jetidx;
 
 	  // now loop over el map and fill info
 	  //	  Int_t iElMapCounter = 0;
@@ -1586,19 +1599,19 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 
 	    SoftElectronPt[NobjSoftElectrons] = (softElectronTagInfo[thisJetRef]->lepton(tagInfoMap[el])->pt());   			       
 	    SoftElectronPtRel[NobjSoftElectrons] = (softElectronTagInfo[thisJetRef]->properties(tagInfoMap[el]).ptRel);   
-	    SoftElectrondR[NobjSoftElectrons] = (softElectronTagInfo[thisJetRef]->properties(tagInfoMap[el]).deltaR);  		       
+	    SoftElectronDeltaR[NobjSoftElectrons] = (softElectronTagInfo[thisJetRef]->properties(tagInfoMap[el]).deltaR);  		       
 	    SoftElectron_jetidx[NobjSoftElectrons] = jtno;
 	    //	    SoftElectron_idx++;
 	    NobjSoftElectrons++;//=(softElectronTagInfo[thisJetRef]->leptons());
 
 	  }
 	}
+      else nSoftElectrons_[jtno] = 0;
 
 
-      if ( softMuonTagInfo[thisJetRef]->leptons() > 0 )
+      if ( softMuonTagInfo[thisJetRef]->leptons() > 0 && writeAdditionalBJetInfos_)
 	{
 	  nSoftMuons_[jtno] = (softMuonTagInfo[thisJetRef]->leptons());
-	      
 	  edm::Handle<reco::MuonCollection> allmuons;
 	  evt.getByLabel("muons",allmuons);
 	  // loop over all muons in tag info and match them to muon collection 
@@ -1634,11 +1647,12 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	  }
 	  for(std::map<Double_t, const reco::Muon*>::reverse_iterator it= muMap.rbegin(); it != muMap.rend(); it++){
 
+	    if(NobjSoftMuons >= kMAX) break;
 	    const reco::Muon * mu =  it->second;
 
 	    SoftMuonPt[NobjSoftMuons] = (softMuonTagInfo[thisJetRef]->lepton(tagInfoMap[mu])->pt());   			       
 	    SoftMuonPtRel[NobjSoftMuons] = (softMuonTagInfo[thisJetRef]->properties(tagInfoMap[mu]).ptRel);   
-	    SoftMuondR[NobjSoftMuons] = (softMuonTagInfo[thisJetRef]->properties(tagInfoMap[mu]).deltaR);  		       
+	    SoftMuonDeltaR[NobjSoftMuons] = (softMuonTagInfo[thisJetRef]->properties(tagInfoMap[mu]).deltaR);  		       
 	    SoftMuon_jetidx[NobjSoftMuons] = jtno;
 	    NobjSoftMuons++;//=(softElectronTagInfo[thisJetRef]->leptons());
 
@@ -1646,6 +1660,7 @@ template <typename T> void NJet<T>::analyze(const edm::Event& evt, const edm::Ev
 	  }
 
 	}
+      else nSoftMuons_[jtno] = 0;
 
 
       // L2L3 correction

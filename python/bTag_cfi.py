@@ -83,8 +83,8 @@ ak5JPTCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
 ak5JPTStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak5JPTCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak5JPTStandardCombinedSecondaryVertex')
 ak5JPTCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5JPTImpactParameterTagInfos"), cms.InputTag("ak5JPTSecondaryVertexTagInfos") )
-ak5JPTSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'ak5JPTJets' )
-ak5JPTSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'ak5JPTJets' )
+ak5JPTSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'JetPlusTrackZSPCorJetAntiKt5' )
+ak5JPTSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'JetPlusTrackZSPCorJetAntiKt5' )
 ak5JPTJetBtaggingSV = cms.Sequence(
                                     ak5JPTImpactParameterTagInfos *
                                     ak5JPTSecondaryVertexTagInfos *

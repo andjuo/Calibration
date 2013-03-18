@@ -1,4 +1,4 @@
-## $Id: CalibTreeMaker_cfi.py,v 1.48 2013/03/15 14:32:11 kirschen Exp $
+## $Id: CalibTreeMaker_cfi.py,v 1.49 2013/03/15 18:29:47 kirschen Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -62,6 +62,7 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
+    WriteAdditionalBJetInfos = cms.bool(True), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
@@ -133,6 +134,7 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
+    WriteAdditionalBJetInfos = cms.bool(True), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
@@ -200,6 +202,7 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
  
+    WriteAdditionalBJetInfos = cms.bool(True), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                    
@@ -267,6 +270,7 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
+    WriteAdditionalBJetInfos = cms.bool(True), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
@@ -334,6 +338,7 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
+    WriteAdditionalBJetInfos = cms.bool(True), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
