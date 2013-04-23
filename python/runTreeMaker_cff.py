@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.12 2013/03/15 18:29:47 kirschen Exp $
+# $Id: runTreeMaker_cff.py,v 1.13 2013/03/18 17:45:48 kirschen Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -71,16 +71,6 @@ def runTreeMaker(
 
     # standard filter sequence + ecal dead-cell tagger
     process.load('Calibration.CalibTreeMaker.cleaningSequences_cff')
-
-#    ## New HO mis-reco Filter ____________________________________________________||
-#    from SandBox.Skims.caloVsPFMetFilter_cfi import caloVsPFMetFilter
-#    process.RA2CaloVsPFMETFilter = caloVsPFMetFilter.clone(
-#        CaloMetInputTag  = cms.InputTag('met'),
-#        PFMetInputTag    = cms.InputTag('pfMet'),
-#        MinCaloOverPFMet = cms.double(0.5),
-#        SizeOfDeltaPhiWindowInNPi = cms.double(1.),
-#        TaggingMode      = cms.bool(True)
-#    )
     
     ## Additional event list for Hcal Laser Filter _______________________________||
     from RecoMET.METFilters.multiEventFilter_cfi import multiEventFilter
@@ -94,7 +84,6 @@ def runTreeMaker(
         process.hltHighLevel *
         process.stdCleaningSequence *
         process.HCALLaserEvtFilterList2012 
-#        process.RA2CaloVsPFMETFilter
         )
 
     if not isData:
@@ -109,7 +98,7 @@ def runTreeMaker(
     if isData:
         process.tmAK5JPTL1Offset = process.calibTreeMakerJPTData.clone(
             TreeName                       = treeName,
-            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
+            WriteAdditionalBJetInfos       = writeAdditionalBJetInfos,
             WritePhotons                   = writePhotons,
             NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
             )
