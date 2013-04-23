@@ -207,11 +207,11 @@ private:
   float *jetpt, *jetmt, *jetphi, *jeteta, *jetet, *jete, *jetgenjetDeltaR, *jetbtag; //added simple secondary vertex b-tag
   int *n90Hits_;
   float *fHad_, *fEMF_, *fHPD_, *fRBX_;
-  float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_, *fMuons_, *fHFEm_, *fHFHad_;
+  float *fChargedHadrons_, *fNeutralHadrons_, *fPhotons_, *fElectrons_, *fMuons_, *fHFEm_, *fHFHad_,*hoEfrac_;
   float *leadingChargedConstPt_;
   float *jetEtWeightedSigmaPhi_, *jetEtWeightedSigmaEta_,*jetarea_;
   float *jscalel1,*jscalel2, *jscalel3, *jscaleZSP, *jscaleJPT, *jscalel2l3, *jscalel2l3JPT,*jscalel4JW, *jscaleUncert;
-  int *nChargedHadrons_,*nChargedPFConstituents_,*nPFConstituents_,*jetieta_, *jetiphi_;
+  int *nChargedHadrons_,*nNeutralHadrons_,*nChargedPFConstituents_,*nPFConstituents_,*jetieta_, *jetiphi_;
   int *nSoftMuons_,*nSoftElectrons_;
   float *sV3dDistance_, *sVChi2_, *sV3dDistanceError_,*sVMass_,*sVPt_;
   float *sVx_;
@@ -471,8 +471,10 @@ template <typename T> NJet<T>::NJet()
   fMuons_ = new float[kjMAX];
   fHFEm_ = new float[kjMAX];
   fHFHad_ = new float[kjMAX];
+  hoEfrac_ = new float[kjMAX];
   leadingChargedConstPt_ = new float[kjMAX];
   nChargedHadrons_ = new int[kjMAX];
+  nNeutralHadrons_ = new int[kjMAX];
   nChargedPFConstituents_ = new int[kjMAX];
   nPFConstituents_ = new int[kjMAX];
   jetIDLoose_ = new bool[kjMAX];
@@ -779,8 +781,10 @@ template <typename T> NJet<T>::~NJet() {
   delete [] fElectrons_;
   delete [] fHFEm_;
   delete [] fHFHad_;
+  delete [] hoEfrac_;
   delete [] leadingChargedConstPt_;
   delete [] nChargedHadrons_;
+  delete [] nNeutralHadrons_;
   delete [] nChargedPFConstituents_;
   delete [] nPFConstituents_;
   delete [] jetIDLoose_;
@@ -1030,6 +1034,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetFMuons",fMuons_,"JetFMuons[NobjJet]/F");  
   CalibTree->Branch( "JetFHFEm",fHFEm_,"JetFHFEm[NobjJet]/F");  
   CalibTree->Branch( "JetFHFHad",fHFHad_,"JetFHFHad[NobjJet]/F");  
+  CalibTree->Branch( "JetHOEfrac",hoEfrac_,"JetHOEfrac[NobjJet]/F");  
   CalibTree->Branch( "JetLeadingChargedConstPt",leadingChargedConstPt_,"JetLeadingChargedConstPt[NobjJet]/F");  
   CalibTree->Branch( "JetIDLoose",jetIDLoose_,"JetIDLoose[NobjJet]/O");
   CalibTree->Branch( "JetIDTight",jetIDTight_,"JetIDTight[NobjJet]/O");
@@ -1048,6 +1053,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch( "JetIEta",jetieta_,"JetIEta[NobjJet]/I");
   CalibTree->Branch( "JetIPhi",jetiphi_,"JetIPhi[NobjJet]/I");
   CalibTree->Branch( "JetNChargedHadrons",nChargedHadrons_,"JetNChargedHadrons[NobjJet]/I"); 
+  CalibTree->Branch( "JetNNeutralHadrons",nNeutralHadrons_,"JetNNeutralHadrons[NobjJet]/I"); 
   CalibTree->Branch( "JetNChargedPFConstituents",nChargedPFConstituents_,"JetNChargedPFConstituents[NobjJet]/I"); 
   CalibTree->Branch( "JetNPFConstituents",nPFConstituents_,"JetNPFConstituents[NobjJet]/I"); 
 
@@ -2015,8 +2021,10 @@ template <> void NJet<reco::CaloJet>::fillExtra(const edm::View<reco::CaloJet>& 
   fMuons_[ jtno ]          = -1;
   fHFEm_[ jtno ]           = -1;
   fHFHad_[ jtno ]          = -1;
+  hoEfrac_[jtno]           = -1;
   leadingChargedConstPt_[ jtno ] = -1;
   nChargedHadrons_[ jtno ] = -1;
+  nNeutralHadrons_[ jtno ] = -1;
   nChargedPFConstituents_[ jtno ] = -1;
   nPFConstituents_[ jtno ] = -1;
   if(! writeTowers_) return;
@@ -2059,6 +2067,7 @@ template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJet
   fHFEm_[ jtno ]           = pJets[jtno].HFEMEnergyFraction ();
   fHFHad_[ jtno ]          = pJets[jtno].HFHadronEnergyFraction () ;
   nChargedHadrons_[ jtno ] = pJets[jtno].chargedHadronMultiplicity();
+  nNeutralHadrons_[ jtno ] = pJets[jtno].neutralHadronMultiplicity();
   nChargedPFConstituents_[ jtno ] = (pJets[jtno].chargedHadronMultiplicity () + pJets[jtno].electronMultiplicity () +pJets[jtno].muonMultiplicity () );
   nPFConstituents_[ jtno ] = (pJets[jtno].chargedHadronMultiplicity () +pJets[jtno].neutralHadronMultiplicity () +pJets[jtno].photonMultiplicity ()  +pJets[jtno].electronMultiplicity () +pJets[jtno].muonMultiplicity ()  +pJets[jtno].HFHadronMultiplicity ()  +pJets[jtno].HFEMMultiplicity () );
 
@@ -2073,7 +2082,16 @@ template <> void NJet<reco::PFJet>::fillExtra(const edm::View<reco::PFJet>& pJet
       break;
     }
   }
-  
+  // Compute HO-energy fraction per jet
+  hoEfrac_[jtno] = 0.;
+  for(std::vector<reco::PFCandidatePtr>::const_iterator constituent = PFConstituents.begin();
+	constituent!=PFConstituents.end(); ++constituent) {
+    hoEfrac_[jtno] += (*constituent)->hoEnergy();
+  }	
+  if( pJets[jtno].energy() > 0 ) {
+    hoEfrac_[jtno] = hoEfrac_[jtno] / pJets[jtno].energy();
+  }
+
 }  
 
 template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtno)
@@ -2087,8 +2105,10 @@ template <typename T> void NJet<T>::fillExtra(const edm::View<T>& pJets, int jtn
   fMuons_[ jtno ]          = -1;
   fHFEm_[ jtno ]           = -1;
   fHFHad_[ jtno ]          = -1;
+  hoEfrac_[jtno]           = -1;
   leadingChargedConstPt_[ jtno ] = -1;
   nChargedHadrons_[ jtno ] = -1;
+  nNeutralHadrons_[ jtno ] = -1;
   nChargedPFConstituents_[ jtno ] = -1;
   nPFConstituents_[ jtno ] = -1;
 }
