@@ -1,4 +1,4 @@
-## $Id: cleaningSequences_cff.py,v 1.6 2013/02/15 15:10:50 kheine Exp $
+## $Id: cleaningSequences_cff.py,v 1.7 2013/03/15 14:32:11 kirschen Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -24,6 +24,9 @@ from Calibration.CalibTreeMaker.beamBkgFilter_cfi import beamBkgFilter
 ##  cvs co -r V00-00-08 RecoMET/METAnalyzers
 ##
 ## Please check at the above TWiki whether the tags are still appropriate!
+
+## PKAM filter
+from Calibration.CalibTreeMaker.beamBkgFilter_cfi import beamBkgFilter
 
 ## The iso-based HBHE noise filter ___________________________________________||
 from CommonTools.RecoAlgos.HBHENoiseFilter_cfi import HBHENoiseFilter
@@ -59,7 +62,7 @@ EcalDeadCellBoundaryEnergyFilter.taggingMode = cms.bool(False)
 
 ## The tracking POG filters __________________________________________________||
 # was:
-#from RecoMET.METFilters.trackingPOGFilters_cff import *
+from RecoMET.METFilters.trackingPOGFilters_cff import *
 #from RecoMET.METFilters.trackingPOGFilters_cfi import *
 
 ##
@@ -77,8 +80,8 @@ stdCleaningSequence = cms.Sequence(
    ecalLaserCorrFilter *
    goodPrimaryVertices * trackingFailureFilter *
    EcalDeadCellTriggerPrimitiveFilter *
-   EcalDeadCellBoundaryEnergyFilter 
-#   trkPOGFilters 
+   EcalDeadCellBoundaryEnergyFilter *
+   trkPOGFilters 
 )
 
 
