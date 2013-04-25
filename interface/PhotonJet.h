@@ -31,8 +31,8 @@ private:
   int nphotons_, ngenphotons_;
   bool hltPhoton20_, hltPhoton30_, hltPhoton50_,hltPhoton75_,hltPhoton90_,hltPhoton135_,hltPhoton150_,hltPhoton160_;
   float *photonpt_, *photonphi_, *photoneta_, *photone_;
-  float *photonisoecal04_,*photonisohcal04_, *photonisotrk04_;
-  bool *photonidloose_,*photonidtight_;
+  float *photonisoecal04_,*photonisohcal04_, *photonisotrk04_, *photonsigmaietaieta_, *photonhovere_;
+  bool *photonidloose_,*photonidtight_,*photonhaspixelseed_;
   float *genphotonpt_, *genphotonphi_, *genphotoneta_, *genphotone_; 
   static const int NMax_;
 };

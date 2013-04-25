@@ -25,6 +25,9 @@ PhotonJet::PhotonJet() : nphotons_(0),  ngenphotons_(0), hltPhoton20_(false),
   photonisoecal04_ = new float[NMax_];
   photonisohcal04_ = new float[NMax_];
   photonisotrk04_ = new float[NMax_];
+  photonsigmaietaieta_ = new float[NMax_];
+  photonhovere_ = new float[NMax_];
+  photonhaspixelseed_ = new bool[NMax_];
   photonidloose_ = new bool[NMax_];
   photonidtight_ = new bool[NMax_];
   genphotonpt_ = new float[NMax_];
@@ -42,6 +45,9 @@ PhotonJet::~PhotonJet() {
   delete [] photonisoecal04_;
   delete [] photonisohcal04_;
   delete [] photonisotrk04_;
+  delete [] photonsigmaietaieta_;
+  delete [] photonhovere_;
+  delete [] photonhaspixelseed_;
   delete [] photonidloose_;
   delete [] photonidtight_;
   delete [] genphotonpt_;
@@ -76,6 +82,9 @@ void PhotonJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
   CalibTree->Branch( "PhotonIsoECAL04", photonisoecal04_, "PhotonIsoECAL04[NobjPhoton]/F");
   CalibTree->Branch( "PhotonIsoHCAL04", photonisohcal04_, "PhotonIsoHCAL04[NobjPhoton]/F");
   CalibTree->Branch( "PhotonIsoTrk04", photonisotrk04_, "PhotonIsoTrk04[NobjPhoton]/F");
+  CalibTree->Branch( "PhotonSigmaIetaIeta", photonsigmaietaieta_, "PhotonSigmaIetaIeta[NobjPhoton]/F");
+  CalibTree->Branch( "PhotonHadronicOverEM", photonhovere_, "PhotonHadronicOverEM[NobjPhoton]/F");
+  CalibTree->Branch( "PhotonHasPixelSeed",photonhaspixelseed_,"PhotonHasPixelSeed[NobjPhoton]/O");
   CalibTree->Branch( "PhotonIDLoose",photonidloose_,"PhotonIDLoose[NobjPhoton]/O");
   CalibTree->Branch( "PhotonIDTight",photonidtight_,"PhotonIDTight[NobjPhoton]/O");
   // GenPhotons branches
@@ -157,7 +166,10 @@ void PhotonJet::analyze(const edm::Event& evt, const edm::EventSetup& setup)
     photone_[nphotons_]   = pho->energy();
     photonisoecal04_[nphotons_] = pho->ecalRecHitSumEtConeDR04();
     photonisohcal04_[nphotons_] = pho->hcalTowerSumEtConeDR04();
-    photonisotrk04_[nphotons_] = pho->trkSumPtSolidConeDR04();
+    photonisotrk04_[nphotons_]  = pho->trkSumPtHollowConeDR04();
+    photonsigmaietaieta_[nphotons_] = pho->sigmaIetaIeta();
+    photonhovere_[nphotons_] = pho->hadronicOverEm();
+    photonhaspixelseed_[nphotons_] = pho->hasPixelSeed();
     photonidloose_[nphotons_] = (*phoMapLoose)[photonref];
     photonidtight_[nphotons_] = (*phoMapTight)[photonref];
     
