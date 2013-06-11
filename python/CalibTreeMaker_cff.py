@@ -151,6 +151,13 @@ calibTreeMakerAK7PF = calibTreeMakerPF.clone(
     NJet_L1L2L3L4JWJetCorrector = cms.string(ShortNameNextJetTypes+'L1L2L3')
 )
 
+ShortNameNextJetTypes          = 'ak7FastPF'
+calibTreeMakerAK7FastPF = calibTreeMakerPF.clone(
+    OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
+    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3'    
+)
 
 ShortNameNextJetTypes          = 'ic5PF'
 calibTreeMakerIC5PF = calibTreeMakerPF.clone(
@@ -382,6 +389,12 @@ calibTreeMakerAK7PFData = calibTreeMakerAK7PF.clone(
     NJet_PartonMatch = '',
     NJet_L1L2L3JetCorrector = 'ak7PFL1L2L3Residual',
     NJet_L1L2L3L4JWJetCorrector = 'ak7PFL1L2L3Residual'
+)
+
+calibTreeMakerAK7FastPFData = calibTreeMakerAK7FastPF.clone(
+    NJet_PartonMatch = '',
+    NJet_L1L2L3JetCorrector = 'ak7PFL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFL1FastL2L3Residual'
 )
 
 calibTreeMakerAK5FastCaloData = calibTreeMakerAK5FastCalo.clone(
