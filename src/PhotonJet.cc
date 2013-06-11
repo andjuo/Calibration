@@ -15,8 +15,9 @@
 
 const int PhotonJet::NMax_ = 10;
 
-PhotonJet::PhotonJet() : nphotons_(0),  ngenphotons_(0), hltPhoton20calo_(false),hltPhoton20iso_(false),hltPhoton30calo_(false),hltPhoton30iso_(false),hltPhoton30R9_(false),
-			 hltPhoton50calo_(false),hltPhoton50iso_(false),hltPhoton75calo_(false),hltPhoton75iso_(false),hltPhoton90calo_(false),hltPhoton90iso_(false),hltPhoton135_(false),hltPhoton150_(false),hltPhoton160_(false)
+PhotonJet::PhotonJet() : nphotons_(0),  ngenphotons_(0), hltPhoton20calo_(false),hltPhoton30calo_(false), hltPhoton50calo_(false),hltPhoton75calo_(false),hltPhoton90calo_(false),
+                         hltPhoton135_(false),hltPhoton150_(false),hltPhoton160_(false),
+			 hltPhoton20iso_(false),hltPhoton30iso_(false),hltPhoton50iso_(false),hltPhoton75iso_(false),hltPhoton90iso_(false),hltPhoton30_(false),hltPhoton30R9_(false)
 {
   photonpt_ = new float[NMax_];
   photonphi_ = new float[NMax_];
