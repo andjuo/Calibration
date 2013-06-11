@@ -100,7 +100,7 @@ process.pData = cms.Path(process.goodPhotons *
                          process.ak5PFCHSJetsBtag *
                          process.calibTreeMakerAK5PFCHS *
                          process.ak7PFJetsBtag *
-                         process.calibTreeMakerAK7PF *
+                         process.calibTreeMakerAK7FastPF *
                          process.ak7PFCHSJetsBtag *
                          process.calibTreeMakerAK7PFCHS
                          )
