@@ -1,4 +1,4 @@
-## $Id: cleaningSequences_cff.py,v 1.7 2013/03/15 14:32:11 kirschen Exp $
+## $Id: cleaningSequences_cff.py,v 1.8 2013/04/23 11:33:39 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 
@@ -17,13 +17,16 @@ from Calibration.CalibTreeMaker.beamBkgFilter_cfi import beamBkgFilter
 ## MET filter recommended at
 ## https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters
 ##
-## You have to check out the RecoMET/METFilters and RecoMET/METAnalyzers
-## packages:
+## You have to check out the following additional packages (>=53X)
+## cvs co -r V00-03-23      CommonTools/RecoAlgos                            
+## cvs co -r V00-11-17      DPGAnalysis/SiStripTools                         
+## cvs co -r V01-00-11-01   DPGAnalysis/Skims                                
+## cvs co -r V00-00-08      DataFormats/TrackerCommon                        
+## cvs co -r V01-09-05      RecoLocalTracker/SubCollectionProducers          
+## cvs co -r V00-00-08      RecoMET/METAnalyzers                             
+## cvs co -r V00-00-13-01   RecoMET/METFilters                  
 ##
-##  cvs co -r V00-00-10 RecoMET/METFilters
-##  cvs co -r V00-00-08 RecoMET/METAnalyzers
-##
-## Please check at the above TWiki whether the tags are still appropriate!
+## Please check the above TWiki to confirm that the tags are still appropriate!
 
 ## PKAM filter
 from Calibration.CalibTreeMaker.beamBkgFilter_cfi import beamBkgFilter
@@ -53,17 +56,13 @@ trackingFailureFilter.taggingMode = cms.bool(False)
 trackingFailureFilter.VertexSource = cms.InputTag('goodPrimaryVertices')
 
 ## The ECAL dead cell filters ________________________________________________||
-## Filter is set up in tagging mode; decision can be written
-## to the ntuple if specified in calibTreeMaker...
 from RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi import EcalDeadCellTriggerPrimitiveFilter
 EcalDeadCellTriggerPrimitiveFilter.taggingMode = cms.bool(False)
 from RecoMET.METFilters.EcalDeadCellBoundaryEnergyFilter_cfi import EcalDeadCellBoundaryEnergyFilter
 EcalDeadCellBoundaryEnergyFilter.taggingMode = cms.bool(False)
 
 ## The tracking POG filters __________________________________________________||
-# was:
 from RecoMET.METFilters.trackingPOGFilters_cff import *
-#from RecoMET.METFilters.trackingPOGFilters_cfi import *
 
 ##
 ##  Cleaning sequence to be used before ntupling

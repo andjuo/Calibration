@@ -1,4 +1,4 @@
-# $Id: runTreeMaker_cff.py,v 1.13 2013/03/18 17:45:48 kirschen Exp $
+# $Id: runTreeMaker_cff.py,v 1.14 2013/04/23 11:34:05 mschrode Exp $
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -96,44 +96,29 @@ def runTreeMaker(
     process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
     if isData:
-        process.tmAK5JPTL1Offset = process.calibTreeMakerJPTData.clone(
-            TreeName                       = treeName,
-            WriteAdditionalBJetInfos       = writeAdditionalBJetInfos,
-            WritePhotons                   = writePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
-            )
-    
-        process.tmAK5CaloL1Offset = process.calibTreeMakerCaloData.clone(
-            TreeName                       = treeName,
-            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
-            WritePhotons                   = writePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
-            )
-    
         process.tmAK5CaloL1FastJet = process.calibTreeMakerAK5FastCaloData.clone(
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
+            TreeName                       = treeName,
+            WritePhotons                   = writePhotons,
+            WriteAdditionalBJetInfos       = writeAdditionalBJetInfos
             )
     
         process.tmAK5PFL1FastJet = process.calibTreeMakerAK5FastPFData.clone(
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
+            TreeName                       = process.tmAK5CaloL1FastJet.TreeName,
+            WritePhotons                   = process.tmAK5CaloL1FastJet.WritePhotons,
+            WriteAdditionalBJetInfos       = process.tmAK5CaloL1FastJet.WriteAdditionalBJetInfos
             )
     
         process.tmAK5PFL1CHS = process.calibTreeMakerAK5PFCHSData.clone(
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")          
+            TreeName                       = process.tmAK5CaloL1FastJet.TreeName,
+            WritePhotons                   = process.tmAK5CaloL1FastJet.WritePhotons,
+            WriteAdditionalBJetInfos       = process.tmAK5CaloL1FastJet.WriteAdditionalBJetInfos
             )
     
         process.tmAK5withNuPFL1CHS = process.calibTreeMakerAK5PFCHSData.clone(
             OutputFile                     = cms.string('ak5withNuPFCHS.root'),
-            NJet_GenJets                   = cms.InputTag("ak5GenJets"),
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")          
+            TreeName                       = process.tmAK5CaloL1FastJet.TreeName,
+            WritePhotons                   = process.tmAK5CaloL1FastJet.WritePhotons,
+            WriteAdditionalBJetInfos       = process.tmAK5CaloL1FastJet.WriteAdditionalBJetInfos
             )
     
         process.products = cms.Sequence(
@@ -143,45 +128,35 @@ def runTreeMaker(
             process.produceAllPFCHSMETCorrections
             )
     if not isData:
-        process.tmAK5JPTL1Offset = process.calibTreeMakerJPT.clone(
-            TreeName                       = treeName,
-            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
-            WritePhotons                   = writePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
-            )
-    
-        process.tmAK5CaloL1Offset = process.calibTreeMakerCalo.clone(
-            TreeName                       = treeName,
-            WriteAdditionalBJetInfos          = writeAdditionalBJetInfos,
-            WritePhotons                   = writePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
-            )
-    
         process.tmAK5CaloL1FastJet = process.calibTreeMakerAK5FastCalo.clone(
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
+            NJet_GenJets                   = cms.InputTag("ak5GenJets"),
+            TreeName                       = treeName,
+            WritePhotons                   = writePhotons,
+            WriteAdditionalBJetInfos       = writeAdditionalBJetInfos
             )
     
         process.tmAK5PFL1FastJet = process.calibTreeMakerAK5FastPF.clone(
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")      
+            NJet_GenJets                   = cms.InputTag("ak5GenJets"),
+            TreeName                       = process.tmAK5CaloL1FastJet.TreeName,
+            WritePhotons                   = process.tmAK5CaloL1FastJet.WritePhotons,
+            WriteAdditionalBJetInfos       = process.tmAK5CaloL1FastJet.WriteAdditionalBJetInfos
             )
     
         process.tmAK5PFL1CHS = process.calibTreeMakerAK5PFCHS.clone(
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")          
+            NJet_GenJets                   = cms.InputTag("ak5GenJets"),
+            TreeName                       = process.tmAK5CaloL1FastJet.TreeName,
+            WritePhotons                   = process.tmAK5CaloL1FastJet.WritePhotons,
+            WriteAdditionalBJetInfos       = process.tmAK5CaloL1FastJet.WriteAdditionalBJetInfos
             )
     
         process.tmAK5withNuPFL1CHS = process.calibTreeMakerAK5PFCHS.clone(
             OutputFile                     = cms.string('ak5withNuPFCHS.root'),
             NJet_GenJets                   = cms.InputTag("ak5GenJets"),
-            TreeName                       = process.tmAK5CaloL1Offset.TreeName,
-            WritePhotons                   = process.tmAK5CaloL1Offset.WritePhotons,
-            NJet_BoolTags                  = cms.VInputTag("RA2CaloVsPFMETFilter")          
+            TreeName                       = process.tmAK5CaloL1FastJet.TreeName,
+            WritePhotons                   = process.tmAK5CaloL1FastJet.WritePhotons,
+            WriteAdditionalBJetInfos       = process.tmAK5CaloL1FastJet.WriteAdditionalBJetInfos
             )
+
 
         process.products = cms.Sequence(
             process.calibTreeMakerGenJetsNoNuNoMuNoNu *
@@ -193,11 +168,12 @@ def runTreeMaker(
             process.genPhotons *
             process.goodGenPhotons *
             process.myPartons *
-            process.JPTJetPartonMatching *
+#            process.JPTJetPartonMatching *
             process.CaloJetPartonMatching *
             process.PFJetPartonMatching *
             process.AK5PFCHSJetPartonMatching
             )
+
 
 
     # ---- Path -------------------------------------------------------------------
@@ -207,8 +183,8 @@ def runTreeMaker(
 #        process.dump *
         process.products *
         process.softElectronCands *
-        process.ak5JPTJetsBtag *
-        process.tmAK5JPTL1Offset *
+#        process.ak5JPTJetsBtag *
+#        process.tmAK5JPTL1Offset *
         process.ak5CaloJetsBtag *
         process.tmAK5CaloL1FastJet *
         process.ak5PFJetsBtag *
