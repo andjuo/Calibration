@@ -36,7 +36,7 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000) )  # number of events 
+    input = cms.untracked.int32(100) )  # number of events 
 
 process.options = cms.untracked.PSet(
     SkipEvent = cms.untracked.vstring('ProductNotFound'),
@@ -99,7 +99,7 @@ process.pData = cms.Path(process.filterSequence *
                          process.ak5PFCHSJetsBtag *
                          process.calibTreeMakerAK5PFCHSData *
                          process.ak7PFJetsBtag *
-                         process.calibTreeMakerAK7PFData *
+                         process.calibTreeMakerAK7FastPFData *
                          process.ak7PFCHSJetsBtag *
                          process.calibTreeMakerAK7PFCHSData
                          )
