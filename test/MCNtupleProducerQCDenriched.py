@@ -27,15 +27,24 @@ process.GlobalTag.globaltag = 'START53_V22::All'
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(	
-    '/store/mc/Summer12_DR53X/G_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/EE4EEC78-4D0E-E211-BC0C-00266CF33288.root'
-#    '/store/mc/Summer12_DR53X/G_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/507F6985-C70E-E211-9D0F-00266CF330D8.root'
+    '/store/mc/Summer12_DR53X/QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/0003/FEEC95EF-E4E4-E111-8FDA-00304867C04E.root'
     )
                             )
 
-                            
+# photon selection
+process.goodPhotons = cms.EDFilter("PhotonSelector",
+                                   src = cms.InputTag("photons"),
+                                   cut = cms.string('et > 20 && hadronicOverEm < 0.05 && ecalRecHitSumEtConeDR04 < 0.006*pt + 4.2 && hcalTowerSumEtConeDR04 <  0.0025*pt + 2.2 && trkSumPtHollowConeDR04 <  0.001*pt + 3.5')
+                                   )
+
+process.photonFilter = cms.EDFilter("EtMinPhotonCountFilter",
+                            src = cms.InputTag("goodPhotons"),
+                            etMin = cms.double(20.0),
+                            minNumber = cms.uint32(1)
+                            )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100) )  # number of events 
+    input = cms.untracked.int32(1000) )  # number of events 
 
 process.options = cms.untracked.PSet(
     SkipEvent = cms.untracked.vstring('ProductNotFound'),
@@ -56,18 +65,15 @@ process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 process.calibTreeMakerAK5FastPF.ECALDeadCellBEFilterModuleName = cms.InputTag("EcalDeadCellBoundaryEnergyFilter")
 process.calibTreeMakerAK5FastPF.ECALDeadCellTPFilterModuleName = cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
 process.calibTreeMakerAK5FastPF.WritePhotons = True
-
 process.calibTreeMakerAK5FastPF.TreeName = "GammaJetTree"
 process.calibTreeMakerAK5PFCHS.ECALDeadCellBEFilterModuleName = cms.InputTag("EcalDeadCellBoundaryEnergyFilter")
 process.calibTreeMakerAK5PFCHS.ECALDeadCellTPFilterModuleName = cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
 process.calibTreeMakerAK5PFCHS.WritePhotons = True
-
 process.calibTreeMakerAK5PFCHS.TreeName = "GammaJetTree"
 
 process.calibTreeMakerAK7FastPF.ECALDeadCellBEFilterModuleName = cms.InputTag("EcalDeadCellBoundaryEnergyFilter")
 process.calibTreeMakerAK7FastPF.ECALDeadCellTPFilterModuleName = cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
 process.calibTreeMakerAK7FastPF.WritePhotons = True
-
 process.calibTreeMakerAK7FastPF.TreeName = "GammaJetTree"
 process.calibTreeMakerAK7PFCHS.ECALDeadCellBEFilterModuleName = cms.InputTag("EcalDeadCellBoundaryEnergyFilter")
 process.calibTreeMakerAK7PFCHS.ECALDeadCellTPFilterModuleName = cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
@@ -77,7 +83,9 @@ process.calibTreeMakerAK7PFCHS.TreeName = "GammaJetTree"
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 process.pDump = cms.Path(process.dump )
-process.pData = cms.Path(process.filterSequence *
+process.pData = cms.Path(process.goodPhotons *
+                         process.photonFilter *
+                         process.filterSequence *
                          process.calibjets *
                          process.produceAllCaloMETCorrections *
                          process.produceAllPFMETCorrections *

@@ -2,6 +2,8 @@ from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
 from Calibration.CalibTreeMaker.bTag_cfi import *
 from TrackingTools.TrackAssociator.default_cfi import *
 from PhysicsTools.HepMCCandAlgos.genParticles_cfi import *
+from RecoJets.Configuration.GenJetParticles_cff import *
+from RecoJets.Configuration.RecoGenJets_cff import *
 from Calibration.CalibTreeMaker.calibjets_cff import *
 from Calibration.CalibTreeMaker.MET_cff import *
 
@@ -18,6 +20,11 @@ ak7PFchsL3Absolute          = ak7PFL3Absolute.clone( algorithm = cms.string('AK7
 ak7PFchsResidual            = ak7PFResidual.clone  ( algorithm = cms.string('AK7PFchs') )
 ak7PFchsL1FastL2L3          = ak7PFL1FastL2L3.clone( correctors = cms.vstring('ak7PFchsL1Fastjet', 'ak7PFchsL2Relative', 'ak7PFchsL3Absolute') )
 ak7PFchsL1FastL2L3Residual  = ak7PFL1FastL2L3Residual.clone( correctors = cms.vstring('ak7PFchsL1Fastjet', 'ak7PFchsL2Relative', 'ak7PFchsL3Absolute', 'ak7PFchsResidual') ) 
+
+
+calibTreeMakerGenJetsNoNuNoMuNoNu = cms.Sequence(genJetParticles * genParticlesForJetsNoNu * genParticlesForJetsNoMuNoNu * recoGenJets * kt4GenJetsNoNu * kt6GenJetsNoNu * ak5GenJetsNoNu * ak7GenJetsNoNu * 
+                                                 kt4GenJetsNoMuNoNu * kt6GenJetsNoMuNoNu * 
+                                                 ak5GenJetsNoMuNoNu * ak7GenJetsNoMuNoNu)
 
 genPhotons = cms.EDFilter("PdgIdAndStatusCandViewSelector",
     src = cms.InputTag("genParticles"),
@@ -51,11 +58,13 @@ calibTreeMakerAK7Calo = calibTreeMakerCalo.clone(
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_JetIDs = 'ak7JetID',
     NJet_PartonMatch = 'AK7CaloJetPartonMatching',
-    NJet_GenJets                = 'ak7GenJets',
+    NJet_GenJets                = 'ak7GenJetsNoMuNoNu',
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -69,11 +78,13 @@ calibTreeMakerIC5Calo = calibTreeMakerCalo.clone(
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_JetIDs = 'ic5JetID',
     NJet_PartonMatch = 'IC5CaloJetPartonMatching',
-    NJet_GenJets = 'iterativeCone5GenJets',    
+    NJet_GenJets = 'iterativeCone5GenJetsNoMuNoNu',    
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -87,11 +98,13 @@ calibTreeMakerKT4Calo = calibTreeMakerCalo.clone(
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_JetIDs = 'kt4JetID',
     NJet_PartonMatch = 'KT4CaloJetPartonMatching',
-    NJet_GenJets = 'kt4GenJets',    
+    NJet_GenJets = 'kt4GenJetsNoMuNoNu',    
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -105,11 +118,13 @@ calibTreeMakerKT6Calo = calibTreeMakerCalo.clone(
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_JetIDs = 'kt6JetID',
     NJet_PartonMatch = 'KT6CaloJetPartonMatching',
-    NJet_GenJets = 'kt6GenJets',    
+    NJet_GenJets = 'kt6GenJetsNoMuNoNu',    
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -122,11 +137,13 @@ calibTreeMakerAK7PF = calibTreeMakerPF.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_PartonMatch = 'AK7PFJetPartonMatching',
-    NJet_GenJets = 'ak7GenJets',
+    NJet_GenJets = 'ak7GenJetsNoNu',
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -134,17 +151,26 @@ calibTreeMakerAK7PF = calibTreeMakerPF.clone(
     NJet_L1L2L3L4JWJetCorrector = cms.string(ShortNameNextJetTypes+'L1L2L3')
 )
 
+ShortNameNextJetTypes          = 'ak7FastPF'
+calibTreeMakerAK7FastPF = calibTreeMakerPF.clone(
+    OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
+    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3'    
+)
 
 ShortNameNextJetTypes          = 'ic5PF'
 calibTreeMakerIC5PF = calibTreeMakerPF.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_PartonMatch = 'IC5PFJetPartonMatching',
-    NJet_GenJets = 'iterativeCone5GenJets',
+    NJet_GenJets = 'iterativeCone5GenJetsNoNu',
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -158,11 +184,13 @@ calibTreeMakerKT4PF = calibTreeMakerPF.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_PartonMatch = 'KT4PFJetPartonMatching',
-    NJet_GenJets = 'kt4GenJets',
+    NJet_GenJets = 'kt4GenJetsNoNu',
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -175,11 +203,13 @@ calibTreeMakerKT6PF = calibTreeMakerPF.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
     NJet_PartonMatch = 'KT6PFJetPartonMatching',
-    NJet_GenJets = 'kt6GenJets',
+    NJet_GenJets = 'kt6GenJetsNoNu',
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Offset'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
@@ -198,7 +228,11 @@ calibTreeMakerAK5PFCHS = calibTreeMakerPF.clone(
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
     NJet_L1JetCorrector = 'ak5PFchsL1Fastjet',
+    NJet_L2JetCorrector = 'ak5PFchsL2Relative',
+    NJet_L3JetCorrector = 'ak5PFchsL3Absolute',
     NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3',
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3'
 )
@@ -214,9 +248,13 @@ calibTreeMakerAK7PFCHS = calibTreeMakerPF.clone(
     NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
     NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
     NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
-    NJet_L1JetCorrector = 'ak5PFchsL1Fastjet',
-    NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3'
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos"),
+    NJet_L1JetCorrector = 'ak7PFchsL1Fastjet',
+    NJet_L2JetCorrector = 'ak7PFchsL2Relative',
+    NJet_L3JetCorrector = 'ak7PFchsL3Absolute',
+    NJet_L1L2L3JetCorrector = 'ak7PFchsL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFchsL1FastL2L3'
 )
 
 ShortNameNextJetTypes          = 'ak5FastCalo'
@@ -295,7 +333,8 @@ AK7PFCHSJetPartonMatching = PFJetPartonMatching.clone(
 )
 
 calibTreeMakersMC = cms.Sequence( #calibjets *
-                                  genPhotons * goodGenPhotons 
+                                  calibTreeMakerGenJetsNoNuNoMuNoNu
+                                  * genPhotons * goodGenPhotons 
                                   * genMuons * goodGenMuons
                                   * myPartons 
                                   * CaloJetPartonMatching
@@ -352,6 +391,12 @@ calibTreeMakerAK7PFData = calibTreeMakerAK7PF.clone(
     NJet_L1L2L3L4JWJetCorrector = 'ak7PFL1L2L3Residual'
 )
 
+calibTreeMakerAK7FastPFData = calibTreeMakerAK7FastPF.clone(
+    NJet_PartonMatch = '',
+    NJet_L1L2L3JetCorrector = 'ak7PFL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFL1FastL2L3Residual'
+)
+
 calibTreeMakerAK5FastCaloData = calibTreeMakerAK5FastCalo.clone(
     NJet_PartonMatch = '',
     NJet_L1L2L3JetCorrector = 'ak5CaloL1FastL2L3Residual',
@@ -372,8 +417,8 @@ calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
 
 calibTreeMakerAK7PFCHSData = calibTreeMakerAK7PFCHS.clone(
     NJet_PartonMatch = '',
-    NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3Residual',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3Residual'
+    NJet_L1L2L3JetCorrector = 'ak7PFchsL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFchsL1FastL2L3Residual'
 )
 
 calibTreeMakersData = cms.Sequence(   
