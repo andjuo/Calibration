@@ -1,3 +1,4 @@
+from CommonTools.ParticleFlow.PFBRECO_cff import *
 from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
 from Calibration.CalibTreeMaker.bTag_cfi import *
 from TrackingTools.TrackAssociator.default_cfi import *
@@ -21,6 +22,12 @@ ak7PFchsResidual            = ak7PFResidual.clone  ( algorithm = cms.string('AK7
 ak7PFchsL1FastL2L3          = ak7PFL1FastL2L3.clone( correctors = cms.vstring('ak7PFchsL1Fastjet', 'ak7PFchsL2Relative', 'ak7PFchsL3Absolute') )
 ak7PFchsL1FastL2L3Residual  = ak7PFL1FastL2L3Residual.clone( correctors = cms.vstring('ak7PFchsL1Fastjet', 'ak7PFchsL2Relative', 'ak7PFchsL3Absolute', 'ak7PFchsResidual') ) 
 
+# CHS + TopProjections excluding muons and electrons from jets
+# there is no need for new tau or MET collections
+PFBRECO.remove(pfNoJet)
+PFBRECO.remove(pfTauSequence)
+PFBRECO.remove(pfNoTau)
+PFBRECO.remove(pfMET)
 
 calibTreeMakerGenJetsNoNuNoMuNoNu = cms.Sequence(genJetParticles * genParticlesForJetsNoNu * genParticlesForJetsNoMuNoNu * recoGenJets * kt4GenJetsNoNu * kt6GenJetsNoNu * ak5GenJetsNoNu * ak7GenJetsNoNu * 
                                                  kt4GenJetsNoMuNoNu * kt6GenJetsNoMuNoNu * 
@@ -239,6 +246,19 @@ calibTreeMakerAK5PFCHS = calibTreeMakerPF.clone(
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3'
 )
 
+ShortNameNextJetTypes          = 'ak5PFCHSTop'
+calibTreeMakerAK5PFCHSTop = calibTreeMakerAK5PFCHS.clone(
+    OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
+    NJet_Jets         = cms.InputTag("pfJets"),
+    NJet_PartonMatch = 'AK5PFCHSTopJetPartonMatching',
+    NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
+    NJetSecondVxTagInfo      = cms.InputTag(ShortNameNextJetTypes+"SecondaryVertexTagInfos"),
+    NJetTrackIPTagInfos      = cms.InputTag(ShortNameNextJetTypes+"ImpactParameterTagInfos"),
+    NJet_svComputer          = cms.InputTag(ShortNameNextJetTypes+"StandardCombinedSecondaryVertex"),
+    NJet_electronTagInfo     = cms.InputTag(ShortNameNextJetTypes+"SoftElectronTagInfos"),
+    NJet_muonTagInfo         = cms.InputTag(ShortNameNextJetTypes+"SoftMuonTagInfos")
+)
+
 ShortNameNextJetTypes          = 'ak7PFCHS'
 calibTreeMakerAK7PFCHS = calibTreeMakerPF.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
@@ -331,9 +351,19 @@ AK5PFCHSJetPartonMatching = PFJetPartonMatching.clone(
     jets = 'ak5PFCHSJets' 
 )
 
+AK5PFCHSTopJetPartonMatching = PFJetPartonMatching.clone( 
+    jets = 'pfJets' 
+)
+
 AK7PFCHSJetPartonMatching = PFJetPartonMatching.clone( 
     jets = 'ak7PFCHSJets' 
 )
+
+topProjectionsMC =  cms.Sequence( PFBRECO
+                                * AK5PFCHSTopJetPartonMatching
+                                * ak5PFCHSTopJetsBtag
+                                * calibTreeMakerAK5PFCHSTop
+                                )
 
 calibTreeMakersMC = cms.Sequence( #calibjets *
                                   calibTreeMakerGenJetsNoNuNoMuNoNu
@@ -365,7 +395,9 @@ calibTreeMakersMC = cms.Sequence( #calibjets *
 				  * ak5PFCHSJetsBtag
                                   * calibTreeMakerAK5PFCHS
                                   * ak7PFCHSJetsBtag
-                                  * calibTreeMakerAK7PFCHS)
+                                  * calibTreeMakerAK7PFCHS
+                                  #* topProjectionsMC
+                                  )
 
 ### data
 calibTreeMakerCaloData = calibTreeMakerCalo.clone(
@@ -418,11 +450,22 @@ calibTreeMakerAK5PFCHSData = calibTreeMakerAK5PFCHS.clone(
     NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3Residual'
 )
 
+calibTreeMakerAK5PFCHSTopData = calibTreeMakerAK5PFCHSTop.clone(
+    NJet_PartonMatch = '',
+    NJet_L1L2L3JetCorrector = 'ak5PFchsL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak5PFchsL1FastL2L3Residual'
+)
+
 calibTreeMakerAK7PFCHSData = calibTreeMakerAK7PFCHS.clone(
     NJet_PartonMatch = '',
     NJet_L1L2L3JetCorrector = 'ak7PFchsL1FastL2L3Residual',
     NJet_L1L2L3L4JWJetCorrector = 'ak7PFchsL1FastL2L3Residual'
 )
+
+topProjectionsData =  cms.Sequence( PFBRECO
+                                  * ak5PFCHSTopJetsBtag
+                                  * calibTreeMakerAK5PFCHSTopData
+                                  )
 
 calibTreeMakersData = cms.Sequence(   
 				   #calibjets *
@@ -445,4 +488,5 @@ calibTreeMakersData = cms.Sequence(
                                    calibTreeMakerAK5PFCHSData *
                                    ak7PFCHSJetsBtag *
                                    calibTreeMakerAK7PFCHSData
+                                   #* topProjectionsData
 				  )
