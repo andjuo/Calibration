@@ -214,6 +214,35 @@ ak5PFCHSJetsBtag = cms.Sequence(
                                ak5PFCHSSoftMuonTagInfos
                               )
 
+#ak5PFCHSTop
+ak5PFCHSTopJetTracksAssociatorAtVertex = ic5JetTracksAssociatorAtVertex.clone()
+ak5PFCHSTopJetTracksAssociatorAtVertex.jets = "pfJets"
+ak5PFCHSTopJetTracksAssociatorAtVertex.tracks = "generalTracks"
+ak5PFCHSTopImpactParameterTagInfos = impactParameterTagInfos.clone()
+ak5PFCHSTopImpactParameterTagInfos.jetTracks = "ak5PFCHSTopJetTracksAssociatorAtVertex"
+ak5PFCHSTopSecondaryVertexTagInfos = secondaryVertexTagInfos.clone()
+ak5PFCHSTopSecondaryVertexTagInfos.trackIPTagInfos = "ak5PFCHSTopImpactParameterTagInfos"
+#ak5PFCHSTopSimpleSecondaryVertexBJetTags = simpleSecondaryVertexBJetTags.clone()
+#ak5PFCHSTopSimpleSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFCHSTopSecondaryVertexTagInfos") )
+ak5PFCHSTopCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+ak5PFCHSTopStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
+ak5PFCHSTopCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak5PFCHSTopStandardCombinedSecondaryVertex')
+ak5PFCHSTopCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFCHSTopImpactParameterTagInfos"), cms.InputTag("ak5PFCHSTopSecondaryVertexTagInfos") )
+ak5PFCHSTopSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'pfJets' )
+ak5PFCHSTopSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'pfJets' )
+ak5PFCHSTopJetBtaggingSV = cms.Sequence(
+                                    ak5PFCHSTopImpactParameterTagInfos *
+                                    ak5PFCHSTopSecondaryVertexTagInfos *
+#                                    ak5PFCHSTopStandardCombinedSecondaryVertex *
+                                    ak5PFCHSTopCombinedSecondaryVertexBJetTags
+                                   )
+ak5PFCHSTopJetsBtag = cms.Sequence(
+                               ak5PFCHSTopJetTracksAssociatorAtVertex *
+                               ak5PFCHSTopJetBtaggingSV *
+                               ak5PFCHSTopSoftElectronTagInfos *
+                               ak5PFCHSTopSoftMuonTagInfos
+                              )
+
 #if some other algorithm is to be included at a later date, see leftovers below
 
 # impact parameter b-tag
