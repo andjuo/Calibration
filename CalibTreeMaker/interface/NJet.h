@@ -368,6 +368,25 @@ template <typename T> NJet<T>::NJet()
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltSixJet45","HLT_SixJet45",false,1));
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltSixJet45L1","HLT_SixJet45_L1FastJet",false,1));
 
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet50","HLT_QuadJet50",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltSixJet45","HLT_SixJet45",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet60DiJet20","HLT_QuadJet60_DiJet20",false,1));
+
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltIsoMu24Eta2p1","HLT_IsoMu24_eta2p1",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltIsoMu24","HLT_IsoMu24_v",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu40Eta2p1","HLT_Mu40_eta2p1",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu40","HLT_Mu40_v",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu15Eta2p1TriCentralJet402020","HLT_Mu15_eta2p1_TriCentral_40_20_20",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu17Eta2p1TriCentralPFNoPUJet453525","HLT_Mu17_eta2p1_TriCentralPFNoPUJet45_35_25",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu17Eta2p1TriCentralPFNoPUJet30","HLT_Mu17_eta2p1_TriCentralPFNoPUJet30_v",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu17Eta2p1TriCentralPFNoPUJet303020","HLT_Mu17_eta2p1_TriCentralPFNoPUJet30_30_20",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu24DiCentralPFJet3025","HLT_Mu24_CentralPFJet30_CentralPFJet25",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu24Eta2p1","HLT_Mu24_eta2p1",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu24","HLT_Mu24_v",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu30Eta2p1","HLT_Mu30_eta2p1",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltMu30","HLT_Mu30_v",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltIsoMu17Eta2p1TriCentralPFNoPUJet303020","HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_30_20",false,1));
+  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltIsoMu17Eta2p1TriCentralPFNoPUJet30","HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_v",false,1));
 
   vtxN_ = 0;
   vtxNTracks_ = 0;
