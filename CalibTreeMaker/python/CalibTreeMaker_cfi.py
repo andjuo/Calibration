@@ -62,7 +62,7 @@ calibTreeMakerCalo = cms.EDAnalyzer("CalibTreeMakerCalo",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    WriteAdditionalBJetInfos = cms.bool(True), 
+    WriteAdditionalBJetInfos = cms.bool(False), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
@@ -134,7 +134,7 @@ calibTreeMakerPF = cms.EDAnalyzer("CalibTreeMakerPF",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    WriteAdditionalBJetInfos = cms.bool(True), 
+    WriteAdditionalBJetInfos = cms.bool(False), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
@@ -202,7 +202,7 @@ calibTreeMakerTrack = cms.EDAnalyzer("CalibTreeMakerTrack",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
  
-    WriteAdditionalBJetInfos = cms.bool(True), 
+    WriteAdditionalBJetInfos = cms.bool(False), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                    
@@ -270,7 +270,7 @@ calibTreeMakerJPT = cms.EDAnalyzer("CalibTreeMakerJPT",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    WriteAdditionalBJetInfos = cms.bool(True), 
+    WriteAdditionalBJetInfos = cms.bool(False), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
@@ -338,7 +338,7 @@ calibTreeMakerPFCluster = cms.EDAnalyzer("CalibTreeMakerPFCluster",
     NJet_writeTracks  = cms.bool(False),
     NJet_writeTowers  = cms.bool(False),
 
-    WriteAdditionalBJetInfos = cms.bool(True), 
+    WriteAdditionalBJetInfos = cms.bool(False), 
     WriteGenJetParticles = cms.bool(False), 
     WriteStableGenParticles = cms.bool(False),                             
                                   
