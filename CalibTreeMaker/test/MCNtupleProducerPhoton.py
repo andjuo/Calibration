@@ -27,8 +27,9 @@ process.GlobalTag.globaltag = 'START53_V22::All'
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(	
-    '/store/mc/Summer12_DR53X/G_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/EE4EEC78-4D0E-E211-BC0C-00266CF33288.root'
+    #'/store/mc/Summer12_DR53X/G_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/EE4EEC78-4D0E-E211-BC0C-00266CF33288.root'
 #    '/store/mc/Summer12_DR53X/G_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/507F6985-C70E-E211-9D0F-00266CF330D8.root'
+  'file:selection.root'
     )
                             )
 
