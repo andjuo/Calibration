@@ -2,6 +2,9 @@ import FWCore.ParameterSet.Config as cms
 
 from RecoBTag.Configuration.RecoBTag_cff import *
 
+softPFElectronTagInfos=softPFElectronsTagInfos
+softPFMuonTagInfos=softPFMuonsTagInfos
+
 from RecoJets.JetAssociationProducers.j2tParametersVX_cfi import *
 ic5JetTracksAssociatorAtVertex = cms.EDProducer("JetTracksAssociatorAtVertex",
     j2tParametersVX,
@@ -25,8 +28,8 @@ ak5CaloCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
 ak5CaloStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak5CaloCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak5CaloStandardCombinedSecondaryVertex')
 ak5CaloCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5CaloImpactParameterTagInfos"), cms.InputTag("ak5CaloSecondaryVertexTagInfos") )
-ak5CaloSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'ak5CaloJets' )
-ak5CaloSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'ak5CaloJets' )
+ak5CaloSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'ak5CaloJets' )
+ak5CaloSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'ak5CaloJets' )
 ak5CaloJetBtaggingSV = cms.Sequence(
                                     ak5CaloImpactParameterTagInfos *
                                     ak5CaloSecondaryVertexTagInfos *
@@ -36,8 +39,8 @@ ak5CaloJetBtaggingSV = cms.Sequence(
 ak5CaloJetsBtag = cms.Sequence(
                                ak5CaloJetTracksAssociatorAtVertex *
                                ak5CaloJetBtaggingSV *
-                               ak5CaloSoftElectronTagInfos *
-                               ak5CaloSoftMuonTagInfos
+                               ak5CaloSoftPFElectronTagInfos *
+                               ak5CaloSoftPFMuonTagInfos
                               )
 
 #ak5PF
@@ -54,8 +57,8 @@ ak5PFCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
 ak5PFStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak5PFCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak5PFStandardCombinedSecondaryVertex')
 ak5PFCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFImpactParameterTagInfos"), cms.InputTag("ak5PFSecondaryVertexTagInfos") )
-ak5PFSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'ak5PFJets' )
-ak5PFSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'ak5PFJets' )
+ak5PFSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'ak5PFJets' )
+ak5PFSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'ak5PFJets' )
 ak5PFJetBtaggingSV = cms.Sequence(
                                     ak5PFImpactParameterTagInfos *
                                     ak5PFSecondaryVertexTagInfos *
@@ -65,8 +68,8 @@ ak5PFJetBtaggingSV = cms.Sequence(
 ak5PFJetsBtag = cms.Sequence(
                                ak5PFJetTracksAssociatorAtVertex *
                                ak5PFJetBtaggingSV *
-                               ak5PFSoftElectronTagInfos *
-                               ak5PFSoftMuonTagInfos
+                               ak5PFSoftPFElectronTagInfos *
+                               ak5PFSoftPFMuonTagInfos
                               )
 
 #ak5JPT
@@ -83,8 +86,8 @@ ak5JPTCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
 ak5JPTStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak5JPTCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak5JPTStandardCombinedSecondaryVertex')
 ak5JPTCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5JPTImpactParameterTagInfos"), cms.InputTag("ak5JPTSecondaryVertexTagInfos") )
-ak5JPTSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'JetPlusTrackZSPCorJetAntiKt5' )
-ak5JPTSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'JetPlusTrackZSPCorJetAntiKt5' )
+ak5JPTSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'JetPlusTrackZSPCorJetAntiKt5' )
+ak5JPTSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'JetPlusTrackZSPCorJetAntiKt5' )
 ak5JPTJetBtaggingSV = cms.Sequence(
                                     ak5JPTImpactParameterTagInfos *
                                     ak5JPTSecondaryVertexTagInfos *
@@ -94,8 +97,8 @@ ak5JPTJetBtaggingSV = cms.Sequence(
 ak5JPTJetsBtag = cms.Sequence(
                                ak5JPTJetTracksAssociatorAtVertex *
                                ak5JPTJetBtaggingSV *
-                               ak5JPTSoftElectronTagInfos *
-                               ak5JPTSoftMuonTagInfos
+                               ak5JPTSoftPFElectronTagInfos *
+                               ak5JPTSoftPFMuonTagInfos
                               )
 
 #ak7Calo
@@ -112,8 +115,8 @@ ak7CaloCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
 ak7CaloStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak7CaloCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak7CaloStandardCombinedSecondaryVertex')
 ak7CaloCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7CaloImpactParameterTagInfos"), cms.InputTag("ak7CaloSecondaryVertexTagInfos") )
-ak7CaloSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'ak7CaloJets' )
-ak7CaloSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'ak7CaloJets' )
+ak7CaloSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'ak7CaloJets' )
+ak7CaloSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'ak7CaloJets' )
 ak7CaloJetBtaggingSV = cms.Sequence(
                                     ak7CaloImpactParameterTagInfos *
                                     ak7CaloSecondaryVertexTagInfos *
@@ -123,8 +126,8 @@ ak7CaloJetBtaggingSV = cms.Sequence(
 ak7CaloJetsBtag = cms.Sequence(
                                ak7CaloJetTracksAssociatorAtVertex *
                                ak7CaloJetBtaggingSV *
-                               ak7CaloSoftElectronTagInfos *
-                               ak7CaloSoftMuonTagInfos
+                               ak7CaloSoftPFElectronTagInfos *
+                               ak7CaloSoftPFMuonTagInfos
                               )
 
 #ak7PF
@@ -141,8 +144,8 @@ ak7PFCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
 ak7PFStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak7PFCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak7PFStandardCombinedSecondaryVertex')
 ak7PFCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7PFImpactParameterTagInfos"), cms.InputTag("ak7PFSecondaryVertexTagInfos") )
-ak7PFSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'ak7PFJets' )
-ak7PFSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'ak7PFJets' )
+ak7PFSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'ak7PFJets' )
+ak7PFSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'ak7PFJets' )
 ak7PFJetBtaggingSV = cms.Sequence(
                                     ak7PFImpactParameterTagInfos *
                                     ak7PFSecondaryVertexTagInfos *
@@ -152,8 +155,8 @@ ak7PFJetBtaggingSV = cms.Sequence(
 ak7PFJetsBtag = cms.Sequence(
                                ak7PFJetTracksAssociatorAtVertex *
                                ak7PFJetBtaggingSV *
-                               ak7PFSoftElectronTagInfos *
-                               ak7PFSoftMuonTagInfos
+                               ak7PFSoftPFElectronTagInfos *
+                               ak7PFSoftPFMuonTagInfos
                               )
 			      
 #ak7PFCHS
@@ -170,8 +173,8 @@ ak7PFCHSCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone(
 ak7PFCHSStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak7PFCHSCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak7PFCHSStandardCombinedSecondaryVertex')
 ak7PFCHSCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak7PFCHSImpactParameterTagInfos"), cms.InputTag("ak7PFCHSSecondaryVertexTagInfos") )
-ak7PFCHSSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'ak7PFCHSJets' )
-ak7PFCHSSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'ak7PFCHSJets' )
+ak7PFCHSSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'ak7PFCHSJets' )
+ak7PFCHSSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'ak7PFCHSJets' )
 ak7PFCHSJetBtaggingSV = cms.Sequence(
                                     ak7PFCHSImpactParameterTagInfos *
                                     ak7PFCHSSecondaryVertexTagInfos *
@@ -181,8 +184,8 @@ ak7PFCHSJetBtaggingSV = cms.Sequence(
 ak7PFCHSJetsBtag = cms.Sequence(
                                ak7PFCHSJetTracksAssociatorAtVertex *
                                ak7PFCHSJetBtaggingSV *
-                               ak7PFCHSSoftElectronTagInfos *
-                               ak7PFCHSSoftMuonTagInfos
+                               ak7PFCHSSoftPFElectronTagInfos *
+                               ak7PFCHSSoftPFMuonTagInfos
                               )			      
 
 #ak5PFCHS
@@ -199,8 +202,8 @@ ak5PFCHSCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone(
 ak5PFCHSStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak5PFCHSCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak5PFCHSStandardCombinedSecondaryVertex')
 ak5PFCHSCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFCHSImpactParameterTagInfos"), cms.InputTag("ak5PFCHSSecondaryVertexTagInfos") )
-ak5PFCHSSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'ak5PFCHSJets' )
-ak5PFCHSSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'ak5PFCHSJets' )
+ak5PFCHSSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'ak5PFCHSJets' )
+ak5PFCHSSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'ak5PFCHSJets' )
 ak5PFCHSJetBtaggingSV = cms.Sequence(
                                     ak5PFCHSImpactParameterTagInfos *
                                     ak5PFCHSSecondaryVertexTagInfos *
@@ -210,8 +213,8 @@ ak5PFCHSJetBtaggingSV = cms.Sequence(
 ak5PFCHSJetsBtag = cms.Sequence(
                                ak5PFCHSJetTracksAssociatorAtVertex *
                                ak5PFCHSJetBtaggingSV *
-                               ak5PFCHSSoftElectronTagInfos *
-                               ak5PFCHSSoftMuonTagInfos
+                               ak5PFCHSSoftPFElectronTagInfos *
+                               ak5PFCHSSoftPFMuonTagInfos
                               )
 
 #ak5PFCHSTop
@@ -228,8 +231,8 @@ ak5PFCHSTopCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clo
 ak5PFCHSTopStandardCombinedSecondaryVertex = combinedSecondaryVertex.clone()
 ak5PFCHSTopCombinedSecondaryVertexBJetTags.jetTagComputer = cms.string('ak5PFCHSTopStandardCombinedSecondaryVertex')
 ak5PFCHSTopCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("ak5PFCHSTopImpactParameterTagInfos"), cms.InputTag("ak5PFCHSTopSecondaryVertexTagInfos") )
-ak5PFCHSTopSoftElectronTagInfos = softElectronTagInfos.clone( leptonCands = cms.InputTag("softElectronCands"), jets = 'pfJets' )
-ak5PFCHSTopSoftMuonTagInfos = softMuonTagInfos.clone(jets = 'pfJets' )
+ak5PFCHSTopSoftPFElectronTagInfos = softPFElectronTagInfos.clone( leptonCands = cms.InputTag("softPFElectronCands"), jets = 'pfJets' )
+ak5PFCHSTopSoftPFMuonTagInfos = softPFMuonTagInfos.clone(jets = 'pfJets' )
 ak5PFCHSTopJetBtaggingSV = cms.Sequence(
                                     ak5PFCHSTopImpactParameterTagInfos *
                                     ak5PFCHSTopSecondaryVertexTagInfos *
@@ -239,8 +242,8 @@ ak5PFCHSTopJetBtaggingSV = cms.Sequence(
 ak5PFCHSTopJetsBtag = cms.Sequence(
                                ak5PFCHSTopJetTracksAssociatorAtVertex *
                                ak5PFCHSTopJetBtaggingSV *
-                               ak5PFCHSTopSoftElectronTagInfos *
-                               ak5PFCHSTopSoftMuonTagInfos
+                               ak5PFCHSTopSoftPFElectronTagInfos *
+                               ak5PFCHSTopSoftPFMuonTagInfos
                               )
 
 #if some other algorithm is to be included at a later date, see leftovers below
