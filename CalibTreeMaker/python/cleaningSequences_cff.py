@@ -36,7 +36,8 @@ from CommonTools.RecoAlgos.HBHENoiseFilter_cfi import HBHENoiseFilter
 HBHENoiseFilter.taggingMode = cms.bool(False)
 
 ## The CSC beam halo tight filter ____________________________________________||
-from RecoMET.METAnalyzers.CSCHaloFilter_cfi import CSCTightHaloFilter
+#from RecoMET.METAnalyzers.CSCHaloFilter_cfi import CSCTightHaloFilter
+from RecoMET.METFilters.CSCTightHaloFilter_cfi import CSCTightHaloFilter
 
 ## The HCAL laser filter _____________________________________________________||
 from RecoMET.METFilters.hcalLaserEventFilter_cfi import hcalLaserEventFilter
