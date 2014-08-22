@@ -1,12 +1,17 @@
 #include "Calibration/CalibTreeMaker/interface/ZJet.h"
 #include "JetMETCorrections/Objects/interface/JetCorrector.h"
 
+// AJ: Aug 22, 2014 commented out PFTrackIndex in line 577 do by-pass
+// compiler error. This variable was inactivated earlier
+
 
 //check out first cvs co -d CSA07EffAnalyser UserCode/lowette/CSA07EffAnalyser/CSA07EffAnalyser
 //#include "CSA07EffAnalyser/interface/CSA07ProcessId.h"
 
 void ZJet::setup(const edm::ParameterSet& cfg, TTree* CalibTree)
 {
+  if (0) std::cout << CLHEP::electron_charge << "\n"; // by-pass compiler error
+
   jets_             = cfg.getParameter<edm::InputTag>("ZJetJets");
   z_                = cfg.getParameter<edm::InputTag>("ZJetZs");
   genzs_            = cfg.getParameter<edm::InputTag>("ZJetGenZs");
@@ -558,7 +563,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
       clustHEnergy[iTrack] = 0;
       clustHID[iTrack] = -1;
       clustEID[iTrack] = -1;
-      int PFTrackIndex = 0;
+      //int PFTrackIndex = 0;
       double DRmin = 100;
       reco::PFBlockCollection::const_iterator TrackBlock;
       for(reco::PFBlockCollection::const_iterator pfBlock = pfBlocks->begin(); pfBlock != pfBlocks->end(); ++pfBlock)
@@ -570,7 +575,7 @@ void ZJet::analyze(const edm::Event& evt, const edm::EventSetup& setup, TTree* C
 	      DR = deltaR(pfElement->trackRef()->eta(),pfElement->trackRef()->phi(), it->eta() , it->phi());
 	      if(DR < DRmin){
 		DRmin = DR;
-		PFTrackIndex = pfElement->index();
+		//PFTrackIndex = pfElement->index();
 		TrackBlock = pfBlock;
 	      }
 	    }
