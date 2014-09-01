@@ -1,3 +1,6 @@
+# AJ notes on Sept 01, 2014:
+#  NJet_L2L3JetCorrectorJPT=ak5JPTL2L3 in AK7 jets
+
 from CommonTools.ParticleFlow.PFBRECO_cff import *
 from Calibration.CalibTreeMaker.CalibTreeMaker_cfi import *
 from Calibration.CalibTreeMaker.bTag_cfi import *
