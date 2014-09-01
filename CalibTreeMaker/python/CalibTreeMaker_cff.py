@@ -143,6 +143,7 @@ ShortNameNextJetTypes          = 'ak7PF'
 calibTreeMakerAK7PF = calibTreeMakerPF.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
+    NJet_JetIDs         = 'ak7JetID',  # AJ not sure
     NJet_PartonMatch = 'AK7PFJetPartonMatching',
     NJet_GenJets = 'ak7GenJetsNoNu',
     NJetSecondVx             = cms.InputTag(ShortNameNextJetTypes+"CombinedSecondaryVertexBJetTags"),
@@ -159,13 +160,14 @@ calibTreeMakerAK7PF = calibTreeMakerPF.clone(
 )
 
 ShortNameNextJetTypes          = 'ak7FastPF'
-calibTreeMakerAK7FastPF = calibTreeMakerPF.clone(
+calibTreeMakerAK7FastPF = calibTreeMakerAK7PF.clone(  #  clone AK7PF
     OutputFile          = cms.string(ShortNameNextJetTypes+'.root'),
+    #NJet_Jets           = 'ak7PFJets',
     NJet_PartonMatch    = 'AK7PFJetPartonMatching',
     NJet_GenJets        = cms.InputTag("ak7GenJetsNoNu"),
-    NJet_L1JetCorrector = 'ak5PFL1Fastjet',
-    NJet_L1L2L3JetCorrector = 'ak5PFL1FastL2L3',
-    NJet_L1L2L3L4JWJetCorrector = 'ak5PFL1FastL2L3'    
+    NJet_L1JetCorrector = 'ak7PFL1Fastjet',
+    NJet_L1L2L3JetCorrector = 'ak7PFL1FastL2L3',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7PFL1FastL2L3'
 )
 
 ShortNameNextJetTypes          = 'ic5PF'
@@ -263,6 +265,7 @@ ShortNameNextJetTypes          = 'ak7PFCHS'
 calibTreeMakerAK7PFCHS = calibTreeMakerPF.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
+    NJet_JetIDs       = 'ak7JetID', # AJ not sure
     NJet_PartonMatch  = 'AK7PFCHSJetPartonMatching',
     NJet_Rho          = cms.InputTag('kt6PFJets','rho'),    
     NJet_Rho25        = cms.InputTag('rho25kt6PFJets','rho'),
