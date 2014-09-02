@@ -26,10 +26,10 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoBTag/Configuration/RecoBTag_cff')
 
-process.GlobalTag.globaltag = 'FT_53_V21_AN4::All' 	
+process.GlobalTag.globaltag = 'FT_53_V21_AN4::All'
 
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring(		
+                            fileNames = cms.untracked.vstring(
 # '/store/data/Run2012A/Photon/AOD/13Jul2012-v1/00000/FCDDD6B1-30CF-E111-88D0-002481E75ED0.root'
 # '/store/data/Run2012A/Photon/AOD/13Jul2012-v1/00000/FEDB62D9-7BD0-E111-A709-001E67398E12.root'
 # '/store/data/Run2012A/Photon/AOD/22Jan2013-v1/20000/FEF664CA-ED68-E211-A3FA-003048678B08.root'
@@ -50,7 +50,7 @@ process.options = cms.untracked.PSet(
 # HLT
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 process.hltHighLevel.HLTPaths = cms.vstring('HLT_Photon20_CaloIdVL_IsoL_v*','HLT_Photon30_CaloIdVL_IsoL_v*','HLT_Photon50_CaloIdVL_IsoL_v*','HLT_Photon75_CaloIdVL_IsoL_v*','HLT_Photon90_CaloIdVL_IsoL_v*','HLT_Photon135_v*','HLT_Photon150_v*','HLT_Photon160_v*','HLT_Photon20_CaloIdVL_v*','HLT_Photon30_CaloIdVL_v*','HLT_Photon50_CaloIdVL_v*','HLT_Photon75_CaloIdVL_v*','HLT_Photon90_CaloIdVL_v*','HLT_Photon30_v*','HLT_Photon30_R9Id90_CaloId_HE10_Iso40_EBOnly_v*')
-process.hltHighLevel.andOr = cms.bool(True) 
+process.hltHighLevel.andOr = cms.bool(True)
 process.hltHighLevel.throw = cms.bool(False)
 
 #Filter
@@ -58,7 +58,7 @@ process.load('Calibration.CalibTreeMaker.cleaningSequences_cff')
 
 ## sequence with filters
 process.filterSequence = cms.Sequence(  process.hltHighLevel *
-					process.stdCleaningSequence                                        
+					process.stdCleaningSequence
                                         )
 
 from RecoMET.METFilters.multiEventFilter_cfi import multiEventFilter
@@ -70,7 +70,7 @@ process.filterSequence += process.HCALLaserEvtFilterList2012
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
-set_NJet_BoolTags = cms.VInputTag( 
+set_NJet_BoolTags = cms.VInputTag(
     cms.InputTag("EcalDeadCellBoundaryEnergyFilter"),
     cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
     )

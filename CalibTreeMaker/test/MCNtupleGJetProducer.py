@@ -29,17 +29,16 @@ process.load('RecoBTag/Configuration/RecoBTag_cff')
 process.GlobalTag.globaltag = 'START53_V22::All'
 
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring(	
+                            fileNames = cms.untracked.vstring(
     #'/store/mc/Summer12_DR53X/G_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/EE4EEC78-4D0E-E211-BC0C-00266CF33288.root'
 #    '/store/mc/Summer12_DR53X/G_Pt-15to3000_TuneZ2_Flat_8TeV_pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/507F6985-C70E-E211-9D0F-00266CF330D8.root'
   'file:selection.root'
     )
                             )
 
-                            
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100) )  # number of events 
+    input = cms.untracked.int32(100) )  # number of events
 
 process.options = cms.untracked.PSet(
     SkipEvent = cms.untracked.vstring('ProductNotFound'),
@@ -52,11 +51,11 @@ process.load('Calibration.CalibTreeMaker.cleaningSequences_cff')
 
 ## sequence with filters
 process.filterSequence = cms.Sequence(  process.stdCleaningSequence
-                                        ) 
+                                        )
 
 process.load("Calibration.CalibTreeMaker.CalibTreeMaker_cff")
 
-set_NJet_BoolTags = cms.VInputTag( 
+set_NJet_BoolTags = cms.VInputTag(
     cms.InputTag("EcalDeadCellBoundaryEnergyFilter"),
     cms.InputTag("EcalDeadCellTriggerPrimitiveFilter")
     )
