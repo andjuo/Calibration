@@ -1,5 +1,6 @@
-## $Id: DataNtupleGJetProducer.py, v 1.0 2014/08/29 andjuo $
+## $Id: DataNtupleGJetProducer.py, v 1.0 2014/09/02 andjuo $
 #  For Gamma+Jet studies
+#  2014/09/02 Added calo jets
 
 import FWCore.ParameterSet.Config as cms
 import os
@@ -34,7 +35,8 @@ process.source = cms.Source("PoolSource",
 # '/store/data/Run2012A/Photon/AOD/13Jul2012-v1/00000/FEDB62D9-7BD0-E111-A709-001E67398E12.root'
 # '/store/data/Run2012A/Photon/AOD/22Jan2013-v1/20000/FEF664CA-ED68-E211-A3FA-003048678B08.root'
 # '/store/data/Run2012A/Photon/AOD/22Jan2013-v1/20000/FCBF09BB-0469-E211-848F-002618FDA277.root'
-  '/store/data/Run2012D/SinglePhotonParked/AOD/22Jan2013-v1/30003/2651A609-ED84-E211-B41D-003048D477AA.root'
+#  '/store/data/Run2012D/SinglePhotonParked/AOD/22Jan2013-v1/30003/2651A609-ED84-E211-B41D-003048D477AA.root'
+  'file:selection_data.root'
             )
                             )
 
@@ -76,25 +78,41 @@ set_NJet_BoolTags = cms.VInputTag(
     )
 #set_NJet_BoolTags = cms.VInputTag()
 
+process.calibTreeMakerAK5FastCaloData.NJet_BoolTags = set_NJet_BoolTags
+process.calibTreeMakerAK5FastCaloData.WritePhotons = True
+process.calibTreeMakerAK5FastCaloData.NJet_writeTowers = True
+process.calibTreeMakerAK5FastCaloData.TreeName = "GammaJetTree"
+process.calibTreeMakerAK5FastCaloData.OutputFile = cms.string("data_ak5FastCalo.root")
+
 process.calibTreeMakerAK5FastPFData.NJet_BoolTags = set_NJet_BoolTags
 process.calibTreeMakerAK5FastPFData.WritePhotons = True
 process.calibTreeMakerAK5FastPFData.NJet_writeTowers = True
 process.calibTreeMakerAK5FastPFData.TreeName = "GammaJetTree"
+process.calibTreeMakerAK5FastPFData.OutputFile = cms.string("data_ak5FastPF.root")
 
 process.calibTreeMakerAK5PFCHSData.NJet_BoolTags = set_NJet_BoolTags
 process.calibTreeMakerAK5PFCHSData.WritePhotons = True
 process.calibTreeMakerAK5PFCHSData.NJet_writeTowers = True
 process.calibTreeMakerAK5PFCHSData.TreeName = "GammaJetTree"
+process.calibTreeMakerAK5PFCHSData.OutputFile = cms.string("data_ak5PFCHS.root")
+
+process.calibTreeMakerAK7FastCaloData.NJet_BoolTags = set_NJet_BoolTags
+process.calibTreeMakerAK7FastCaloData.WritePhotons = True
+process.calibTreeMakerAK7FastCaloData.NJet_writeTowers = True
+process.calibTreeMakerAK7FastCaloData.TreeName = "GammaJetTree"
+process.calibTreeMakerAK7FastCaloData.OutputFile = cms.string("data_ak7FastCalo.root")
 
 process.calibTreeMakerAK7FastPFData.NJet_BoolTags = set_NJet_BoolTags
 process.calibTreeMakerAK7FastPFData.WritePhotons = True
 process.calibTreeMakerAK7FastPFData.NJet_writeTowers = True
 process.calibTreeMakerAK7FastPFData.TreeName = "GammaJetTree"
+process.calibTreeMakerAK7FastPFData.OutputFile = cms.string("data_ak7FastPF.root")
 
 process.calibTreeMakerAK7PFCHSData.NJet_BoolTags = set_NJet_BoolTags
 process.calibTreeMakerAK7PFCHSData.WritePhotons = True
 process.calibTreeMakerAK7PFCHSData.NJet_writeTowers = True
 process.calibTreeMakerAK7PFCHSData.TreeName = "GammaJetTree"
+process.calibTreeMakerAK7PFCHSData.OutputFile = cms.string("data_ak7PFCHS.root")
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
@@ -111,7 +129,12 @@ process.pData = cms.Path(process.filterSequence *
                          process.ak7PFJetsBtag *
                          process.calibTreeMakerAK7FastPFData *
                          process.ak7PFCHSJetsBtag *
-                         process.calibTreeMakerAK7PFCHSData
+                         process.calibTreeMakerAK7PFCHSData *
+# calo jets
+                         process.ak5CaloJetsBtag *
+                         process.calibTreeMakerAK5FastCaloData *
+                         process.ak7CaloJetsBtag *
+                         process.calibTreeMakerAK7FastCaloData
                          )
 process.schedule = cms.Schedule(process.pData)
 
