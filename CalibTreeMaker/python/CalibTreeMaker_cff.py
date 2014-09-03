@@ -62,7 +62,7 @@ goodGenMuons = cms.EDFilter("EtaPtMinCandViewSelector",
      ptMin = cms.double(5.0)
 )
 
-ShortNameNextJetTypes          = 'ak7Calo'
+ShortNameNextJetTypes          = 'ak7Calo' # it's a fast ak7FastCalo
 calibTreeMakerAK7Calo = calibTreeMakerCalo.clone(
     OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
     NJet_Jets         = cms.InputTag(ShortNameNextJetTypes+"Jets"),
@@ -78,8 +78,13 @@ calibTreeMakerAK7Calo = calibTreeMakerCalo.clone(
     NJet_L1JetCorrector       = cms.string(ShortNameNextJetTypes+'L1Fastjet'),
     NJet_L2JetCorrector       = cms.string(ShortNameNextJetTypes+'L2Relative'),
     NJet_L3JetCorrector       = cms.string(ShortNameNextJetTypes+'L3Absolute'),
-    NJet_L1L2L3JetCorrector     = cms.string(ShortNameNextJetTypes+'L1L2L3'),
-    NJet_L1L2L3L4JWJetCorrector = cms.string(ShortNameNextJetTypes+'L1L2L3')
+    NJet_L1L2L3JetCorrector     = cms.string(ShortNameNextJetTypes+'L1FastL2L3'),
+    NJet_L1L2L3L4JWJetCorrector = cms.string(ShortNameNextJetTypes+'L1FastL2L3')
+)
+
+ShortNameNextJetTypes          = 'ak7FastCalo'
+calibTreeMakerAK7FastCalo = calibTreeMakerAK7Calo.clone(
+    OutputFile        = cms.string(ShortNameNextJetTypes+'.root'),
 )
 
 ShortNameNextJetTypes          = 'ic5Calo'
@@ -440,6 +445,11 @@ calibTreeMakerAK7CaloData = calibTreeMakerAK7Calo.clone(
     NJet_PartonMatch = '',
     NJet_L1L2L3JetCorrector = 'ak7CaloL1L2L3Residual',
     NJet_L1L2L3L4JWJetCorrector = 'ak7CaloL1L2L3Residual'
+)
+calibTreeMakerAK7FastCaloData = calibTreeMakerAK7FastCalo.clone(
+    NJet_PartonMatch = '',
+    NJet_L1L2L3JetCorrector = 'ak7CaloL1FastL2L3Residual',
+    NJet_L1L2L3L4JWJetCorrector = 'ak7CaloL1FastL2L3Residual'
 )
 calibTreeMakerAK7PFData = calibTreeMakerAK7PF.clone(
     NJet_PartonMatch = '',
