@@ -950,7 +950,7 @@ template <typename T> void NJet<T>::setup(const edm::ParameterSet& cfg, TTree* C
   CalibTree->Branch("LumiBlockNumber",&luminosityBlockNumber_,"LumiBlockNumber/i");
   CalibTree->Branch("EventNumber",&eventNumber_,"EventNumber/i");
 
-  CalibTree->Branch("HltPhysicsDelcared",&hltPhysicsDeclared_,"HltPhysicsDelcared/O");
+  CalibTree->Branch("HltPhysicsDeclared",&hltPhysicsDeclared_,"HltPhysicsDeclared/O");
 
   CalibTree->Branch("HltL1Jet6U",&hltL1Jet6U_,"HltL1Jet6U/O");
 
