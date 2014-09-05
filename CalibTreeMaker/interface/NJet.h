@@ -369,7 +369,6 @@ template <typename T> NJet<T>::NJet()
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltSixJet45L1","HLT_SixJet45_L1FastJet",false,1));
 
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet50","HLT_QuadJet50",false,1));
-  TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltSixJet45","HLT_SixJet45",false,1));
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltQuadJet60DiJet20","HLT_QuadJet60_DiJet20",false,1));
 
   TriggerInfo_.push_back(CalibTreeMakerHelper::AllTriggerInfo("HltIsoMu24Eta2p1","HLT_IsoMu24_eta2p1",false,1));
